@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTIAW", "RTIAW\RTIAW.vcxproj", "{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVX512 = Debug|AVX512
+		Dist|AVX512 = Dist|AVX512
+		Release|AVX512 = Release|AVX512
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Debug|AVX512.ActiveCfg = Debug AVX512|x64
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Debug|AVX512.Build.0 = Debug AVX512|x64
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Dist|AVX512.ActiveCfg = Dist AVX512|x64
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Dist|AVX512.Build.0 = Dist AVX512|x64
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Release|AVX512.ActiveCfg = Release AVX512|x64
+		{8C28FA0D-F83C-22BF-C1BE-C51E2D921EF0}.Release|AVX512.Build.0 = Release AVX512|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
