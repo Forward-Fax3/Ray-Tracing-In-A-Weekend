@@ -71,6 +71,9 @@ project "RTIAW"
 
 	includedirs
 	{
+		"%{prj.name}/src",
+		"%{prj.name}/src/**",
+		
 		"%{IncludeDir.glm}",
 	}
 
