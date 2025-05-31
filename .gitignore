@@ -49,7 +49,7 @@ Generated\ Files/
 *.vcxproj
 
 # Visual Studio project filter files
-*.vcxproj.filter
+*.vcxproj.filters
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
