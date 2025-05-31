@@ -42,6 +42,15 @@ bld/
 # Visual Studio 2017 auto generated files
 Generated\ Files/
 
+# Visual Studio sln
+*.sln
+
+# Visual Studio project files
+*.vcxproj
+
+# Visual Studio project filter files
+*.vcxproj.filter
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
@@ -407,3 +416,4 @@ FodyWeavers.xsd
 
 # project specific
 makeProjAndSln.bat
+image.ppm
