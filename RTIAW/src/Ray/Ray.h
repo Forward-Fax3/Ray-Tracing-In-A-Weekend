@@ -8,6 +8,7 @@ namespace RTW
 {
 	class Ray
 	{
+	public:
 		Ray();
 		Ray(Point3 origin, Vec3 direction);
 
