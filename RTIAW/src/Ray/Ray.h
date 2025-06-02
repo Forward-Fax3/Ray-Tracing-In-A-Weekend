@@ -10,15 +10,15 @@ namespace RTW
 	{
 	public:
 		Ray();
-		Ray(Point3 origin, Vec3 direction);
+		Ray(Point origin, Vec3 direction);
 
-		inline const Point3& origin() const { return m_Origin; }
+		inline const Point& origin() const { return m_Origin; }
 		inline const Vec3& direction() const { return m_Direction; }
 
-		Point3 at(double distance) const;
+		Point at(double distance) const;
 
 	private:
-		Point3 m_Origin;
+		Point m_Origin;
 		Vec3 m_Direction;
 	};
 }
