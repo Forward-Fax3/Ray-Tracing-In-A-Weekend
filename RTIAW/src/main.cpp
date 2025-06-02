@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <chrono>
 
 #include "glm/glm.hpp"
@@ -6,20 +7,15 @@
 #include "Core.h"
 #include "WriteColour.h"
 #include "Ray.h"
-#include "Circle.h"
+#include "Sphere.h"
+#include "Hittables.h"
 
 
-RTW::Colour rayColour(const RTW::Ray& ray)
+RTW::Colour rayColour(const RTW::Ray& ray, const RTW::RayHittable& object)
 {
-	static RTW::Point circleCentre(0.0, 0.0, -1.0);
-	static RTW::Circle circle(circleCentre, 0.5);
-
-	if (circle.IsHit(ray))
-	{
-		RTW::Vec3 normal = glm::normalize(ray.at(circle.getReyHitDiasatnace()) - RTW::Vec3(0.0, 0.0, -1));
-		if (glm::dot(normal, normal) > 0.0)
-			return 0.5 * (RTW::Colour(normal + 1.0));
-	}
+	RTW::HitData data;
+	if (object.IsRayHit(ray, 0, RTW::DoubleInf, data))
+		return 0.5 * (data.normal + 1.0);
 
 	RTW::Vec3 normalizedDirection = glm::normalize(ray.direction());
 	double a = 0.5 * (normalizedDirection.y + 1.0);
@@ -36,10 +32,18 @@ int main()
 	int16_t imageHeight = static_cast<int16_t>(imageWidth / aspectRatio);
 	imageHeight = (imageHeight < 1) ? 1 : imageHeight;
 
+	RTW::RayHittables worldHitables;
+	{
+		RTW::Point tempPoint(0.0, 0.0, 1.0);
+		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5));
+		tempPoint = { 0.0, -100.5, -1 };
+		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 100.0));
+	}
+
 	double focalLength = 2.2;
 	double viewportHeight = 1.2;
 	double viewportWidth = viewportHeight * (double(imageWidth) / double(imageHeight));
-	RTW::Point camaraPosition = RTW::Point(0.0, 0.0, 3.0);
+	RTW::Point camaraPosition(0.0, 0.0, 3.0);
 
 	std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
@@ -63,7 +67,7 @@ int main()
 			RTW::Vec3 rayDirection = pixelCenter - camaraPosition;
 			RTW::Ray ray(camaraPosition, rayDirection);
 
-			RTW::Colour pixelColor = rayColour(ray);
+			RTW::Colour pixelColor = rayColour(ray, worldHitables);
 			RTW::WriteColour(std::cout, pixelColor);
 		}
 	}
