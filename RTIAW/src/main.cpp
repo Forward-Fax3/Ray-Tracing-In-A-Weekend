@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "glm/glm.hpp"
 
@@ -27,6 +28,8 @@ RTW::Colour rayColour(const RTW::Ray& ray)
 
 int main()
 {
+	auto startTime = std::chrono::high_resolution_clock().now();
+
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
 
@@ -65,5 +68,8 @@ int main()
 		}
 	}
 
-	std::clog << "\rDone.                 \n";
+	auto finishTime = std::chrono::high_resolution_clock().now();
+
+	std::clog << "\rDone.                 \nTime Took: " << std::chrono::duration_cast<std::chrono::duration<float>>(finishTime - startTime).count() << " seconds";
+	std::cin.get();
 }
