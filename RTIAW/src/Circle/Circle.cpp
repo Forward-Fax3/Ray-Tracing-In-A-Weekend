@@ -1,4 +1,5 @@
 #include "glm/glm.hpp"
+#include "glm/gtx/norm.hpp"
 
 #include "Core.h"
 #include "Circle.h"
@@ -16,13 +17,13 @@ namespace RTW
 	bool Circle::IsHit(const Ray& ray)
 	{
 		Point oc = m_Center - ray.origin();
-		double a = glm::dot(ray.direction(), ray.direction());
-		double b = -2.0 * glm::dot(ray.direction(), oc);
-		double c = glm::dot(oc, oc) - glm::pow(m_Radius, 2);
+		double a = glm::length2(ray.direction());
+		double h = glm::dot(ray.direction(), oc);
+		double c = glm::length2(oc) - m_Radius * m_Radius;
 
-		double discriminant = glm::pow(b, 2) - 4 * a * c;
+		double discriminant = h * h - a * c;
 
-		m_RayHitDiastance = (-b - glm::sqrt(discriminant)) / (2.0 * a);
+		m_RayHitDiastance = (h - glm::sqrt(discriminant)) / a;
 
 		return glm::round(discriminant) >= 0.0;
 	}
