@@ -58,6 +58,7 @@ project "RTIAW"
 	staticruntime "on"
 	toolset "clang"
 	linker "LLD"
+	warnings "Extra"
 	fatalwarnings "ALL"
 
 	targetdir ("Bin/" .. output .. "/%{prj.name}")
