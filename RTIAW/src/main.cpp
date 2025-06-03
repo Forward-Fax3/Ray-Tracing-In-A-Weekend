@@ -16,16 +16,17 @@ int main()
 
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
+	int16_t samplesPerPixel = 10;
 
 	RTW::RayHittables worldHitables;
 	{
 		RTW::Point tempPoint(0.0, 0.0, -1.0);
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5));
-		tempPoint = { 0.0, -100.5, -1 };
+		tempPoint = { 0.0, -100.5, -1.0 };
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 100.0));
 	}
 
-	RTW::Camera camera(aspectRatio, imageWidth);
+	RTW::Camera camera(aspectRatio, imageWidth, samplesPerPixel);
 
 	camera.Render(worldHitables);
 

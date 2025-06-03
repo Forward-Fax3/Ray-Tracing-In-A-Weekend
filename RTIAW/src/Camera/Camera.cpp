@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "glm/gtc/random.hpp"
+
 #include "Core.h"
 #include "Interval.h"
 #include "WriteColour.h"
@@ -11,10 +13,10 @@
 namespace RTW
 {
 	Camera::Camera()
-		: m_AspectRatio(-DoubleInf), m_ImageWidth(-1) {}
+		: m_AspectRatio(-DoubleInf), m_ImageWidth(-1), m_SamplesPerPixel(0) {}
 
-	Camera::Camera(double AspectRatio, int32_t imageWidth)
-		: m_AspectRatio(AspectRatio), m_ImageWidth(imageWidth) {}
+	Camera::Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel)
+		: m_AspectRatio(AspectRatio), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel) {}
 
 	void Camera::Render(const RayHittable& objects)
 	{
@@ -22,18 +24,20 @@ namespace RTW
 
 		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n255\n";
 
-		for (size_t j = 0; j < m_ImageHeight; ++j)
+		for (int16_t j = 0; j < m_ImageHeight; ++j)
 		{
 			std::clog << "\rScanlines remaining: " << (m_ImageHeight - j) << ' ' << std::flush;
 
-			for (size_t i = 0; i < m_ImageWidth; i++)
+			for (int16_t i = 0; i < m_ImageWidth; i++)
 			{
-				RTW::Point pixelCenter = m_Pixel100Location + (static_cast<double>(i) * m_PixelDeltaU) + (static_cast<double>(j) * m_PixelDeltaV);
-				RTW::Vec3 rayDirection = pixelCenter - m_Position;
-				RTW::Ray ray(m_Position, rayDirection);
+				Colour pixelColour(0.0);
+				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
+				{
+					Ray ray = CreateRay(i, j);
+					pixelColour += RayColour(ray, objects);
+				}
 
-				RTW::Colour pixelColor = RayColour(ray, objects);
-				RTW::WriteColour(std::cout, pixelColor);
+				WriteColour(std::cout, pixelColour * m_SampleScale);
 			}
 		}
 	}
@@ -42,6 +46,8 @@ namespace RTW
 	{
 		m_ImageHeight = static_cast<int16_t>(m_ImageWidth / m_AspectRatio);
 		m_ImageHeight = (m_ImageHeight < 1) ? 1 : m_ImageHeight;
+
+		m_SampleScale = 1.0 / m_SamplesPerPixel;
 
 		double focalLength = 2.2;
 		double viewportHeight = 1.2;
@@ -58,7 +64,7 @@ namespace RTW
 		m_Pixel100Location = viewportUpperLeft + 0.5 * (m_PixelDeltaU + m_PixelDeltaV);
 	}
 
-	RTW::Colour Camera::RayColour(const Ray& ray, const RayHittable& object)
+	Colour Camera::RayColour(const Ray& ray, const RayHittable& object)
 	{
 		RTW::HitData data;
 		if (object.IsRayHit(ray, RTW::Interval(0, RTW::DoubleInf), data))
@@ -67,5 +73,21 @@ namespace RTW
 		RTW::Vec3 normalizedDirection = glm::normalize(ray.direction());
 		double a = 0.5 * (normalizedDirection.y + 1.0);
 		return RTW::Colour(1.0 - a) + a * RTW::Colour(0.5, 0.7, 1.0);
+	}
+
+	Ray Camera::CreateRay(int16_t i, int16_t j)
+	{
+		glm::dvec2 offset = SampleSquare() + glm::dvec2(i, j);
+		Vec3 pixelSample = m_Pixel100Location + offset.x * m_PixelDeltaU + offset.y * m_PixelDeltaV;
+
+		Vec3 rayOrigin = m_Position;
+		Vec3 rayDirection = pixelSample - rayOrigin;
+
+		return { rayOrigin, rayDirection };
+	}
+
+	glm::dvec2 Camera::SampleSquare()
+	{
+		return { glm::linearRand(-0.5, 0.5), glm::linearRand(-0.5, 0.5) };
 	}
 }

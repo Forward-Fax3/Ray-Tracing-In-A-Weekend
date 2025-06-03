@@ -23,6 +23,9 @@ namespace RTW
 		inline bool Surrounds(const Interval& other) const
 			{ return m_Min < other.m_Min && other.m_Max < m_Max; }
 
+		inline double Clamp(const double x) const { return glm::clamp(x, m_Min, m_Max); }
+		inline Colour Clamp(const Colour& x) const { return glm::clamp(x, Vec3(m_Min), Vec3(m_Max)); }
+
 		inline double GetMax() const { return m_Max; }
 		inline double GetMin() const { return m_Min; }
 		inline void SetMax(const double max) { m_Max = max; }
