@@ -141,10 +141,18 @@ project "RTIAW"
 	filter { "platforms:AVX512" }
 --		vectorextensions "AVX512" currently not supported need to use buildoptions instead
 		buildoptions { "/arch:AVX512" }
-		defines { "GLM_FORCE_AVX2" } -- GLM doesnt seem to support AVX512 anymore so we use AVX2 instead though the compiler should still compile it with AVX512
+		defines
+		{
+			"GLM_FORCE_AVX2", -- GLM doesnt seem to support AVX512 anymore so we use AVX2 instead though the compiler should still compile it with AVX512
+			"GLM_FORCE_FMA"
+		} 
 	filter { "platforms:AVX2" }
 		vectorextensions "AVX2"
-		defines { "GLM_FORCE_AVX2" }
+		defines
+		{
+			"GLM_FORCE_AVX2",
+			"GLM_FORCE_FMA"
+		} 
 	filter { "platforms:SSE2" }
 		vectorextensions "SSE2"
 		defines { "GLM_FORCE_SSE2" }
