@@ -11,7 +11,7 @@ namespace RTW
 	Sphere::Sphere(const Point& center, double radius)
 		: m_Radius(glm::max(0.0, radius)), m_Center(center) {}
 
-	bool Sphere::IsRayHit(const Ray& ray, double rayDistanceMin, double rayDistanceMax, HitData& hitData) const
+	bool Sphere::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
 	{
 		Vec3 oc = m_Center - ray.origin();
 		double a = glm::length2(ray.direction());
@@ -25,10 +25,10 @@ namespace RTW
 		double sqrtDiscriminant = glm::sqrt(discriminant);
 
 		double root = (h - sqrtDiscriminant) / a;
-		if (root <= rayDistanceMin || root >= rayDistanceMax)
+		if (!rayDistance.Contains(root))
 		{
 			root = (h + sqrtDiscriminant) / a;
-			if (root <= rayDistanceMin || root >= rayDistanceMax)
+			if (!rayDistance.Contains(root))
 				return false;
 		}
 

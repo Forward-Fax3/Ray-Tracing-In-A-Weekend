@@ -13,7 +13,7 @@ namespace RTW
 	public:
 		Sphere(const Point& center, double radius);
 
-		virtual bool IsRayHit(const Ray& ray, double rayDistanceMin, double rayDistanceMax, HitData& hitData) const override;
+		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
 	private:
 		double m_Radius;

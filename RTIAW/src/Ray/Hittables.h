@@ -19,7 +19,7 @@ namespace RTW
 
 		inline void clear() { m_Objects.clear(); }
 
-		virtual bool IsRayHit(const Ray& ray, double rayDistanceMin, double rayDistanceMax, HitData& hitData) const override;
+		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
 	private:
 		std::vector<std::shared_ptr<RayHittable>> m_Objects;

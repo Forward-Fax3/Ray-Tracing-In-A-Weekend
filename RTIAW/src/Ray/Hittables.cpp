@@ -8,16 +8,16 @@
 
 namespace RTW
 {
-	bool RayHittables::IsRayHit(const Ray& ray, double rayDistanceMin, double rayDistanceMax, HitData& data) const
+	bool RayHittables::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& data) const
 	{
 		bool hasHit = false;
-		double closest = rayDistanceMax;
+		Interval tempRayDist(rayDistance);
 
 		for (const std::shared_ptr<RayHittable>& object : m_Objects)
-			if (object->IsRayHit(ray, rayDistanceMin, closest, data))
+			if (object->IsRayHit(ray, tempRayDist, data))
 			{
 				hasHit = true;
-				closest = data.distance;
+				tempRayDist.SetMax(data.distance);
 			}
 
 		return hasHit;

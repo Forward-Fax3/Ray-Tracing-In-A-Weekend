@@ -2,6 +2,7 @@
 #include "glm/glm.hpp"
 
 #include "Core.h"
+#include "Interval.h"
 #include "Ray.h"
 
 
@@ -20,7 +21,7 @@ namespace RTW
 	public:
 		virtual ~RayHittable() = default;
 
-		virtual bool IsRayHit(const Ray& ray, double rayDistanceMin, double rayDistanceMax, HitData& hitData) const = 0;
+		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const = 0;
 
 		inline void setFaceNormal(const Ray& ray, const Vec3& outwardNormal, HitData& hitData) const
 		{
