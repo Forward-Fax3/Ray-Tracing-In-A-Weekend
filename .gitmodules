@@ -1,0 +1,3 @@
+[submodule "RTIAW/3rd Party/git/glm"]
+	path = RTIAW/3rd Party/git/glm
+	url = https://github.com/g-truc/glm.git

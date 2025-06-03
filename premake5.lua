@@ -28,10 +28,11 @@ workspace "RTIAW"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["glm"]    = "3rd Party/Git/glm/"
+IncludeDir["glm"]    = "RTIAW/3rd Party/Git/glm/"
 
 if _ACTION == "clean" then
 	os.rmdir("bin");
+	os.remove("RTIAW/image.ppm")
 	filter { "options:cleanType=vs2022" }
 		os.remove("RTIAW.sln")
 		os.remove("RTIAW/RTIAW.vcxproj")
