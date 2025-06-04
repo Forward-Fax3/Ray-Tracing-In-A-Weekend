@@ -72,7 +72,7 @@ namespace RTW
 
 		HitData data;
 		if (object.IsRayHit(ray, Interval(0.001, DoubleInf), data))
-			return 0.5 * RayColour(Ray(data.point, Sphere::RandomOnHemisphere(data.normal)), bouncesLeft - 1, object);
+			return 0.5 * RayColour(Ray(data.point, data.normal + Sphere::RandomOnHemisphere(data.normal)), bouncesLeft - 1, object);
 
 		Vec3 normalizedDirection = glm::normalize(ray.direction());
 		double a = 0.5 * (normalizedDirection.y + 1.0);

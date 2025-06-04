@@ -16,8 +16,8 @@ int main()
 
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
-	int16_t samplesPerPixel = 8;
-	int16_t maxBounceDepth = 4;
+	int16_t samplesPerPixel = 32;
+	int16_t maxBounceDepth = 32;
 
 	RTW::RayHittables worldHitables;
 	{
