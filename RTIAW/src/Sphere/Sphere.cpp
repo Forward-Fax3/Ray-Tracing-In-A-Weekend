@@ -55,8 +55,7 @@ namespace RTW
 		double lengthSqared = 0.0;
 		const Interval MaxMin(1e-160, 1);
 
-		do
-		{
+		do {
 			direction = glm::linearRand(Vec3(-1), Vec3(1));
 			lengthSqared = glm::length2(direction);
 		} while (!MaxMin.Surrounds(lengthSqared));
