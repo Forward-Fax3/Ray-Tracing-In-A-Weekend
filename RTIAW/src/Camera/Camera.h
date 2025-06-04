@@ -11,7 +11,7 @@ namespace RTW
 	{
 	public:
 		Camera();
-		Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel);
+		Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel, int16_t maxBounces);
 
 		void Render(const RayHittable& objects);
 
@@ -22,18 +22,19 @@ namespace RTW
 	private:
 		void Init();
 
-		Colour RayColour(const Ray& ray, const RayHittable& object);
+		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object);
 		Ray CreateRay(int16_t i, int16_t j);
 		glm::dvec2 SampleSquare();
 
 	// Private Variables
 	private:
-		// externally changeable
+		// Externally changeable
 		double m_AspectRatio;
 		int16_t m_ImageWidth;
 		int16_t m_SamplesPerPixel;
+		int16_t m_MaxBounces;
 
-		// only internally changeable
+		// Only internally changeable
 		int16_t m_ImageHeight = 0;
 		double m_SampleScale = 0.0;
 		Point m_Position = Point(0.0, 0.0, 3.0);

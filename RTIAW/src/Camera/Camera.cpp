@@ -7,16 +7,17 @@
 #include "WriteColour.h"
 #include "Ray.h"
 #include "RayHittable.h"
+#include "Sphere.h"
 #include "Camera.h"
 
 
 namespace RTW
 {
 	Camera::Camera()
-		: m_AspectRatio(-DoubleInf), m_ImageWidth(-1), m_SamplesPerPixel(0) {}
+		: m_AspectRatio(-DoubleInf), m_ImageWidth(-1), m_SamplesPerPixel(0), m_MaxBounces(0) {}
 
-	Camera::Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel)
-		: m_AspectRatio(AspectRatio), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel) {}
+	Camera::Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel, int16_t maxBounces)
+		: m_AspectRatio(AspectRatio), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) {}
 
 	void Camera::Render(const RayHittable& objects)
 	{
@@ -34,7 +35,7 @@ namespace RTW
 				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 				{
 					Ray ray = CreateRay(i, j);
-					pixelColour += RayColour(ray, objects);
+					pixelColour += RayColour(ray, m_MaxBounces, objects);
 				}
 
 				WriteColour(std::cout, pixelColour * m_SampleScale);
@@ -64,15 +65,18 @@ namespace RTW
 		m_Pixel100Location = viewportUpperLeft + 0.5 * (m_PixelDeltaU + m_PixelDeltaV);
 	}
 
-	Colour Camera::RayColour(const Ray& ray, const RayHittable& object)
+	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object)
 	{
-		RTW::HitData data;
-		if (object.IsRayHit(ray, RTW::Interval(0, RTW::DoubleInf), data))
-			return 0.5 * (data.normal + 1.0);
+		if (bouncesLeft <= 0)
+			return { 0.0, 0.0, 0.0 };
 
-		RTW::Vec3 normalizedDirection = glm::normalize(ray.direction());
+		HitData data;
+		if (object.IsRayHit(ray, Interval(0, DoubleInf), data))
+			return 1.0 * RayColour(Ray(data.point, Sphere::RandomOnHemisphere(data.normal)), bouncesLeft - 1, object);
+
+		Vec3 normalizedDirection = glm::normalize(ray.direction());
 		double a = 0.5 * (normalizedDirection.y + 1.0);
-		return RTW::Colour(1.0 - a) + a * RTW::Colour(0.5, 0.7, 1.0);
+		return Colour(1.0 - a) + a * Colour(0.5, 0.7, 1.0);
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j)
@@ -88,6 +92,6 @@ namespace RTW
 
 	glm::dvec2 Camera::SampleSquare()
 	{
-		return { glm::linearRand(-0.5, 0.5), glm::linearRand(-0.5, 0.5) };
+		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
 	}
 }
