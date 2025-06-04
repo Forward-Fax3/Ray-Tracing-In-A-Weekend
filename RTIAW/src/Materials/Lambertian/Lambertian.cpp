@@ -8,9 +8,10 @@
 
 namespace RTW
 {
-	inline static bool operator<(const double lhs, const Vec3& rhs)
+	inline static bool operator<(const Vec3& lhs, const double rhs)
 	{
-		return abs(lhs) < rhs.x && abs(lhs) < rhs.y && abs(lhs) < rhs.z;
+		Vec3 abslhs = glm::abs(lhs);
+		return abslhs.x < rhs && abslhs.y < rhs && abslhs.z < rhs;
 	}
 
 	Lambertian::Lambertian(const Colour& albedo)
@@ -21,7 +22,7 @@ namespace RTW
 		Vec3 scatterDirection = data.normal + RandomUnitVector();
 		double minValue = 1e-8;
 
-		scatterDirection = minValue < scatterDirection ? data.normal : scatterDirection;
+		scatterDirection = scatterDirection < minValue ? data.normal : scatterDirection;
 
 		scatter = Ray(data.point, scatterDirection);
 		colour = m_Albedo;
