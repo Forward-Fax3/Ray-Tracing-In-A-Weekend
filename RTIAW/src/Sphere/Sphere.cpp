@@ -10,8 +10,8 @@
 
 namespace RTW
 {
-	Sphere::Sphere(const Point& center, double radius)
-		: m_Radius(glm::max(0.0, radius)), m_Center(center) {}
+	Sphere::Sphere(const Point& center, double radius, std::shared_ptr<BaseMaterial> material)
+		: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material) {}
 
 	bool Sphere::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
 	{
@@ -40,26 +40,8 @@ namespace RTW
 
 		setFaceNormal(ray, normal, hitData);
 
+		hitData.material = m_Material;
+
 		return true;
-	}
-
-	Vec3 Sphere::RandomOnHemisphere(const Vec3& normal)
-	{
-		Vec3 onUnitSphere = RandomUnitVector();
-		return glm::dot(onUnitSphere, normal) > 0.0 ? onUnitSphere : -onUnitSphere;
-	}
-
-	Vec3 Sphere::RandomUnitVector()
-	{
-		Vec3 direction(0.0);
-		double lengthSqared = 0.0;
-		const Interval MaxMin(1e-160, 1);
-
-		do {
-			direction = glm::linearRand(Vec3(-1), Vec3(1));
-			lengthSqared = glm::length2(direction);
-		} while (!MaxMin.Surrounds(lengthSqared));
-
-		return direction / lengthSqared;
 	}
 }

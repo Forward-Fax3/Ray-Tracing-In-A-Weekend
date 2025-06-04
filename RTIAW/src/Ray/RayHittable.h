@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "glm/glm.hpp"
 
 #include "Core.h"
@@ -8,10 +10,13 @@
 
 namespace RTW
 {
+	class BaseMaterial;
+
 	struct HitData
 	{
 		Point point = Point(0.0);
 		Vec3 normal = Vec3(0.0);
+		std::shared_ptr<BaseMaterial> material;
 		double distance = 0.0;
 		bool isFrontFace = false;
 	};
@@ -30,3 +35,7 @@ namespace RTW
 		}
 	};
 }
+
+#if !defined(_BaseMaterial)
+#include "BaseMaterial.h"
+#endif
