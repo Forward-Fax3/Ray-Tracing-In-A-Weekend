@@ -10,11 +10,12 @@ namespace RTW
 	class Metal : public BaseMaterial
 	{
 	public:
-		Metal(const Colour& albedo);
+		Metal(const Colour& albedo, double fuzz);
 
 		virtual bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
 
 	private:
 		Colour m_Albido;
+		double m_Fuzz;
 	};
 }

@@ -30,7 +30,7 @@ namespace RTW
 
 		inline void setFaceNormal(const Ray& ray, const Vec3& outwardNormal, HitData& hitData) const
 		{
-			hitData.isFrontFace = glm::dot(ray.direction(), outwardNormal);
+			hitData.isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
 			hitData.normal = hitData.isFrontFace ? outwardNormal : -outwardNormal;
 		}
 	};

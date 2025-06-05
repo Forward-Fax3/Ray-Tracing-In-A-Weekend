@@ -12,6 +12,7 @@
 #include "BaseMaterial.h"
 #include "Lambertian.h"
 #include "Metal.h"
+#include "Dielectric.h"
 
 
 int main()
@@ -20,8 +21,13 @@ int main()
 
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
-	int16_t samplesPerPixel = 512;
-	int16_t maxBounceDepth = 256;
+#ifdef _DEBUG // do not change these values for debug will take for ever otherwise
+	int16_t samplesPerPixel = 4;
+	int16_t maxBounceDepth = 4;
+#else
+	int16_t samplesPerPixel = 16;
+	int16_t maxBounceDepth = 8;
+#endif
 
 	RTW::RayHittables worldHitables;
 	{
@@ -29,17 +35,17 @@ int main()
 		std::shared_ptr<RTW::BaseMaterial> material(std::make_shared<RTW::Lambertian>(RTW::Colour(0.8, 0.8, 0.0)));
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 100.0, material));
 
-		tempPoint = { 0.0, 0.0, -1.0 };
+		tempPoint = { 0.0, 0.0, -1.2 };
 		material = std::make_shared<RTW::Lambertian>(RTW::Colour(0.1, 0.2, 0.5));
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material));
 
 		tempPoint = { -1.0, 0.0, -1.0 };
-		material = std::make_shared<RTW::Metal>(RTW::Colour(0.8));
+		material = std::make_shared<RTW::Metal>(RTW::Colour(0.8), 0.0);
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material));
 
 		tempPoint = { 1.0, 0.0, -1.0 };
-		material = std::make_shared<RTW::Metal>(RTW::Colour(0.8, 0.6, 0.2));
-		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material));
+		material = std::make_shared<RTW::Dielectric>(1.5);
+		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material)); 
 	}
 
 	RTW::Camera camera(aspectRatio, imageWidth, samplesPerPixel, maxBounceDepth);

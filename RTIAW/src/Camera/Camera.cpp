@@ -50,8 +50,10 @@ namespace RTW
 
 		m_SampleScale = 1.0 / m_SamplesPerPixel;
 
-		double focalLength = 2.2;
-		double viewportHeight = 1.2;
+//		double focalLength = 2.2;
+//		double viewportHeight = 1.2;
+		double focalLength = 1.0;
+		double viewportHeight = 2.0;
 		double viewportWidth = viewportHeight * (static_cast<double>(m_ImageWidth) / static_cast<double>(m_ImageHeight));
 
 		RTW::Point viewportU(viewportWidth, 0.0, 0.0);
@@ -78,6 +80,20 @@ namespace RTW
 			return data.material->Scatter(ray, data, colour, newRay) ?
 				colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
 		}
+
+//		if (object.IsRayHit(ray, Interval(0.001, DoubleInf), data))
+//		{
+//			Ray newRay;
+//			Colour colour;
+//			Colour returnColour(0.0);
+//
+//			int16_t maxNewRays = bouncesLeft;
+//
+//			for (int16_t i = 0; i < maxNewRays; i++)
+//				returnColour += data.material->Scatter(ray, data, colour, newRay) ? colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
+//
+//			return returnColour / static_cast<double>(maxNewRays);
+//		}
 			
 		Vec3 normalizedDirection = glm::normalize(ray.direction());
 		double a = 0.5 * (normalizedDirection.y + 1.0);

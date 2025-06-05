@@ -37,7 +37,8 @@ namespace RTW
 		// Only internally changeable
 		int16_t m_ImageHeight = 0;
 		double m_SampleScale = 0.0;
-		Point m_Position = Point(0.0, 0.0, 3.0);
+//		Point m_Position = Point(0.0, 0.0, 3.0);
+		Point m_Position = Point(0.0);
 		Point m_Pixel100Location = Point(0.0);
 		Vec3 m_PixelDeltaU = Vec3(0.0);
 		Vec3 m_PixelDeltaV = Vec3(0.0);
