@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <chrono>
+#include <thread>
 
 #include "glm/glm.hpp"
 
@@ -25,9 +26,10 @@ int main()
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 16;
-	int16_t maxBounceDepth = 8;
+	int16_t samplesPerPixel = 512;
+	int16_t maxBounceDepth = 512;
 #endif
+	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
 	{
@@ -51,7 +53,7 @@ int main()
 	RTW::Camera camera(aspectRatio, imageWidth, samplesPerPixel, maxBounceDepth);
 
 //	camera.Render(worldHitables);
-	camera.RenderMultiThreaded(worldHitables);
+	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 

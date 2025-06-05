@@ -46,45 +46,21 @@ namespace RTW
 		}
 	}
 
-	void Camera::RenderMultiThreaded(const RayHittable& objects)
+	void Camera::RenderMultiThreaded(const int16_t numberOfThreads, const RayHittable& objects)
 	{
 		Init();
 		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
 
-		ctpl::thread_pool threads(32);
-		int64_t numberOfPixels = static_cast<int64_t>(m_ImageWidth) * static_cast<int64_t>(m_ImageHeight);
-		int64_t numberOfPixelsPerThread = numberOfPixels / 12;
-		int64_t pixelsLeft = numberOfPixels % 12;
+		ctpl::thread_pool threads(numberOfThreads);
+		m_NumberOfPixels = static_cast<int64_t>(m_ImageWidth) * static_cast<int64_t>(m_ImageHeight);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-		for (int16_t i = 0; i < 12; i++)
-		{
-			MultiThreadedData* data = new MultiThreadedData;
-			data->camera = this;
-			data->object = &objects;
-			data->offset = numberOfPixelsPerThread * i;
-			data->colourArray = &m_ColourPixelArray[data->offset];
-			data->numberOfPixels = numberOfPixelsPerThread;
-
-			threads.push(Camera::StaticMultiThreadRenderLoop, data);
-		}
-
-		if (0 < pixelsLeft)
-		{
-			MultiThreadedData data;
-			data.camera = this;
-			data.object = &objects;
-			data.offset = numberOfPixels - pixelsLeft;
-			data.colourArray = &m_ColourPixelArray[data.offset];
-			data.numberOfPixels = pixelsLeft;
-			MultiThreadRenderLoop(&data);
-		}
+		for (int16_t i = 0; i < numberOfThreads; i++)
+			threads.push(Camera::StaticMultiThreadRenderLoop, *this, i, numberOfThreads, &objects);
 
 		threads.~thread_pool();
 
 		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n255\n";
-		for (int64_t i = 0; i < numberOfPixels; i++)
+		for (int64_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
 
 		delete[] m_ColourPixelArray;
@@ -163,25 +139,22 @@ namespace RTW
 		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
 	}
 
-	void Camera::MultiThreadRenderLoop(MultiThreadedData* data)
+	void Camera::MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object)
 	{
-		for (int64_t i = 0; i < data->numberOfPixels; i++)
+		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 			{
-				int64_t pixel = i + data->offset;
-				Ray ray = CreateRay(pixel % m_ImageWidth, pixel / m_ImageWidth);
-				colour += RayColour(ray, m_MaxBounces, *data->object);
+				Ray ray = CreateRay(i % m_ImageWidth, i / m_ImageWidth);
+				colour += RayColour(ray, m_MaxBounces, object);
 			}
-			data->colourArray[i] = colour * m_SampleScale;
+			m_ColourPixelArray[i] = colour * m_SampleScale;
 		}
 	}
 
-	void Camera::StaticMultiThreadRenderLoop([[maybe_unused]] int id, void* data)
+	void Camera::StaticMultiThreadRenderLoop([[maybe_unused]] int id, Camera& camera, int64_t offset, int64_t increment, const RayHittable* object)
 	{
-		MultiThreadedData* d = reinterpret_cast<MultiThreadedData*>(data);
-		d->camera->MultiThreadRenderLoop(d);
-		delete d;
+		camera.MultiThreadRenderLoop(offset, increment, *object);
 	}
 }
