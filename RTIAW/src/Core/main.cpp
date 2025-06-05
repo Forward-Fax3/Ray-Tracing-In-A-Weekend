@@ -50,7 +50,8 @@ int main()
 
 	RTW::Camera camera(aspectRatio, imageWidth, samplesPerPixel, maxBounceDepth);
 
-	camera.Render(worldHitables);
+//	camera.Render(worldHitables);
+	camera.RenderMultiThreaded(worldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 

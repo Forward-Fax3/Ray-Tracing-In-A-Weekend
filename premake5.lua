@@ -29,6 +29,7 @@ workspace "RTIAW"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["glm"]    = "RTIAW/3rd Party/Git/glm/"
+IncludeDir["CTPL"]    = "RTIAW/3rd Party/Git/CTPL/"
 
 if _ACTION == "clean" then
 	os.rmdir("bin");
@@ -55,7 +56,7 @@ project "RTIAW"
 	language "C++"
 	cppdialect "c++17"
 	cdialect "c17"
-	staticruntime "on"
+	staticruntime "off"
 	toolset "clang"
 	linker "LLD"
 	warnings "Extra"
@@ -77,6 +78,7 @@ project "RTIAW"
 		"%{prj.name}/src/**",
 		
 		"%{IncludeDir.glm}",
+		"%{IncludeDir.CTPL}",
 	}
 
 	links
