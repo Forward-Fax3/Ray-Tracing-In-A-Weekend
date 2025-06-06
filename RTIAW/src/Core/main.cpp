@@ -35,6 +35,9 @@ int main()
 	int16_t samplesPerPixel = 64;
 	int16_t maxBounceDepth = 8;
 #endif
+
+	RTW::Vec3 gamma(2.4);
+
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
@@ -56,7 +59,7 @@ int main()
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material)); 
 	}
 
-	RTW::Camera camera(aspectRatio, imageWidth, FOV, lookFrom, LookAt, VUp, samplesPerPixel, maxBounceDepth);
+	RTW::Camera camera(aspectRatio, imageWidth, FOV, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
 //	camera.Render(worldHitables);
 	camera.RenderMultiThreaded(numberOfThreads, worldHitables);

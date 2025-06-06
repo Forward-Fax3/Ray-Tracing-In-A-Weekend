@@ -20,8 +20,8 @@ namespace RTW
 	Camera::Camera()
 		: m_AspectRatio(-DoubleInf), m_FOV(0), m_ImageWidth(-1), m_SamplesPerPixel(0), m_MaxBounces(0) {}
 
-	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, int16_t samplesPerPixel, int16_t maxBounces)
-		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) { }
+	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces)
+		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_Gamma(gamma), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) { }
 
 	void Camera::Render(const RayHittable& objects)
 	{
@@ -41,7 +41,7 @@ namespace RTW
 					Ray ray = CreateRay(j, i);
 					colour += RayColour(ray, m_MaxBounces, objects);
 				}
-				WriteColour(std::cout, colour * m_SampleScale);
+				WriteColour(std::cout, ColourCorrection(colour));
 			}
 		}
 	}
@@ -57,7 +57,7 @@ namespace RTW
 		for (int16_t i = 0; i < numberOfThreads; i++)
 			threads.push(Camera::StaticMultiThreadRenderLoop, *this, i, numberOfThreads, &objects);
 
-		threads.~thread_pool();
+		threads.~thread_pool(); // waits for all threads to finish and then deletes the thread pool.
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
@@ -70,6 +70,8 @@ namespace RTW
 
 	void Camera::Init()
 	{
+		m_GammaInv = 1.0 / m_Gamma;
+
 		m_ImageHeight = static_cast<int16_t>(m_ImageWidth / m_AspectRatio);
 		m_ImageHeight = (m_ImageHeight < 1) ? 1 : m_ImageHeight;
 
@@ -145,6 +147,11 @@ namespace RTW
 		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
 	}
 
+	Colour Camera::ColourCorrection(const Colour colour) const
+	{
+		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_GammaInv)) * 256.0;
+	}
+
 	void Camera::MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object)
 	{
 		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
@@ -158,7 +165,7 @@ namespace RTW
 				Ray ray = CreateRay(i % m_ImageWidth, i / m_ImageWidth);
 				colour += RayColour(ray, m_MaxBounces, object);
 			}
-			m_ColourPixelArray[i] = colour * m_SampleScale;
+			m_ColourPixelArray[i] = ColourCorrection(colour);
 		}
 	}
 

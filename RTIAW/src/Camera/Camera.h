@@ -11,7 +11,7 @@ namespace RTW
 	{
 	public:
 		Camera();
-		Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, int16_t samplesPerPixel, int16_t maxBounces);
+		Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces);
 
 		void Render(const RayHittable& objects);
 		void RenderMultiThreaded(const int16_t numberOfThreads, const RayHittable& objects);
@@ -27,6 +27,8 @@ namespace RTW
 		Ray CreateRay(int16_t i, int16_t j);
 		glm::dvec2 SampleSquare();
 
+		inline Colour ColourCorrection(const Colour colour) const;
+
 		void MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object);
 		static void StaticMultiThreadRenderLoop(int id, Camera& camera, int64_t offset, int64_t increment, const RayHittable* object);
 
@@ -41,6 +43,7 @@ namespace RTW
 		};
 		Point m_LookAt;
 		Vec3 m_VUp;
+		Vec3 m_Gamma;
 		int16_t m_ImageWidth;
 		int16_t m_SamplesPerPixel;
 		int16_t m_MaxBounces;
@@ -56,5 +59,6 @@ namespace RTW
 		Vec3 m_U = Vec3(0.0);
 		Vec3 m_V = Vec3(0.0);
 		Vec3 m_W = Vec3(0.0);
+		Vec3 m_GammaInv = Vec3(0.0);
 	};
 }
