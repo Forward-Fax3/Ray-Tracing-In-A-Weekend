@@ -3,7 +3,6 @@
 #include "glm/glm.hpp"
 
 #include "Core.h"
-#include "Interval.h"
 #include "WriteColour.h"
 
 

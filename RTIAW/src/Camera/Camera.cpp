@@ -62,7 +62,7 @@ namespace RTW
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n255\n";
+		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
 		for (int64_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
 
@@ -160,7 +160,7 @@ namespace RTW
 
 	Colour Camera::ColourCorrection(const Colour colour) const
 	{
-		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_GammaInv)) * 256.0;
+		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_GammaInv)) * 1024.0;
 	}
 
 	void Camera::MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object)

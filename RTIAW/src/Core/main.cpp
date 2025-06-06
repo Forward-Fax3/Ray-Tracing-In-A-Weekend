@@ -35,10 +35,11 @@ int main()
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	int16_t samplesPerPixel = 4;
+
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 2048;
-	int16_t maxBounceDepth = 64;
+	int16_t samplesPerPixel = 32;
+	int16_t maxBounceDepth = 8;
 #endif
 
 	RTW::Vec3 gamma(2.4);
