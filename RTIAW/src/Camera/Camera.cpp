@@ -18,10 +18,11 @@
 namespace RTW
 {
 	Camera::Camera()
-		: m_AspectRatio(-DoubleInf), m_FOV(0), m_ImageWidth(-1), m_SamplesPerPixel(0), m_MaxBounces(0) {}
+		: m_AspectRatio(0.0), m_FOV(0.0), m_DefocusAngle(0.0), m_FocusDistance(0.0), m_LookFrom(0.0), m_LookAt(0.0), m_VUp(0.0), m_Gamma(0.0), m_ImageWidth(0), m_SamplesPerPixel(0), m_MaxBounces(0) {}
 
-	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces)
-		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_Gamma(gamma), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) { }
+
+	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces)
+		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_DefocusAngle(defocusAngle), m_FocusDistance(focusDistance), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_Gamma(gamma), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) {}
 
 	void Camera::Render(const RayHittable& objects)
 	{
@@ -57,7 +58,7 @@ namespace RTW
 		for (int16_t i = 0; i < numberOfThreads; i++)
 			threads.push(Camera::StaticMultiThreadRenderLoop, *this, i, numberOfThreads, &objects);
 
-		threads.~thread_pool(); // waits for all threads to finish and then deletes the thread pool.
+		threads.~thread_pool(); // Waits for all threads to finish and then deletes the thread pool.
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
@@ -77,7 +78,7 @@ namespace RTW
 
 		m_SampleScale = 1.0 / m_SamplesPerPixel;
 
-		double focalLength = (m_LookFrom - m_LookAt).length();
+		double focalLength = (m_FocusDistance == 0.0) ? (m_LookFrom - m_LookAt).length() : m_FocusDistance;
 		double theta = glm::radians(m_FOV);
 		double h = glm::tan(theta / 2);
 		double viewportHeight = 2 * h * focalLength;
@@ -96,6 +97,10 @@ namespace RTW
 		RTW::Point viewportUpperLeft = m_Position - focalLength * m_W - 0.5 * (viewportU + viewportV);
 
 		m_Pixel100Location = viewportUpperLeft + 0.5 * (m_PixelDeltaU + m_PixelDeltaV);
+
+		double defocusRadius = m_FocusDistance * std::tan(glm::radians(m_DefocusAngle * 0.5));
+		m_DefocusDiskU = m_U * defocusRadius;
+		m_DefocusDiskV = m_V * defocusRadius;
 	}
 
 	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object)
@@ -136,7 +141,7 @@ namespace RTW
 		glm::dvec2 offset = SampleSquare() + glm::dvec2(j, i);
 		Vec3 pixelSample = m_Pixel100Location + offset.x * m_PixelDeltaU + offset.y * m_PixelDeltaV;
 
-		Vec3 rayOrigin = m_Position;
+		Point rayOrigin = (m_DefocusAngle <= 0.0) ? m_Position : DefocusDiskSample();
 		Vec3 rayDirection = pixelSample - rayOrigin;
 
 		return { rayOrigin, rayDirection };
@@ -145,6 +150,12 @@ namespace RTW
 	glm::dvec2 Camera::SampleSquare()
 	{
 		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
+	}
+
+	RTW::Point Camera::DefocusDiskSample()
+	{
+		Point point = RandomOnUnitDisk();
+		return m_Position + point.x * m_DefocusDiskU + point.y * m_DefocusDiskV;
 	}
 
 	Colour Camera::ColourCorrection(const Colour colour) const

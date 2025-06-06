@@ -29,4 +29,14 @@ namespace RTW
 
 		return direction / lengthSqared;
 	}
+
+	RTW::Vec3 RandomOnUnitDisk()
+	{
+		Point point(0.0);
+		do {
+			point = glm::linearRand(Vec3(-1.0, -1.0, 0.0), Vec3(1.0, 1.0, 0.0));
+		} while (glm::length2(point) >= 1);
+
+		return point;
+	}
 }

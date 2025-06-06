@@ -11,13 +11,23 @@ namespace RTW
 	{
 	public:
 		Camera();
-		Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces);
+		Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces);
 
 		void Render(const RayHittable& objects);
 		void RenderMultiThreaded(const int16_t numberOfThreads, const RayHittable& objects);
 
-		inline void SetAspectRatio(double AR) { m_AspectRatio = AR; }
-		inline void SetImageWidth(int16_t imageWidth) { m_ImageWidth = imageWidth; }
+		inline void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
+		inline void SetFOV(const double FOV) { m_FOV = FOV; }
+		inline void SetDefocusAngle(const double defocusAngle) { m_DefocusAngle = defocusAngle; }
+		inline void SetFocusDistance(const double focusDistance) { m_FocusDistance = focusDistance; }
+		inline void SetPosition(const Point position) { m_Position = position; }
+		inline void SetLookFrom(const Point lookFrom) { m_LookFrom = lookFrom; }
+		inline void SetLookAt(const Point lookAt) { m_LookAt = lookAt; }
+		inline void SetUp(const Vec3 VUp) { m_VUp = VUp; }
+		inline void SetGamma(const Vec3 gamma) { m_Gamma = gamma; }
+		inline void SetImageWidth(const int16_t imageWidth) { m_ImageWidth = imageWidth; }
+		inline void SetSamplesPerPixel(const int16_t samplesPerPixel) { m_SamplesPerPixel = samplesPerPixel; }
+		inline void SetMaxBounces(const int16_t maxBounces) { m_MaxBounces = maxBounces; }
 
 	// Private helper functions
 	private:
@@ -26,6 +36,7 @@ namespace RTW
 		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object);
 		Ray CreateRay(int16_t i, int16_t j);
 		glm::dvec2 SampleSquare();
+		Point DefocusDiskSample();
 
 		inline Colour ColourCorrection(const Colour colour) const;
 
@@ -37,9 +48,11 @@ namespace RTW
 		// Externally changeable
 		double m_AspectRatio;
 		double m_FOV;
+		double m_DefocusAngle;
+		double m_FocusDistance;
 		union {
-			Point m_LookFrom;
 			Point m_Position;
+			Point m_LookFrom;
 		};
 		Point m_LookAt;
 		Vec3 m_VUp;
@@ -56,6 +69,8 @@ namespace RTW
 		Point m_Pixel100Location = Point(0.0);
 		Vec3 m_PixelDeltaU = Vec3(0.0);
 		Vec3 m_PixelDeltaV = Vec3(0.0);
+		Vec3 m_DefocusDiskU = Vec3(0.0);
+		Vec3 m_DefocusDiskV = Vec3(0.0);
 		Vec3 m_U = Vec3(0.0);
 		Vec3 m_V = Vec3(0.0);
 		Vec3 m_W = Vec3(0.0);

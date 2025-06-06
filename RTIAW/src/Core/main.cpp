@@ -38,6 +38,9 @@ int main()
 
 	RTW::Vec3 gamma(2.4);
 
+	double defocusAngle = 0.0;
+	double focusDistance = 0.0;
+
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
@@ -59,7 +62,7 @@ int main()
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material)); 
 	}
 
-	RTW::Camera camera(aspectRatio, imageWidth, FOV, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
+	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
 //	camera.Render(worldHitables);
 	camera.RenderMultiThreaded(numberOfThreads, worldHitables);

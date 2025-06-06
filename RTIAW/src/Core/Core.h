@@ -14,4 +14,6 @@ namespace RTW
 	Vec3 RandomOnHemisphere(const Vec3& normal);
 
 	Vec3 RandomUnitVector();
+
+	Vec3 RandomOnUnitDisk();
 }
