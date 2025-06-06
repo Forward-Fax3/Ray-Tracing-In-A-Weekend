@@ -22,8 +22,8 @@ namespace RTW
 		double sinTheta = glm::sqrt(1.0 - cosTheta * cosTheta);
 
 		Vec3 refracted = ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0) ?
-			reflect(normalDirection, data.normal) :
-			refract(normalDirection, data.normal, ri);
+			glm::reflect(normalDirection, data.normal) :
+			glm::refract(normalDirection, data.normal, ri);
 
 		scatter = Ray(data.point, refracted);
 		return true;

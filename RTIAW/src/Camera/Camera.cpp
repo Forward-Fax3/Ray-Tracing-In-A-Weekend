@@ -18,10 +18,10 @@
 namespace RTW
 {
 	Camera::Camera()
-		: m_AspectRatio(-DoubleInf), m_ImageWidth(-1), m_SamplesPerPixel(0), m_MaxBounces(0) {}
+		: m_AspectRatio(-DoubleInf), m_FOV(0), m_ImageWidth(-1), m_SamplesPerPixel(0), m_MaxBounces(0) {}
 
-	Camera::Camera(double AspectRatio, int16_t imageWidth, int16_t samplesPerPixel, int16_t maxBounces)
-		: m_AspectRatio(AspectRatio), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) {}
+	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, Point lookFrom, Point lookAt, Vec3 VUp, int16_t samplesPerPixel, int16_t maxBounces)
+		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) { }
 
 	void Camera::Render(const RayHittable& objects)
 	{
@@ -59,6 +59,8 @@ namespace RTW
 
 		threads.~thread_pool();
 
+		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
+
 		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n255\n";
 		for (int64_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
@@ -73,19 +75,23 @@ namespace RTW
 
 		m_SampleScale = 1.0 / m_SamplesPerPixel;
 
-		double focalLength = 2.2;
-		double viewportHeight = 1.2;
-//		double focalLength = 1.0;
-//		double viewportHeight = 2.0;
+		double focalLength = (m_LookFrom - m_LookAt).length();
+		double theta = glm::radians(m_FOV);
+		double h = glm::tan(theta / 2);
+		double viewportHeight = 2 * h * focalLength;
 		double viewportWidth = viewportHeight * (static_cast<double>(m_ImageWidth) / static_cast<double>(m_ImageHeight));
 
-		RTW::Point viewportU(viewportWidth, 0.0, 0.0);
-		RTW::Point viewportV(0.0, -viewportHeight, 0.0);
+		m_W = glm::normalize(m_LookFrom - m_LookAt);
+		m_U = glm::normalize(glm::cross(m_VUp, m_W));
+		m_V = glm::cross(m_W, m_U);
+
+		RTW::Point viewportU(viewportWidth * m_U);
+		RTW::Point viewportV(viewportHeight * -m_V);
 
 		m_PixelDeltaU = viewportU / static_cast<double>(m_ImageWidth);
 		m_PixelDeltaV = viewportV / static_cast<double>(m_ImageHeight);
 
-		RTW::Point viewportUpperLeft = m_Position - RTW::Point(0.0, 0.0, focalLength) - 0.5 * (viewportU + viewportV);
+		RTW::Point viewportUpperLeft = m_Position - focalLength * m_W - 0.5 * (viewportU + viewportV);
 
 		m_Pixel100Location = viewportUpperLeft + 0.5 * (m_PixelDeltaU + m_PixelDeltaV);
 	}
@@ -110,7 +116,7 @@ namespace RTW
 //			Colour colour;
 //			Colour returnColour(0.0);
 //
-//			int16_t maxNewRays = bouncesLeft;
+//			int16_t maxNewRays = 3;
 //
 //			for (int16_t i = 0; i < maxNewRays; i++)
 //				returnColour += data.material->Scatter(ray, data, colour, newRay) ? colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
@@ -143,6 +149,9 @@ namespace RTW
 	{
 		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
+			if (i % m_ImageWidth == 0)
+				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
+
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 			{

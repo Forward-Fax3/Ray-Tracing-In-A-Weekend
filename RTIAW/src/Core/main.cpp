@@ -22,12 +22,18 @@ int main()
 
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
+
+	double FOV = 20.0;
+	RTW::Vec3 lookFrom(-2.0, 2.0, 1.0);
+	RTW::Vec3 LookAt(0.0, 0.0, -1.0);
+	RTW::Vec3 VUp(0.0, 1.0, 0.0);
+
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 512;
-	int16_t maxBounceDepth = 512;
+	int16_t samplesPerPixel = 64;
+	int16_t maxBounceDepth = 8;
 #endif
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
@@ -50,13 +56,13 @@ int main()
 		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material)); 
 	}
 
-	RTW::Camera camera(aspectRatio, imageWidth, samplesPerPixel, maxBounceDepth);
+	RTW::Camera camera(aspectRatio, imageWidth, FOV, lookFrom, LookAt, VUp, samplesPerPixel, maxBounceDepth);
 
 //	camera.Render(worldHitables);
 	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 
-	std::clog << "\rDone.                 \nTime Took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
+	std::clog << "\rTime Took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
 	std::cin.get();
 }
