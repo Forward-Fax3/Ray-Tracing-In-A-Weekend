@@ -152,7 +152,7 @@ namespace RTW
 		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
 	}
 
-	RTW::Point Camera::DefocusDiskSample()
+	RTW::Point Camera::DefocusDiskSample() const
 	{
 		Point point = RandomOnUnitDisk();
 		return m_Position + point.x * m_DefocusDiskU + point.y * m_DefocusDiskV;

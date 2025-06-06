@@ -36,7 +36,7 @@ namespace RTW
 		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object);
 		Ray CreateRay(int16_t i, int16_t j);
 		glm::dvec2 SampleSquare();
-		Point DefocusDiskSample();
+		Point DefocusDiskSample() const;
 
 		inline Colour ColourCorrection(const Colour colour) const;
 
