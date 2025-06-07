@@ -13,7 +13,7 @@ namespace RTW
 	{
 		Vec3 refelcted = glm::reflect(ray.direction(), data.normal);
 		refelcted = glm::normalize(refelcted) + (m_Fuzz * RandomUnitVector());
-		scatter = Ray(data.point, refelcted);
+		scatter = Ray(data.point, refelcted, ray.time());
 		colour = m_Albido;
 		return (glm::dot(scatter.direction(), data.normal) > 0.0);
 	}

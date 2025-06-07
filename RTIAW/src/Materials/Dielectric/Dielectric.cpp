@@ -25,7 +25,7 @@ namespace RTW
 			glm::reflect(normalDirection, data.normal) :
 			glm::refract(normalDirection, data.normal, ri);
 
-		scatter = Ray(data.point, refracted);
+		scatter = Ray(data.point, refracted, ray.time());
 		return true;
 	}
 

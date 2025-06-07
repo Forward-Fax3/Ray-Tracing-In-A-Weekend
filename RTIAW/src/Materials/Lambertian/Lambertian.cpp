@@ -24,7 +24,7 @@ namespace RTW
 
 		scatterDirection = scatterDirection < minValue ? data.normal : scatterDirection;
 
-		scatter = Ray(data.point, scatterDirection);
+		scatter = Ray(data.point, scatterDirection, ray.time());
 		colour = m_Albedo;
 		return true;
 	}

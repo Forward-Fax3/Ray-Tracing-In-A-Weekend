@@ -8,18 +8,28 @@
 #include "RayHittable.h"
 
 
-namespace RTW
+namespace RTW::Templates
 {
+	template <bool t_IsMoving>
 	class Sphere : public RayHittable
 	{
 	public:
-		Sphere(const Point& center, double radius, std::shared_ptr<BaseMaterial> material);
+		Sphere<false>(const Point& center, double radius, std::shared_ptr<BaseMaterial> material);
+		Sphere<true>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material);
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
 	private:
+		using m_CenterType = std::conditional_t<t_IsMoving, Ray, Point>;
+
 		double m_Radius;
-		Point m_Center;
+		m_CenterType m_Center;
 		std::shared_ptr<BaseMaterial> m_Material;
 	};
+}
+
+namespace RTW
+{
+	using Sphere = Templates::Sphere<false>;
+	using MovingSphere = Templates::Sphere<true>;
 }

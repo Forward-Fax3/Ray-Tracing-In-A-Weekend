@@ -143,8 +143,9 @@ namespace RTW
 
 		Point rayOrigin = (m_DefocusAngle <= 0.0) ? m_Position : DefocusDiskSample();
 		Vec3 rayDirection = pixelSample - rayOrigin;
+		double rayTime = glm::linearRand(0.0, 1.0);
 
-		return { rayOrigin, rayDirection };
+		return { rayOrigin, rayDirection, rayTime};
 	}
 
 	glm::dvec2 Camera::SampleSquare()

@@ -35,17 +35,16 @@ int main()
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	int16_t samplesPerPixel = 4;
-
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 32;
-	int16_t maxBounceDepth = 8;
+	int16_t samplesPerPixel = 512;
+	int16_t maxBounceDepth = 64;
 #endif
 
 	RTW::Vec3 gamma(2.4);
 
-	double defocusAngle = 0.0;
-	double focusDistance = 0.0;
+	double defocusAngle = 0.6;
+	double focusDistance = 10.0;
 
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
@@ -84,7 +83,8 @@ int main()
 					{
 						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0)) * glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0));
 						std::shared_ptr<RTW::BaseMaterial> sphere_material = std::make_shared<RTW::Lambertian>(albedo);
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphere_material));
+						auto center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
+						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, sphere_material));
 					}
 					else if (choose_mat < 0.95) // metal
 					{
