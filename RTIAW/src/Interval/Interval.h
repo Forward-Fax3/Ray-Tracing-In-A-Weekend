@@ -12,6 +12,10 @@ namespace RTW
 		inline Interval(const Interval& old) : m_Min(old.m_Min), m_Max(old.m_Max) {}
 		inline Interval(Interval&& old) : m_Min(old.m_Min), m_Max(old.m_Max)
 			{ old.m_Min = DoubleInf; old.m_Max = -DoubleInf; }
+		inline Interval(const Interval& a, const Interval& b)
+			: m_Min((a.m_Min <= b.m_Min) ? a.m_Min : b.m_Min), m_Max((a.m_Max >= b.m_Max) ? a.m_Max : b.m_Max) {}
+
+		inline Interval operator=(const Interval& original) { this->m_Min = original.m_Min; this->m_Max = original.m_Max; return *this; }
 
 		inline double Size() const { return m_Max - m_Min; }
 
@@ -25,6 +29,11 @@ namespace RTW
 
 		inline double Clamp(const double x) const { return glm::clamp(x, m_Min, m_Max); }
 		inline Colour Clamp(const Colour& x) const { return glm::clamp(x, Vec3(m_Min), Vec3(m_Max)); }
+
+		[[nodiscard]] inline Interval Expand(double dalta) const
+			{ return { m_Min + dalta * 0.5, m_Max + dalta * 0.5 }; }
+		[[nodiscard]] inline Interval Expand(double minIncrease, double maxIncrease) const
+			{ return { m_Min + minIncrease, m_Max + maxIncrease }; }
 
 		inline double GetMax() const { return m_Max; }
 		inline double GetMin() const { return m_Min; }

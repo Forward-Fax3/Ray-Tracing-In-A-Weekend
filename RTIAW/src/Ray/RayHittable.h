@@ -5,6 +5,7 @@
 
 #include "Core.h"
 #include "Interval.h"
+#include "AxisAliagnedBoundingBoxes.h"
 #include "Ray.h"
 
 
@@ -28,7 +29,9 @@ namespace RTW
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const = 0;
 
-		inline void setFaceNormal(const Ray& ray, const Vec3& outwardNormal, HitData& hitData) const
+		virtual const AABB& GetBoundingBox() const = 0;
+
+		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal, HitData& hitData) const
 		{
 			hitData.isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
 			hitData.normal = hitData.isFrontFace ? outwardNormal : -outwardNormal;

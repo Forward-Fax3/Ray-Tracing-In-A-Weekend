@@ -9,6 +9,7 @@
 #include "Core.h"
 #include "Sphere.h"
 #include "Hittables.h"
+#include "BoundingVolumeHierarchiesNode.h"
 #include "Camera.h"
 
 #include "BaseMaterial.h"
@@ -37,8 +38,8 @@ int main()
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 512;
-	int16_t maxBounceDepth = 64;
+	int16_t samplesPerPixel = 32;
+	int16_t maxBounceDepth = 8;
 #endif
 
 	RTW::Vec3 gamma(2.4);
@@ -68,53 +69,56 @@ int main()
 //	}
 
 	{
-		auto groundMaterial = std::make_shared<RTW::Lambertian>(RTW::Colour(0.5));
+		std::shared_ptr<RTW::BaseMaterial> groundMaterial = std::make_shared<RTW::Lambertian>(RTW::Colour(0.5));
 		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(0, -1000, 0), 1000, groundMaterial));
 
 		for (int a = -11; a < 11; a++)
 			for (int b = -11; b < 11; b++)
 			{
-				double choose_mat = glm::linearRand(0.0, 1.0);
+				double chooseMat = glm::linearRand(0.0, 1.0);
 				RTW::Point center(RTW::Point(a, 0.2, b) + glm::linearRand(RTW::Point(0.0), RTW::Point(0.9, 0.0, 0.9)));
 
 				if ((center - RTW::Point(4, 0.2, 0)).length() > 0.9)
 				{
-					if (choose_mat < 0.8) // diffuse
+					if (chooseMat < 0.8) // diffuse
 					{
 						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0)) * glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0));
-						std::shared_ptr<RTW::BaseMaterial> sphere_material = std::make_shared<RTW::Lambertian>(albedo);
-						auto center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
-						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, sphere_material));
+						std::shared_ptr<RTW::BaseMaterial> sphereMaterial = std::make_shared<RTW::Lambertian>(albedo);
+						RTW::Point center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
+						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, sphereMaterial));
 					}
-					else if (choose_mat < 0.95) // metal
+					else if (chooseMat < 0.95) // metal
 					{
 						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.5), RTW::Vec3(1.0));
 						double fuzz = glm::linearRand(0.0, 0.5);
-						std::shared_ptr<RTW::BaseMaterial> sphere_material = std::make_shared<RTW::Metal>(albedo, fuzz);
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphere_material));
+						std::shared_ptr<RTW::BaseMaterial> sphereMaterial = std::make_shared<RTW::Metal>(albedo, fuzz);
+						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphereMaterial));
 					}
 					else // glass
 					{
-						std::shared_ptr<RTW::BaseMaterial> sphere_material = std::make_shared<RTW::Dielectric>(1.5);
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphere_material));
+						double refactionIndex = glm::linearRand(0.0, 2.0);
+						std::shared_ptr<RTW::BaseMaterial> sphereMaterial = std::make_shared<RTW::Dielectric>(refactionIndex);
+						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphereMaterial));
 					}
 				}
 			}
 
-		auto material1 = std::make_shared<RTW::Dielectric>(1.5);
+		std::shared_ptr<RTW::BaseMaterial> material1 = std::make_shared<RTW::Dielectric>(1.5);
 		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(0, 1, 0), 1.0, material1));
 
-		auto material2 = std::make_shared<RTW::Lambertian>(RTW::Colour(0.4, 0.2, 0.1));
+		std::shared_ptr<RTW::BaseMaterial> material2 = std::make_shared<RTW::Lambertian>(RTW::Colour(0.4, 0.2, 0.1));
 		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(-4, 1, 0), 1.0, material2));
 
-		auto material3 = std::make_shared<RTW::Metal>(RTW::Colour(0.7, 0.6, 0.5), 0.0);
+		std::shared_ptr<RTW::BaseMaterial> material3 = std::make_shared<RTW::Metal>(RTW::Colour(0.7, 0.6, 0.5), 0.0);
 		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(4, 1, 0), 1.0, material3));
 	}
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
-//	camera.Render(worldHitables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
+	RTW::BVHNode BVHWorldHitables(worldHitables);
+
+//	camera.Render(BVHWorldHitables);
+	camera.RenderMultiThreaded(numberOfThreads, BVHWorldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 

@@ -19,12 +19,15 @@ namespace RTW::Templates
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
+		inline virtual const AABB& GetBoundingBox() const override { return m_AABB; }
+
 	private:
 		using m_CenterType = std::conditional_t<t_IsMoving, Ray, Point>;
 
 		double m_Radius;
 		m_CenterType m_Center;
 		std::shared_ptr<BaseMaterial> m_Material;
+		AABB m_AABB;
 	};
 }
 

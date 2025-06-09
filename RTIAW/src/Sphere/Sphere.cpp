@@ -12,11 +12,18 @@ namespace RTW::Templates
 {
 	template <>
 	Sphere<false>::Sphere(const Point& center, double radius, std::shared_ptr<BaseMaterial> material)
-		: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material) { }
+		: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material), m_AABB(center - radius, center + radius) {}
 
 	template <>
 	Sphere<true>::Sphere(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material)
-		: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material) { }
+		: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material)
+	{
+		AABB box[2] = {
+			{ m_Center.at(0.0) - radius, m_Center.at(0.0) + radius },
+			{ m_Center.at(1.0) - radius, m_Center.at(1.0) + radius }
+		};
+		m_AABB = { box[0], box[1] };
+	}
 
 	template <bool t_IsMoving>
 	bool Sphere<t_IsMoving>::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
@@ -50,7 +57,7 @@ namespace RTW::Templates
 		hitData.point = ray.at(hitData.distance);
 		Vec3 normal = (hitData.point - center) / m_Radius;
 
-		setFaceNormal(ray, normal, hitData);
+		SetFaceNormal(ray, normal, hitData);
 
 		hitData.material = m_Material;
 
