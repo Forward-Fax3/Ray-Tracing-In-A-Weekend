@@ -12,11 +12,13 @@ namespace RTW
 		enum class Axis : uint8_t { x = 0, y, z };
 
 	public:
-		AxisAliagnedBoundingBoxes() = default;
+		inline AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes++; }
 		AxisAliagnedBoundingBoxes(const Interval& interval);
 		AxisAliagnedBoundingBoxes(const Interval& x, const Interval& y, const Interval& z);
 		AxisAliagnedBoundingBoxes(const Point& a, const Point& b);
 		AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& box0, const AxisAliagnedBoundingBoxes& box1);
+
+		inline ~AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes--; }
 
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
@@ -24,10 +26,14 @@ namespace RTW
 
 		AxisAliagnedBoundingBoxes::Axis LongestAxis() const;
 
+		static inline size_t GetNumberofBBs() { return s_NumberofBoundingBoxes; }
+
 		static const AxisAliagnedBoundingBoxes empty, univers;
 
 	private:
 		Interval m_X, m_Y, m_Z;
+
+		static size_t s_NumberofBoundingBoxes;
 	};
 
 	using AABB = AxisAliagnedBoundingBoxes;

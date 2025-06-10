@@ -25,7 +25,7 @@ int main()
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
 
-	double FOV = 20.0;
+	double FOV = 40.0;
 //	RTW::Vec3 lookFrom(-2.0, 2.0, 1.0);
 //	RTW::Vec3 LookAt(0.0, 0.0, -1.0);
 //	RTW::Vec3 VUp(0.0, 1.0, 0.0);
@@ -39,13 +39,13 @@ int main()
 	int16_t maxBounceDepth = 4;
 #else
 	int16_t samplesPerPixel = 32;
-	int16_t maxBounceDepth = 8;
+	int16_t maxBounceDepth = 512;
 #endif
 
 	RTW::Vec3 gamma(2.4);
 
-	double defocusAngle = 0.6;
-	double focusDistance = 10.0;
+	double defocusAngle = 0.0;
+	double focusDistance = 0.0;
 
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
@@ -84,8 +84,9 @@ int main()
 					{
 						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0)) * glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0));
 						std::shared_ptr<RTW::BaseMaterial> sphereMaterial = std::make_shared<RTW::Lambertian>(albedo);
-						RTW::Point center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
-						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, sphereMaterial));
+//						RTW::Point center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
+//						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, sphereMaterial));
+						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, sphereMaterial));
 					}
 					else if (chooseMat < 0.95) // metal
 					{
@@ -115,10 +116,12 @@ int main()
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
-	RTW::BVHNode BVHWorldHitables(worldHitables);
+	std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
+	worldHitables.clear();
+	worldHitables.add(BVHWorldHitables);
 
 //	camera.Render(BVHWorldHitables);
-	camera.RenderMultiThreaded(numberOfThreads, BVHWorldHitables);
+	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 

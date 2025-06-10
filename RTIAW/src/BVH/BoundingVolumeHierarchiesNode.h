@@ -33,7 +33,7 @@ namespace RTW
 		std::shared_ptr<RayHittable> m_Left, m_Right;
 		AABB m_AABB;
 
-		static size_t numberOfBBs;
+		static size_t currentDepth, maxDepth;
 	};
 
 	using BVHNode = BoundingVolumeHierarchiesNode;

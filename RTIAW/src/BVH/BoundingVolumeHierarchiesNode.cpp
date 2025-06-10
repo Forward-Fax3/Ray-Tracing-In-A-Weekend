@@ -15,27 +15,23 @@
 
 namespace RTW
 {
-	size_t BoundingVolumeHierarchiesNode::numberOfBBs;
+	size_t BoundingVolumeHierarchiesNode::currentDepth = 0;
+	size_t BoundingVolumeHierarchiesNode::maxDepth = 0;
 
 	BVHNode::BoundingVolumeHierarchiesNode(RayHittables& hittables)
 		: BVHNode(hittables.GetObjects(), 0, hittables.GetObjects().size()) {
-		std::clog << numberOfBBs << '\n' << std::flush;
+		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << '\n' << std::flush;
 	}
 
 	BVHNode::BoundingVolumeHierarchiesNode(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end)
 	{
-		numberOfBBs++;
-
 		m_AABB = AABB::empty;
 
 		for (size_t i = start; i < end; i++)
 			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
 
-		AABB::Axis axis = m_AABB.LongestAxis();
-
-		auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis
-								: (axis == AABB::Axis::y) ? CompareBoxYAxis
-								: CompareBoxZAxis;
+		currentDepth++;
+		maxDepth = glm::max(maxDepth, currentDepth);
 
 		size_t hittablesRange = end - start;
 
@@ -48,12 +44,19 @@ namespace RTW
 		}
 		else
 		{
+			AABB::Axis axis = m_AABB.LongestAxis();
+
+			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis
+									: (axis == AABB::Axis::y) ? CompareBoxYAxis
+									: CompareBoxZAxis;
+
 			std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
 
 			size_t midPoint = start + hittablesRange / 2;
-			m_Left = std::make_shared<BVHNode>(hittables, start, midPoint);
+			m_Left = (midPoint - start == 1) ? hittables[start] : std::make_shared<BVHNode>(hittables, start, midPoint);
 			m_Right = std::make_shared<BVHNode>(hittables, midPoint, end);
 		}
+		currentDepth--;
 	}
 
 	bool BVHNode::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
