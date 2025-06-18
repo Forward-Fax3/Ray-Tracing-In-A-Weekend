@@ -101,6 +101,8 @@ namespace RTW
 		double defocusRadius = m_FocusDistance * std::tan(glm::radians(m_DefocusAngle * 0.5));
 		m_DefocusDiskU = m_U * defocusRadius;
 		m_DefocusDiskV = m_V * defocusRadius;
+
+		m_MaxBounces++;
 	}
 
 	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object)
