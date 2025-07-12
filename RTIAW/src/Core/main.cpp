@@ -17,6 +17,10 @@
 #include "Metal.h"
 #include "Dielectric.h"
 
+#include "BaseTexture.h"
+#include "SolidColour.h"
+#include "CheckeredTexture.h"
+
 
 int main()
 {
@@ -38,8 +42,8 @@ int main()
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 512;
-	int16_t maxBounceDepth = 2048; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	int16_t samplesPerPixel = 256;
+	int16_t maxBounceDepth = 256; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
 	RTW::Vec3 gamma(2.4);
@@ -50,26 +54,9 @@ int main()
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
-//	{
-//		RTW::Point tempPoint(0.0, -100.5, -1.0);
-//		std::shared_ptr<RTW::BaseMaterial> material(std::make_shared<RTW::Lambertian>(RTW::Colour(0.8, 0.8, 0.0)));
-//		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 100.0, material));
-//
-//		tempPoint = { 0.0, 0.0, -1.2 };
-//		material = std::make_shared<RTW::Lambertian>(RTW::Colour(0.1, 0.2, 0.5));
-//		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material));
-//
-//		tempPoint = { -1.0, 0.0, -1.0 };
-//		material = std::make_shared<RTW::Metal>(RTW::Colour(0.8), 0.0);
-//		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material));
-//
-//		tempPoint = { 1.0, 0.0, -1.0 };
-//		material = std::make_shared<RTW::Dielectric>(1.5);
-//		worldHitables.add(std::make_shared<RTW::Sphere>(tempPoint, 0.5, material)); 
-//	}
-
 	{
-		std::shared_ptr<RTW::BaseMaterial> material = std::make_shared<RTW::Lambertian>(RTW::Colour(0.5));
+		std::shared_ptr<RTW::BaseTexture> Texture = std::make_shared<RTW::CheckeredTexture>(RTW::Colour(0.2, 0.3, 0.1), RTW::Colour(0.9), 0.32);
+		std::shared_ptr<RTW::BaseMaterial> material = std::make_shared<RTW::Lambertian>(Texture);
 		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(0, -1000, 0), 1000, material));
 
 		for (int a = -11; a < 11; a++)

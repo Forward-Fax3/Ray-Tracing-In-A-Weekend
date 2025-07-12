@@ -11,7 +11,7 @@ namespace RTW
 	public:
 		Dielectric(double refactionIndex);
 
-		virtual bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const;
+		virtual bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
 
 	private:
 		static Vec3 refract(const Vec3& uv, const Vec3& normal, double etaiOverEtat);

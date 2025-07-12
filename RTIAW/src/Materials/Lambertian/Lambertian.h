@@ -3,6 +3,9 @@
 #include "Ray.h"
 #include "RayHittable.h"
 #include "BaseMaterial.h"
+#include "BaseTexture.h"
+
+#include <memory>
 
 
 namespace RTW
@@ -11,10 +14,11 @@ namespace RTW
 	{
 	public:
 		Lambertian(const Colour& albedo);
+		Lambertian(std::shared_ptr<BaseTexture> texture);
 
 		virtual bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
 
 	private:
-		Colour m_Albedo;
+		std::shared_ptr<BaseTexture> m_Texture;
 	};
 }

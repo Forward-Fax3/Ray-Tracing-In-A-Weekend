@@ -71,7 +71,7 @@ namespace RTW
 
 	void Camera::Init()
 	{
-		m_GammaInv = 1.0 / m_Gamma;
+		m_InvGamma = 1.0 / m_Gamma;
 
 		m_ImageHeight = static_cast<int16_t>(m_ImageWidth / m_AspectRatio);
 		m_ImageHeight = (m_ImageHeight < 1) ? 1 : m_ImageHeight;
@@ -163,7 +163,7 @@ namespace RTW
 
 	Colour Camera::ColourCorrection(const Colour colour) const
 	{
-		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_GammaInv)) * 1024.0;
+		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
 	void Camera::MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object)

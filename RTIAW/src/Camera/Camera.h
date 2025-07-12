@@ -74,6 +74,6 @@ namespace RTW
 		Vec3 m_U = Vec3(0.0);
 		Vec3 m_V = Vec3(0.0);
 		Vec3 m_W = Vec3(0.0);
-		Vec3 m_GammaInv = Vec3(0.0);
+		Vec3 m_InvGamma = Vec3(0.0);
 	};
 }

@@ -17,7 +17,8 @@ namespace RTW
 	{
 		Point point = Point(0.0);
 		Vec3 normal = Vec3(0.0);
-		std::shared_ptr<BaseMaterial> material;
+		UV uv = UV(0.0);
+		std::shared_ptr<BaseMaterial> material = nullptr;
 		double distance = 0.0;
 		bool isFrontFace = false;
 	};

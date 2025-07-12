@@ -3,7 +3,9 @@
 #include "Ray.h"
 #include "RayHittable.h"
 #include "BaseMaterial.h"
+#include "BaseTexture.h"
 #include "Lambertian.h"
+#include "SolidColour.h"
 
 
 namespace RTW
@@ -15,7 +17,10 @@ namespace RTW
 	}
 
 	Lambertian::Lambertian(const Colour& albedo)
-		: m_Albedo(albedo) {}
+		: m_Texture(std::make_shared<SolidColour>(albedo)) {}
+
+	Lambertian::Lambertian(std::shared_ptr<BaseTexture> texture)
+		: m_Texture(texture) {}
 
 	bool Lambertian::Scatter([[maybe_unused]] const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const
 	{
@@ -25,7 +30,7 @@ namespace RTW
 		scatterDirection = scatterDirection < minValue ? data.normal : scatterDirection;
 
 		scatter = Ray(data.point, scatterDirection, ray.time());
-		colour = m_Albedo;
+		colour = m_Texture->GetColour(data.uv, data.point);
 		return true;
 	}
 }
