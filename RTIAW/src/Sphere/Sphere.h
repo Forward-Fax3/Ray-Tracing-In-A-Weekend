@@ -22,6 +22,9 @@ namespace RTW::Templates
 		inline virtual const AABB& GetBoundingBox() const override { return m_AABB; }
 
 	private:
+		static inline UV GetUV(const Point& point);
+
+	private:
 		using m_CenterType = std::conditional_t<t_IsMoving, Ray, Point>;
 
 		double m_Radius;

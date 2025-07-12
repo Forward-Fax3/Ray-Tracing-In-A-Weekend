@@ -1,6 +1,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
 #include "glm/gtx/norm.hpp"
+#include "glm/gtc/constants.hpp"
 
 #include "Core.h"
 #include "Interval.h"
@@ -55,6 +56,7 @@ namespace RTW::Templates
 
 		hitData.distance = root;
 		hitData.point = ray.at(hitData.distance);
+		hitData.uv = GetUV(hitData.point);
 		Vec3 normal = (hitData.point - center) / m_Radius;
 
 		SetFaceNormal(ray, normal, hitData);
@@ -62,5 +64,23 @@ namespace RTW::Templates
 		hitData.material = m_Material;
 
 		return true;
+	}
+
+	template <bool t_IsMoving>
+	UV RTW::Templates::Sphere<t_IsMoving>::GetUV(const Point& point)
+	{
+		/*
+		point: a given point on the sphere of radius one, centered at the origin.
+		u: returned value [0,1] of angle around the Y axis from X=-1.
+		v: returned value [0,1] of angle from Y=-1 to Y=+1.
+		    <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+		    <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+		    <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+		*/
+
+		double theta = glm::acos(-point.y);
+		double phi = glm::atan2(-point.z, point.x) + glm::pi<double>();
+
+		return { phi / glm::two_pi<double>(), theta / glm::pi<double>() };
 	}
 }
