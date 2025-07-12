@@ -1,25 +1,12 @@
 #include <iostream>
-#include <memory>
 #include <chrono>
 #include <thread>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/random.hpp"
-
 #include "Core.h"
-#include "Sphere.h"
 #include "Hittables.h"
 #include "BoundingVolumeHierarchiesNode.h"
 #include "Camera.h"
-
-#include "BaseMaterial.h"
-#include "Lambertian.h"
-#include "Metal.h"
-#include "Dielectric.h"
-
-#include "BaseTexture.h"
-#include "SolidColour.h"
-#include "CheckeredTexture.h"
+#include "Scenes.h"
 
 
 int main()
@@ -43,7 +30,7 @@ int main()
 	int16_t maxBounceDepth = 4;
 #else
 	int16_t samplesPerPixel = 256;
-	int16_t maxBounceDepth = 256; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	int16_t maxBounceDepth = 2048; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
 	RTW::Vec3 gamma(2.4);
@@ -54,52 +41,8 @@ int main()
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
-	{
-		std::shared_ptr<RTW::BaseTexture> Texture = std::make_shared<RTW::CheckeredTexture>(RTW::Colour(0.2, 0.3, 0.1), RTW::Colour(0.9), 0.32);
-		std::shared_ptr<RTW::BaseMaterial> material = std::make_shared<RTW::Lambertian>(Texture);
-		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(0, -1000, 0), 1000, material));
-
-		for (int a = -11; a < 11; a++)
-			for (int b = -11; b < 11; b++)
-			{
-				double chooseMat = glm::linearRand(0.0, 1.0);
-				RTW::Point center(RTW::Point(a, 0.2, b) + glm::linearRand(RTW::Point(0.0), RTW::Point(0.9, 0.0, 0.9)));
-
-				if ((center - RTW::Point(4, 0.2, 0)).length() > 0.9)
-				{
-					if (chooseMat < 0.8) // diffuse
-					{
-						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0)) * glm::linearRand(RTW::Vec3(0.0), RTW::Vec3(1.0));
-						material = std::make_shared<RTW::Lambertian>(albedo);
-//						RTW::Point center2 = center + RTW::Vec3(0, glm::linearRand(0.0, 0.5), 0);
-//						worldHitables.add(std::make_shared<RTW::MovingSphere>(center, center2, 0.2, material));
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, material));
-					}
-					else if (chooseMat < 0.95) // metal
-					{
-						RTW::Colour albedo = glm::linearRand(RTW::Vec3(0.5), RTW::Vec3(1.0));
-						double fuzz = glm::linearRand(0.0, 0.5);
-						material = std::make_shared<RTW::Metal>(albedo, fuzz);
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, material));
-					}
-					else // glass
-					{
-						double refactionIndex = glm::linearRand(0.0, 2.0);
-						material = std::make_shared<RTW::Dielectric>(refactionIndex);
-						worldHitables.add(std::make_shared<RTW::Sphere>(center, 0.2, material));
-					}
-				}
-			}
-
-		material = std::make_shared<RTW::Dielectric>(1.5);
-		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(0, 1, 0), 1.0, material));
-
-		material = std::make_shared<RTW::Lambertian>(RTW::Colour(0.4, 0.2, 0.1));
-		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(-4, 1, 0), 1.0, material));
-
-		material = std::make_shared<RTW::Metal>(RTW::Colour(0.7, 0.6, 0.5), 0.0);
-		worldHitables.add(std::make_shared<RTW::Sphere>(RTW::Point(4, 1, 0), 1.0, material));
-	}
+	RTW::Scenes scene = RTW::Scenes::CheckeredShperes;
+	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
