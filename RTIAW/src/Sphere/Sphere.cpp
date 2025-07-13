@@ -2,6 +2,8 @@
 #include "glm/gtc/random.hpp"
 #include "glm/gtx/norm.hpp"
 #include "glm/gtc/constants.hpp"
+#include "glm/trigonometric.hpp"
+#include "glm/gtx/compatibility.hpp"
 
 #include "Core.h"
 #include "Interval.h"
@@ -56,10 +58,10 @@ namespace RTW::Templates
 
 		hitData.distance = root;
 		hitData.point = ray.at(hitData.distance);
-		hitData.uv = GetUV(hitData.point);
 		Vec3 normal = (hitData.point - center) / m_Radius;
 
 		SetFaceNormal(ray, normal, hitData);
+		hitData.uv = GetUV(hitData.normal);
 
 		hitData.material = m_Material;
 

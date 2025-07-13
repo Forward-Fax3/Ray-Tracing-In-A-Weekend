@@ -12,6 +12,7 @@
 #include "BaseTexture.h"
 #include "SolidColour.h"
 #include "CheckeredTexture.h"
+#include "ImageTexture.h"
 
 #include "Scenes.h"
 
@@ -35,6 +36,8 @@ namespace RTW
 			return;
 		case Scenes::CheckeredShperes:
 			CheckeredShperes(hitables);
+		case Scenes::Earth:
+			Earth(hitables);
 		default:
 			return;
 		}
@@ -43,7 +46,6 @@ namespace RTW
 	template <bool t_IsMoving>
 	void CollectionOfShperes(RayHittables& hitables)
 	{
-
 		std::shared_ptr<BaseTexture> Texture = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
 		std::shared_ptr<BaseMaterial> material = std::make_shared<Lambertian>(Texture);
 		hitables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, material));
@@ -96,9 +98,16 @@ namespace RTW
 
 	void CheckeredShperes(RayHittables& hittables)
 	{
-		auto checker = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
+		std::shared_ptr<BaseTexture> checker = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
 
 		hittables.add(std::make_shared<Sphere>(Point(0, -10, 0), 10, std::make_shared<Lambertian>(checker)));
 		hittables.add(std::make_shared<Sphere>(Point(0, 10, 0), 10, std::make_shared<Lambertian>(checker)));
+	}
+
+	void Earth(RayHittables& hitables)
+	{
+		std::shared_ptr<BaseTexture> earthTexture = std::make_shared<ImageTexture>("earthmap.jpg");
+		std::shared_ptr<BaseMaterial> earthMaterial = std::make_shared<Lambertian>(earthTexture);
+		hitables.add(std::make_shared<Sphere>(Point(0.0), 2, earthMaterial));
 	}
 }

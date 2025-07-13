@@ -9,6 +9,7 @@ namespace RTW
 		CollectionOfShperes,
 		MovingSpheres,
 		CheckeredShperes,
+		Earth,
 	};
 
 	void SceneSelect(Scenes scene, RayHittables& hitables);
@@ -17,4 +18,6 @@ namespace RTW
 	void CollectionOfShperes(RayHittables& hitables);
 
 	void CheckeredShperes(RayHittables& hittables);
+
+	void Earth(RayHittables& hitables);
 }

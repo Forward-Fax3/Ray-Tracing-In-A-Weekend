@@ -27,7 +27,8 @@ namespace RTW
 		inline bool Surrounds(const Interval& other) const
 			{ return m_Min < other.m_Min && other.m_Max < m_Max; }
 
-		inline double Clamp(const double x) const { return glm::clamp(x, m_Min, m_Max); }
+		inline double Clamp(const double x)  const { return glm::clamp(x, m_Min, m_Max); }
+		inline UV     Clamp(const UV& uv)     const { return glm::clamp(uv, glm::dvec2(m_Min), glm::dvec2(m_Max)); }
 		inline Colour Clamp(const Colour& x) const { return glm::clamp(x, Vec3(m_Min), Vec3(m_Max)); }
 
 		[[nodiscard]] inline Interval Expand(double dalta) const

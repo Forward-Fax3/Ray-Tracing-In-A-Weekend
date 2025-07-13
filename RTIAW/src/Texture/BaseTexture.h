@@ -11,6 +11,5 @@ namespace RTW
 		virtual ~BaseTexture() = default;
 
 		virtual const Colour& GetColour(const UV& uv, const Point& point) const = 0;
-
 	};
 }

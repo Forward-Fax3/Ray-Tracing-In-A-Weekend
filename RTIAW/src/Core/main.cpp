@@ -29,7 +29,7 @@ int main()
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 256;
+	int16_t samplesPerPixel = 512;
 	int16_t maxBounceDepth = 2048; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -41,14 +41,19 @@ int main()
 	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
-	RTW::Scenes scene = RTW::Scenes::CheckeredShperes;
+
+	// Scene Selection
+	RTW::Scenes scene = RTW::Scenes::Earth;
 	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
 
-	std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
-	worldHitables.clear();
-	worldHitables.add(BVHWorldHitables);
+	if (worldHitables.size() > 1)
+	{
+		std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
+		worldHitables.clear();
+		worldHitables.add(BVHWorldHitables);
+	}
 
 //	camera.Render(worldHitables);
 	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
