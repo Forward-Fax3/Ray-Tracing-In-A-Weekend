@@ -28,8 +28,9 @@ workspace "RTIAW"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["glm"]    = "RTIAW/3rd Party/Git/glm/"
-IncludeDir["CTPL"]    = "RTIAW/3rd Party/Git/CTPL/"
+IncludeDir["glm"]  = "RTIAW/3rd Party/Git/glm/"
+IncludeDir["CTPL"] = "RTIAW/3rd Party/Git/CTPL/"
+IncludeDir["stb"]  = "RTIAW/3rd Party/Git/stb/"
 
 if _ACTION == "clean" then
 	os.rmdir("bin");
@@ -79,6 +80,7 @@ project "RTIAW"
 		
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.CTPL}",
+		"%{IncludeDir.stb}",
 	}
 
 	links
