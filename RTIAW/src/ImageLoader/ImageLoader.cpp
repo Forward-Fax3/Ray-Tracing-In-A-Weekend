@@ -29,19 +29,20 @@ namespace RTW
 	{
 		stbi_set_flip_vertically_on_load(true);
 
-		int32_t temp = m_ComponentsPerPixel;
-		glm::i32vec2 tempSizes(0i32);
-		float* data = stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &temp, m_ComponentsPerPixel);
+		static constexpr int32_t componentsPerPixel = 3;
+		int32_t componentsPerPixelTemp = componentsPerPixel;
+		glm::i32vec2 tempSizes(0);
+		float* data = stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &componentsPerPixelTemp, componentsPerPixel);
 		if (data == nullptr) return false;
 
 		m_ImageSize = tempSizes;
 		m_Colours = new Colour[m_ImageSize.x * m_ImageSize.y];
 		
-		for (size_t i = 0ui64, j = 0ui64; j < m_ImageSize.x * m_ImageSize.y * 3ui64; i++, j += 3)
+		for (size_t i = 0, j = 0; j < m_ImageSize.x * m_ImageSize.y * 3; i++, j += 3)
 		{
 			m_Colours[i].r = data[j + 0];
 			m_Colours[i].g = data[j + 1];
-			m_Colours[i].b = data[j + 2];
+			m_Colours[i].b = data[j + 2]; 
 		}
 
 		STBI_FREE(data);
