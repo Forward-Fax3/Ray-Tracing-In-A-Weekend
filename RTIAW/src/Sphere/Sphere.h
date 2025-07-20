@@ -19,11 +19,9 @@ namespace RTW::Templates
 	class Sphere : public RayHittable  
 	{
 	public:
-//		template<typename = typename std::enable_if_t<!t_IsMoving>>
 		inline Sphere<t_IsMoving>(const Point& center, double radius, std::shared_ptr<BaseMaterial> material) requires (!t_IsMoving)
 			: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material), m_AABB(center - radius, center + radius) {}
 
-//		template<typename = typename std::enable_if_t<t_IsMoving>>
 		inline Sphere<t_IsMoving>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material) requires (t_IsMoving)
 			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material)
 		{
