@@ -47,7 +47,7 @@ namespace RTW
 		}
 	}
 
-	void Camera::RenderMultiThreaded(const int16_t numberOfThreads, const RayHittable& objects)
+	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const RayHittable& objects)
 	{
 		Init();
 		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
@@ -176,7 +176,7 @@ namespace RTW
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 			{
-				Ray ray = CreateRay(i % m_ImageWidth, i / m_ImageWidth);
+				Ray ray = CreateRay(i % m_ImageWidth, static_cast<int16_t>(i / m_ImageWidth));
 				colour += RayColour(ray, m_MaxBounces, object);
 			}
 			m_ColourPixelArray[i] = ColourCorrection(colour);

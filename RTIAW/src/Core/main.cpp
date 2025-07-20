@@ -38,7 +38,7 @@ int main()
 	double defocusAngle = 0.0;
 	double focusDistance = 0.0;
 
-	[[maybe_unused]] int16_t numberOfThreads = std::thread::hardware_concurrency();
+	[[maybe_unused]] uint32_t numberOfThreads = std::thread::hardware_concurrency();
 
 	RTW::RayHittables worldHitables;
 

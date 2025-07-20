@@ -58,7 +58,7 @@ project "RTIAW"
 	cppdialect "c++23"
 	cdialect "c17"
 	staticruntime "on"
-	toolset "clang"
+	toolset "msc"
 	linker "LLD"
 	warnings "Extra"
 	fatalwarnings "ALL"
@@ -101,9 +101,9 @@ project "RTIAW"
 
 	buildoptions
 	{
-		"-Wno-c++98-compat",
-		"-Wno-c++98-compat-pedantic",
-		"-Wno-extra-semi-stmt"
+--		"-Wno-c++98-compat",
+--		"-Wno-c++98-compat-pedantic",
+--		"-Wno-extra-semi-stmt"
 	}
 
 	filter "system:windows"

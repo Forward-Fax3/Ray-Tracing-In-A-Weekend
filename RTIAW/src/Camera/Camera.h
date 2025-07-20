@@ -14,7 +14,7 @@ namespace RTW
 		Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces);
 
 		void Render(const RayHittable& objects);
-		void RenderMultiThreaded(const int16_t numberOfThreads, const RayHittable& objects);
+		void RenderMultiThreaded(const int32_t numberOfThreads, const RayHittable& objects);
 
 		inline void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
 		inline void SetFOV(const double FOV) { m_FOV = FOV; }
