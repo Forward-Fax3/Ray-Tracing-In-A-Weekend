@@ -6,7 +6,7 @@ namespace RTW
 {
 	enum class Scenes : uint8_t
 	{
-		CollectionOfShperes,
+		CollectionOfSpheres,
 		MovingSpheres,
 		CheckeredShperes,
 		Earth,
@@ -15,7 +15,7 @@ namespace RTW
 	void SceneSelect(Scenes scene, RayHittables& hitables);
 
 	template <bool t_IsMoving>
-	void CollectionOfShperes(RayHittables& hitables);
+	void CollectionOfSpheres(RayHittables& hitables);
 
 	void CheckeredShperes(RayHittables& hittables);
 

@@ -28,11 +28,11 @@ namespace RTW
 	{
 		switch (scene)
 		{
-		case RTW::Scenes::CollectionOfShperes:
-			CollectionOfShperes<false>(hitables);
+		case RTW::Scenes::CollectionOfSpheres:
+			CollectionOfSpheres<false>(hitables);
 			return;
 		case RTW::Scenes::MovingSpheres:
-			CollectionOfShperes<true>(hitables);
+			CollectionOfSpheres<true>(hitables);
 			return;
 		case Scenes::CheckeredShperes:
 			CheckeredShperes(hitables);
@@ -44,7 +44,7 @@ namespace RTW
 	}
 
 	template <bool t_IsMoving>
-	void CollectionOfShperes(RayHittables& hitables)
+	void CollectionOfSpheres(RayHittables& hitables)
 	{
 		std::shared_ptr<BaseTexture> Texture = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
 		std::shared_ptr<BaseMaterial> material = std::make_shared<Lambertian>(Texture);

@@ -80,8 +80,8 @@ namespace RTW
 
 		double focalLength = (m_FocusDistance == 0.0) ? (m_LookFrom - m_LookAt).length() : m_FocusDistance;
 		double theta = glm::radians(m_FOV);
-		double h = glm::tan(theta / 2);
-		double viewportHeight = 2 * h * focalLength;
+		double h = glm::tan(theta / 2.0);
+		double viewportHeight = 2.0 * h * focalLength;
 		double viewportWidth = viewportHeight * (static_cast<double>(m_ImageWidth) / static_cast<double>(m_ImageHeight));
 
 		m_W = glm::normalize(m_LookFrom - m_LookAt);
@@ -111,7 +111,7 @@ namespace RTW
 			return { 0.0, 0.0, 0.0 };
 
 		HitData data;
-		if (object.IsRayHit(ray, Interval(0.001, DoubleInf), data))
+		if (object.IsRayHit(ray, Interval(0.001, doubleInf), data))
 		{
 			Ray newRay;
 			Colour colour;
@@ -119,7 +119,7 @@ namespace RTW
 				colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
 		}
 
-//		if (object.IsRayHit(ray, Interval(0.001, DoubleInf), data))
+//		if (object.IsRayHit(ray, Interval(0.001, doubleInf), data))
 //		{
 //			Ray newRay;
 //			Colour colour;
@@ -170,8 +170,8 @@ namespace RTW
 	{
 		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
-			if (i % m_ImageWidth == 0)
-				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
+//			if (i % m_ImageWidth == 0)
+//				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
 
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)

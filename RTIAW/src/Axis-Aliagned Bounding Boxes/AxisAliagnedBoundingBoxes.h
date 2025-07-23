@@ -24,14 +24,18 @@ namespace RTW
 
 		bool IsHit(const Ray& ray, Interval rayT) const;
 
-		AxisAliagnedBoundingBoxes::Axis LongestAxis() const;
+		AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
 
 		static inline size_t GetNumberofBBs() { return s_NumberofBoundingBoxes; }
 
 		static const AxisAliagnedBoundingBoxes empty, univers;
 
 	private:
+		AxisAliagnedBoundingBoxes::Axis LongestAxisSetter() const;
+
+	private:
 		Interval m_X, m_Y, m_Z;
+		AxisAliagnedBoundingBoxes::Axis m_LongestAxis;
 
 		static size_t s_NumberofBoundingBoxes;
 	};

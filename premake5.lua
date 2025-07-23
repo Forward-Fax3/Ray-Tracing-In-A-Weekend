@@ -22,8 +22,8 @@ workspace "RTIAW"
 	platforms
 	{
 		"AVX512",
---		"AVX2",
---		"SSE2"
+		"AVX2",
+		"SSE2"
 	}
 
 -- Include directories relative to root folder (solution directory)
@@ -62,6 +62,7 @@ project "RTIAW"
 	linker "LLD"
 	warnings "Extra"
 	fatalwarnings "ALL"
+	intrinsics "On"
 
 	targetdir ("Bin/" .. output .. "/%{prj.name}")
 	objdir ("Bin/intermediate/" .. output .. "/%{prj.name}")
@@ -126,6 +127,7 @@ project "RTIAW"
 		defines 
 		{
 			"_RELEASE",
+			"NDEBUG",
 			"ENGINE_RELEASE",
 			"EN_ENABLE_ASSERTS"
 		}
@@ -137,6 +139,7 @@ project "RTIAW"
 		defines
 		{
 			"_DIST",
+			"NDEBUG",
 			"ENGINE_DIST"
 		}
 		linktimeoptimization "on"
@@ -149,15 +152,21 @@ project "RTIAW"
 		defines
 		{
 			"GLM_FORCE_AVX2", -- GLM doesnt seem to support AVX512 anymore so we use AVX2 instead though the compiler should still compile it with AVX512
-			"GLM_FORCE_FMA"
+			"GLM_FORCE_FMA",
+			"RTW_AVX512"
 		} 
 	filter { "platforms:AVX2" }
 		vectorextensions "AVX2"
 		defines
 		{
 			"GLM_FORCE_AVX2",
-			"GLM_FORCE_FMA"
+			"GLM_FORCE_FMA",
+			"RTW_AVX2"
 		} 
 	filter { "platforms:SSE2" }
 		vectorextensions "SSE2"
-		defines { "GLM_FORCE_SSE2" }
+		defines
+		{
+			"GLM_FORCE_SSE2",
+			"RTW_SSE2"
+		}

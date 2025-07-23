@@ -65,7 +65,11 @@ namespace RTW
 			return false;
 
 		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);
-		isHit |= m_Right->IsRayHit(ray, { rayDistance.GetMin(), isHit ? hitData.distance : rayDistance.GetMax() }, hitData);
+		
+		if (isHit)
+			isHit |= m_Right->IsRayHit(ray, { rayDistance.GetMin(), hitData.distance }, hitData);
+		else
+			isHit |= m_Right->IsRayHit(ray, rayDistance, hitData);
 
 		return isHit;
 	}

@@ -34,6 +34,9 @@ namespace RTW::Templates
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override
 		{
+			if (!m_AABB.IsHit(ray, rayDistance))
+				return false;
+
 			Vec3 center;
 			if constexpr (t_IsMoving)
 				center = m_Center.at(ray.time());
