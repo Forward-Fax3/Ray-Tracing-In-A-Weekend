@@ -55,8 +55,8 @@ int main()
 		worldHitables.add(BVHWorldHitables);
 	}
 
-//	camera.Render(worldHitables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
+	camera.Render(worldHitables);
+//	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 

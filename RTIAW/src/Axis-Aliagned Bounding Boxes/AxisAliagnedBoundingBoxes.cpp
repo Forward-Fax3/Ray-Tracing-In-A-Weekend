@@ -45,6 +45,13 @@ namespace RTW
 
 	bool AABB::IsHit(const Ray& ray, Interval rayT) const
 	{
+#ifdef RTW_AVX512
+		const __mmask8 loadMask = 0b00111111;
+		__m512d m512_RayT = _mm512_maskz_broadcast_f64x2(loadMask, rayT.GetAsVector().data);
+		__m512d m512_AxisBounds = _mm512_maskz_load_pd(loadMask, &m_X);
+		(void)ray;
+
+#else // RTW_AVX512
 		for (Axis axis = Axis::x; axis <= Axis::z; axis++)
 		{
 			const Interval& axisBounds = GetAxisInterval(axis);
@@ -87,6 +94,7 @@ namespace RTW
 				return false;
 #endif // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
 		}
+#endif // RTW_AVX512
 		return true;
 	}
 
