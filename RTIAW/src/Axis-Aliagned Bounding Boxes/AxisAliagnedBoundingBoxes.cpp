@@ -68,7 +68,7 @@ namespace RTW
 			if (m128_RayT.m128d_f64[0] >= m128_RayT.m128d_f64[1])
 				return false;
 
-#else // ifdef RTW_AVX512
+#else // RTW_AVX512
 			__m128d bitMask = _mm_cmpgt_pd(m128_T, m128_RayT);
 			m128_RayT = _mm_blendv_pd(rayT.GetAsVector().data, t.data, bitMask);
 			_mm_store_pd(const_cast<double*>(&rayT.GetAsVector().x), m128_RayT);
@@ -76,8 +76,8 @@ namespace RTW
 			if (m128_RayT.m128d_f64[0] >= m128_RayT.m128d_f64[1])
 				return false;
 
-#endif // ifdef RTW_AVX512
-#else // if defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
+#endif // RTW_AVX512
+#else // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
 			if (t.x > rayT.GetMin()) 
 				rayT.SetMin(t.x);
 			if (t.y < rayT.GetMax())
@@ -85,7 +85,7 @@ namespace RTW
 
 			if (rayT.GetMin() >= rayT.GetMax())
 				return false;
-#endif // if defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
+#endif // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
 		}
 		return true;
 	}
