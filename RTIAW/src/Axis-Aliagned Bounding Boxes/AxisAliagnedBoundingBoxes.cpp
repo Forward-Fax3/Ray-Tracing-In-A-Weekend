@@ -6,6 +6,7 @@
 #include <immintrin.h>
 
 #define SIMD 1
+#define AVX512 1
 
 
 namespace RTW
@@ -45,11 +46,59 @@ namespace RTW
 
 	bool AABB::IsHit(const Ray& ray, Interval rayT) const
 	{
-#ifdef RTW_AVX512
+		const __m128d m128_InvertValue = { 1.0, -1.0 };
+#if defined(RTW_AVX512) & (AVX512 == 1)
 		const __mmask8 loadMask = 0b00111111;
-		__m512d m512_RayT = _mm512_maskz_broadcast_f64x2(loadMask, rayT.GetAsVector().data);
 		__m512d m512_AxisBounds = _mm512_maskz_load_pd(loadMask, &m_X);
-		(void)ray;
+		const Vec3& rayOrigin = ray.origin();
+		__m512d m512_RayOrigin = { rayOrigin.x, rayOrigin.x, rayOrigin.y, rayOrigin.y, rayOrigin.z, rayOrigin.z, 0.0, 0.0 };
+		const Vec3& rayDirection = ray.direction();
+		__m512d m512_RayDirection = { rayDirection.x, rayDirection.x, rayDirection.y, rayDirection.y, rayDirection.z, rayDirection.z, 0.0, 0.0 };
+		__m512d m512_InvRayDiraction = _mm512_div_pd(_mm512_set1_pd(1.0), m512_RayDirection);
+
+		__m512d m512_T = _mm512_mul_pd(_mm512_sub_pd(m512_AxisBounds, m512_RayOrigin), m512_InvRayDiraction);
+
+#if __clang__
+		for (size_t i = 0; i < 6; i += 2)
+			if (m512_T[i] > m512_T[i + 1])
+			{
+				double temp = m512_T[i];
+				m512_T[i] = m512_T[i + 1];
+				m512_T[i + 1] = temp;
+			}
+#elif _MSC_VER
+		__m256d m512_TMin = { m512_T.m512d_f64[0], m512_T.m512d_f64[2], m512_T.m512d_f64[4], m512_T.m512d_f64[6] };
+		__m256d m512_TMax = { m512_T.m512d_f64[1], m512_T.m512d_f64[3], m512_T.m512d_f64[5], m512_T.m512d_f64[7] };
+
+		__mmask8 TBaseSwapMask = _mm256_cmp_pd_mask(m512_TMin, m512_TMax, _CMP_GT_OS);
+		uint32_t setSwapMaskBitMask = static_cast<uint32_t>(0b01010101);
+		__mmask8 TSwapMask = static_cast<__mmask8>(_pdep_u32(static_cast<uint32_t>(TBaseSwapMask), setSwapMaskBitMask));
+		setSwapMaskBitMask <<= 1;
+		TSwapMask |= static_cast<__mmask8>(_pdep_u32(static_cast<uint32_t>(TBaseSwapMask), setSwapMaskBitMask));
+
+		m512_T = _mm512_mask_permute_pd(m512_T, TSwapMask, m512_T, 0b01010101);
+#else
+#error only supports clang and msc
+#endif
+
+		__m512d m512_RayT = _mm512_maskz_broadcast_f64x2(loadMask, rayT.GetAsVector().data);
+
+		const __m512d m512_InvertValue = _mm512_maskz_broadcast_f64x2(loadMask, m128_InvertValue);
+
+		__m512d m512_AltInvT = _mm512_mul_pd(m512_T, m512_InvertValue);
+		__m512d m512_AltInvRayT = _mm512_mul_pd(m512_RayT, m512_InvertValue);
+
+		__m512d m512_MaxMinT = _mm512_mul_pd(_mm512_max_pd(m512_AltInvRayT, m512_AltInvT), m512_InvertValue);
+
+#if __clang__
+		for (size_t i = 0; i < 6; i += 2)
+			if (m512_MaxMinT[i] >= m512_MaxMinT[i + 1])
+				return false;
+#elif _MSC_VER
+		for (size_t i = 0; i < 6; i += 2)
+			if (m512_MaxMinT.m512d_f64[i] >= m512_MaxMinT.m512d_f64[i + 1])
+				return false;
+#endif
 
 #else // RTW_AVX512
 		for (Axis axis = Axis::x; axis <= Axis::z; axis++)
@@ -59,21 +108,24 @@ namespace RTW
 
 			glm::dvec2 t = (axisBounds.GetAsVector() - ray.origin()[+axis]) * rAxisDirection;
 
-			if (t.x >= t.y)
+			if (t.x > t.y)
 				std::swap(t.x, t.y);
 
 #if defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
-			__m128d invertValue = { 1.0, -1.0 };
-			__m128d m128_T = _mm_mul_pd(invertValue, t.data);
-			__m128d m128_RayT = _mm_mul_pd(invertValue, rayT.GetAsVector().data);
+			__m128d m128_T = _mm_mul_pd(m128_InvertValue, t.data);
+			__m128d m128_RayT = _mm_mul_pd(m128_InvertValue, rayT.GetAsVector().data);
 
 #ifdef RTW_AVX512
 			__mmask8 bitMask = _mm_cmp_pd_mask(m128_T, m128_RayT, _CMP_GT_OS);
 			m128_RayT = _mm_mask_load_pd(rayT.GetAsVector().data, bitMask, &t);
 			_mm_store_pd(const_cast<double*>(&rayT.GetAsVector().x), m128_RayT);
-
+#if __clang__
+			if (m128_RayT[0] >= m128_RayT[1])
+				return false;
+#elif _MSC_VER
 			if (m128_RayT.m128d_f64[0] >= m128_RayT.m128d_f64[1])
 				return false;
+#endif
 
 #else // RTW_AVX512
 			__m128d bitMask = _mm_cmpgt_pd(m128_T, m128_RayT);

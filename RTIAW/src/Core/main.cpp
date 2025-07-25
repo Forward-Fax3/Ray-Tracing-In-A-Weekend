@@ -26,11 +26,11 @@ int main()
 	RTW::Vec3 VUp(0.0, 1.0, 0.0);
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
-	int16_t samplesPerPixel = 4;
-	int16_t maxBounceDepth = 4;
+	int16_t samplesPerPixel = 1;
+	int16_t maxBounceDepth = 0;
 #else
 	int16_t samplesPerPixel = 8;
-	int16_t maxBounceDepth = 2048; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	int16_t maxBounceDepth = 8; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
 	RTW::Vec3 gamma(2.4);
