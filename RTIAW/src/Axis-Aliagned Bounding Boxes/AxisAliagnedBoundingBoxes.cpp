@@ -70,15 +70,11 @@ namespace RTW
 #endif
 #if defined(RTW_AVX512) & (AVX512 == 1)
 		const __mmask8 loadMask = 0b00111111;
-//		const __m512i m512_VecLoadMap = _mm512_set_epi64(0, 0, 2, 2, 1, 1, 0, 0);
 		__m512d m512_AxisBounds = _mm512_maskz_load_pd(loadMask, &m_X);
 		const Vec3& rayOrigin = ray.origin();
 		__m512d m512_RayOrigin = _mm512_set_pd(0.0, 0.0, rayOrigin.z, rayOrigin.z, rayOrigin.y, rayOrigin.y, rayOrigin.x, rayOrigin.x);
-//		__m512d m512_RayOrigin = _mm512_i64gather_pd(m512_VecLoadMap, &ray.origin(), 8);
-//		__m512d m512_RayOrigin = _mm512_permutexvar_pd(m512_VecLoadMap, ray.origin().data);
 		const Vec3& rayDirection = ray.direction();
 		__m512d m512_RayDirection = _mm512_set_pd(0.0, 0.0, rayDirection.z, rayDirection.z, rayDirection.y, rayDirection.y, rayDirection.x, rayDirection.x);
-//		__m512d m512_RayDirection = _mm512_i64gather_pd(m512_VecLoadMap, &ray.direction(), 8);
 		__m512d m512_InvRayDiraction = _mm512_div_pd(_mm512_set1_pd(1.0), m512_RayDirection);
 
 		__m512d m512_T = _mm512_mul_pd(_mm512_sub_pd(m512_AxisBounds, m512_RayOrigin), m512_InvRayDiraction);
