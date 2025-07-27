@@ -1,0 +1,16 @@
+-r
+C:\Dev\projects\Ray-Tracing-In-A-Weekend\RTIAW\Intel® VTune™ Profiler Results\RTIAW\r001ps0
+--stack-stitching
+--data-limit-mb=1000
+--disk-space-limit=0
+--mrte-type=java,dotnet
+--stack-unwind-limit=8388608
+--itt-config=frame
+--stackwalk=offline
+--mrte-mode=auto
+--type=cpu:counters:nostack
+--type=cpu:stack
+--interval=100
+--app-working-dir=C:\Dev\projects\Ray-Tracing-In-A-Weekend\RTIAW\
+--
+C:\Dev\projects\Ray-Tracing-In-A-Weekend\Bin\windows\Release\AVX512\RTIAW\RTIAW.exe
