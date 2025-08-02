@@ -15,6 +15,7 @@ namespace RTW
 
 		inline const Point& origin() const { return m_Origin; }
 		inline const Vec3& direction() const { return m_Direction; }
+		inline const Vec3& invDirection() const { return m_InvDirection; }
 
 		Point at(double distance) const;
 
@@ -23,6 +24,7 @@ namespace RTW
 	private:
 		Point m_Origin;
 		Vec3 m_Direction;
+		Vec3 m_InvDirection;
 		double m_Time;
 	};
 }

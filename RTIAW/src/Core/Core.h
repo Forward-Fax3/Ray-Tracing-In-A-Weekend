@@ -4,6 +4,8 @@
 
 #include "glm/glm.hpp"
 
+#include "ctpl_stl.h"
+
 #pragma warning (disable: 4201)
 
 
@@ -22,6 +24,8 @@ namespace RTW
 	Vec3 RandomUnitVector();
 
 	Vec3 RandomOnUnitDisk();
+
+	extern ::ctpl::thread_pool g_Threads;
 
 //	template <typename Tout, uint64_t t_ScaleIn, typename Tin>
 //	std::enable_if_t<std::numeric_limits<Tin>::is_signed && std::numeric_limits<Tout>::is_signed, Tout> ScaleBits<Tout, t_ScaleIn>(Tin in)
@@ -47,7 +51,7 @@ namespace RTW
 		constexpr uint8_t N = sizeof(__mmask8) * 2;
 		for (; scale != 0; scale /= 2)
 		{
-			__mmask8 shift = scale * (N - 1);
+			__mmask8 shift = static_cast<__mmask8>(scale * (N - 1));
 			mask &= ~(mask << scale);
 			mask |= mask << (scale * N);
 			out = (out | out << shift) & mask;

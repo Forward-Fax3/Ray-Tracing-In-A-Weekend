@@ -3,44 +3,60 @@
 #include "Interval.h"
 #include "Ray.h"
 
+#include <atomic>
+
 
 namespace RTW
 {
-	class AxisAliagnedBoundingBoxes
+	class AxisAliagnedBoundingBoxe
 	{
 	public:
-		enum class Axis : uint8_t { x = 0, y, z };
+		enum class Axis : uint8_t { x = 0, y, z, none };
 
 	public:
-		inline AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes++; }
-		AxisAliagnedBoundingBoxes(const Interval& interval);
-		AxisAliagnedBoundingBoxes(const Interval& x, const Interval& y, const Interval& z);
-		AxisAliagnedBoundingBoxes(const Point& a, const Point& b);
-		AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& box0, const AxisAliagnedBoundingBoxes& box1);
+		inline AxisAliagnedBoundingBoxe() { s_NumberofBoundingBoxes++; }
+		AxisAliagnedBoundingBoxe(const Interval& interval);
+		AxisAliagnedBoundingBoxe(const Interval& x, const Interval& y, const Interval& z);
+		AxisAliagnedBoundingBoxe(const Point& a, const Point& b);
+		AxisAliagnedBoundingBoxe(const AxisAliagnedBoundingBoxe& box0, const AxisAliagnedBoundingBoxe& box1);
 
-		inline ~AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes--; }
+		inline ~AxisAliagnedBoundingBoxe() { s_NumberofBoundingBoxes--; }
+
+		AxisAliagnedBoundingBoxe& operator=(const AxisAliagnedBoundingBoxe& aabb)
+		{
+			this->m_X = aabb.m_X;
+			this->m_Y = aabb.m_Y;
+			this->m_Z = aabb.m_Z;
+			this->m_LongestAxis = aabb.m_LongestAxis;
+			return *this;
+		}
 
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
 		bool IsHit(const Ray& ray, Interval rayT) const;
 
-		AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
+		void Expand(const AxisAliagnedBoundingBoxe& newAABB);
+
+		double GetSurfaceArea() const { return 2.0 * (m_X.Size() * m_Y.Size() + m_X.Size() * m_Z.Size() + m_Y.Size() * m_Z.Size()); }
+
+		AxisAliagnedBoundingBoxe::Axis LongestAxis() const { return m_LongestAxis; }
 
 		static inline size_t GetNumberofBBs() { return s_NumberofBoundingBoxes; }
+		static inline void ResetNumberOfBBs() { s_NumberofBoundingBoxes = 0; }
 
-		static const AxisAliagnedBoundingBoxes empty, univers;
+		static const AxisAliagnedBoundingBoxe empty, univers;
 
 	private:
-		AxisAliagnedBoundingBoxes::Axis LongestAxisSetter() const;
+		void LongestAxisSetter();
 
 	private:
 		Interval m_X, m_Y, m_Z;
-		AxisAliagnedBoundingBoxes::Axis m_LongestAxis;
+		AxisAliagnedBoundingBoxe::Axis m_LongestAxis;
 
-		static size_t s_NumberofBoundingBoxes;
+		static std::atomic<size_t> s_NumberofBoundingBoxes;
 	};
 
-	using AABB = AxisAliagnedBoundingBoxes;
+	using AABB = AxisAliagnedBoundingBoxe;
 
 	inline AABB::Axis& operator++(AABB::Axis& axis)
 	{

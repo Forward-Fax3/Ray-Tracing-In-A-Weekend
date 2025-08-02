@@ -23,6 +23,8 @@ namespace RTW
 		bool isFrontFace = false;
 	};
 
+	class RayNoHit;
+
 	class RayHittable
 	{
 	public:
@@ -37,7 +39,27 @@ namespace RTW
 			hitData.isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
 			hitData.normal = hitData.isFrontFace ? outwardNormal : -outwardNormal;
 		}
+
+		static inline std::shared_ptr<RayHittable>& GetNoHit();
 	};
+
+	class RayNoHit : public RayHittable
+	{
+	public:
+		RayNoHit() = default;
+
+		virtual bool IsRayHit([[maybe_unused]] const Ray& ray, [[maybe_unused]] const Interval& rayDistance, [[maybe_unused]] HitData& hitData) const override { return false; }
+
+		virtual const AABB& GetBoundingBox() const override { return AABB::empty; }
+
+		static inline std::shared_ptr<RayHittable>& GetNoHit() { return s_NoHit; }
+
+	private:
+		static std::shared_ptr<RayHittable> s_NoHit;
+		friend class RayHittable;
+	};
+
+	inline std::shared_ptr<RayHittable>& RayHittable::GetNoHit() { return RayNoHit::s_NoHit; }
 }
 
 #if !defined(_BaseMaterial)

@@ -35,6 +35,8 @@ namespace RTW
 			{ return { m_Min + dalta * 0.5, m_Max + dalta * 0.5 }; }
 		[[nodiscard]] inline Interval Expand(double minIncrease, double maxIncrease) const
 			{ return { m_Min + minIncrease, m_Max + maxIncrease }; }
+		inline void Expand(const Interval& newInterval)
+			{ m_Min = glm::min(m_Min, newInterval.m_Min); m_Max = glm::max(m_Max, newInterval.m_Max); }
 
 		inline double GetMax() const { return m_Max; }
 		inline double GetMin() const { return m_Min; }

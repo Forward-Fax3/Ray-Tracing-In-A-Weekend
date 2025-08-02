@@ -4,8 +4,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
 
-#include "ctpl_stl.h"
-
 #include "Core.h"
 #include "Interval.h"
 #include "WriteColour.h"
@@ -28,7 +26,7 @@ namespace RTW
 	{
 		Init();
 
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n255\n";
+		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
 
 		for (int16_t i = 0; i < m_ImageHeight; i++)
 		{
@@ -52,13 +50,12 @@ namespace RTW
 		Init();
 		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
 
-		ctpl::thread_pool threads(numberOfThreads);
 		m_NumberOfPixels = static_cast<int64_t>(m_ImageWidth) * static_cast<int64_t>(m_ImageHeight);
 
 		for (int16_t i = 0; i < numberOfThreads; i++)
-			threads.push(Camera::StaticMultiThreadRenderLoop, *this, i, numberOfThreads, &objects);
+			g_Threads.push(std::bind(&Camera::MultiThreadRenderLoop, this, std::placeholders::_1, i, numberOfThreads, std::cref(objects)));
 
-		threads.~thread_pool(); // Waits for all threads to finish and then deletes the thread pool.
+		g_Threads.stop(true); // Waits for all threads to finish.
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
@@ -166,7 +163,7 @@ namespace RTW
 		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
-	void Camera::MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object)
+	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, int64_t offset, int64_t increment, const RayHittable& object)
 	{
 		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
@@ -181,10 +178,5 @@ namespace RTW
 			}
 			m_ColourPixelArray[i] = ColourCorrection(colour);
 		}
-	}
-
-	void Camera::StaticMultiThreadRenderLoop([[maybe_unused]] int id, Camera& camera, int64_t offset, int64_t increment, const RayHittable* object)
-	{
-		camera.MultiThreadRenderLoop(offset, increment, *object);
 	}
 }

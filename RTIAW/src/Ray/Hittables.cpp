@@ -10,6 +10,9 @@ namespace RTW
 {
 	bool RayHittables::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& data) const
 	{
+		if (!m_AABB.IsHit(ray, rayDistance))
+			return false;
+
 		bool hasHit = false;
 		Interval tempRayDist(rayDistance);
 

@@ -29,32 +29,41 @@ namespace RTW
 		switch (scene)
 		{
 		case RTW::Scenes::CollectionOfSpheres:
-			CollectionOfSpheres<false>(hitables);
+			CollectionOfSpheres<false, 22>(hitables);
+			return;
+		case RTW::Scenes::LargeCollectionOfSpheres:
+			CollectionOfSpheres<false, 220>(hitables);
 			return;
 		case RTW::Scenes::MovingSpheres:
-			CollectionOfSpheres<true>(hitables);
+			CollectionOfSpheres<true, 22>(hitables);
+			return;
+		case RTW::Scenes::LargeMovingSpheres:
+			CollectionOfSpheres<true, 220>(hitables);
 			return;
 		case Scenes::CheckeredShperes:
 			CheckeredShperes(hitables);
+			return;
 		case Scenes::Earth:
 			Earth(hitables);
+			return;
 		default:
 			return;
 		}
 	}
 
-	template <bool t_IsMoving>
+	template <bool t_IsMoving, int t_RangeOfSmallBalls>
 	void CollectionOfSpheres(RayHittables& hitables)
 	{
-		std::shared_ptr<BaseTexture> Texture = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
-		std::shared_ptr<BaseMaterial> material = std::make_shared<Lambertian>(Texture);
+		std::shared_ptr<BaseTexture> texture = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
+		std::shared_ptr<BaseMaterial> material = std::make_shared<Lambertian>(texture);
 		hitables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, material));
 
-		for (int a = -11; a < 11; a++)
-			for (int b = -11; b < 11; b++)
+		for (int a = -(t_RangeOfSmallBalls / 2); a < t_RangeOfSmallBalls / 2; a++)
+			for (int b = -(t_RangeOfSmallBalls / 2); b < t_RangeOfSmallBalls / 2; b++)
 			{
 				double chooseMat = glm::linearRand(0.0, 1.0);
-				Point center(Point(a, 0.2, b) + glm::linearRand(Point(0.0), Point(0.9, 0.0, 0.9)));
+				double height = glm::linearRand(0.19, 0.21);
+				Point center(Point(a, height, b) + glm::linearRand(Point(0.0), Point(0.9, 0.0, 0.9)));
 
 				if ((center - Point(4, 0.2, 0)).length() > 0.9)
 				{

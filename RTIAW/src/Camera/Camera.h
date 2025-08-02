@@ -40,8 +40,7 @@ namespace RTW
 
 		inline Colour ColourCorrection(const Colour colour) const;
 
-		void MultiThreadRenderLoop(int64_t offset, int64_t increment, const RayHittable& object);
-		static void StaticMultiThreadRenderLoop(int id, Camera& camera, int64_t offset, int64_t increment, const RayHittable* object);
+		void MultiThreadRenderLoop([[maybe_unused]] int id, int64_t offset, int64_t increment, const RayHittable& object);
 
 	// Private Variables
 	private:
