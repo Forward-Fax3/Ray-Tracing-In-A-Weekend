@@ -252,8 +252,8 @@ namespace RTW
 				double leftSufaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();
 
-				double leftNumberOfItems = splitPosition;
-				double rightNumbeOfItems = hittablesRange - splitPosition;
+				double leftNumberOfItems = static_cast<double>(splitPosition);
+				double rightNumbeOfItems = static_cast<double>(hittablesRange - splitPosition);
 
 				double cost = 0.25 + (leftNumberOfItems * leftSufaceArea + rightNumbeOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
 
