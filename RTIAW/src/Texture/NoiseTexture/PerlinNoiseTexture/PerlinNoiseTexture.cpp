@@ -21,6 +21,6 @@ namespace RTW
 
 	Colour PerlinNoiseTexture::GetColour(const UV& uv, const Point& point) const
 	{
-		return m_BaseTexture->GetColour(uv, point) * m_Noise->Noise(m_Scale * point);
+		return m_BaseTexture->GetColour(uv, point) * 0.5 * (m_Noise->Noise(m_Scale * point) + 1.0);
 	}
 }

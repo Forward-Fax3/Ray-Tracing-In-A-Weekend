@@ -11,7 +11,7 @@ namespace RTW
 	PerlinNoise::PerlinNoise()
 	{
 		for (size_t i = 0; i < s_NumberOfPoints; i++)
-			m_RandDoubles[i] = glm::linearRand(0.0, 1.0);
+			m_RandVec3s[i] = glm::normalize(glm::linearRand(Vec3(-1.0), Vec3(1.0)));
 
 		PerlinNoiseGeneratePermute(m_Permutes);
 	}
@@ -19,11 +19,10 @@ namespace RTW
 	double PerlinNoise::Noise(const Point& point)
 	{
 		Vec3 uvw = point - glm::floor(point);
-		uvw = uvw * uvw * (3.0 - 2.0 * uvw);
 
 		auto indexes = static_cast<glm::vec<3, size_t, glm::defaultp>>(glm::floor(point));
 
-		double samples[2][2][2]{};
+		Vec3 samples[2][2][2]{};
 
 		for (size_t i = 0; i < 2; i++)
 			for (size_t j = 0; j < 2; j++)
@@ -44,21 +43,24 @@ namespace RTW
 
 				size_t doublsIndex = m_Permutes[tempIndexes.x].x ^ m_Permutes[tempIndexes.y].y;
 
-				samples[i][j][0] = m_RandDoubles[doublsIndex ^ m_Permutes[tempIndexes.z].z];
-				samples[i][j][1] = m_RandDoubles[doublsIndex ^ m_Permutes[tempIndexes.w].z];
+				samples[i][j][0] = m_RandVec3s[doublsIndex ^ m_Permutes[tempIndexes.z].z];
+				samples[i][j][1] = m_RandVec3s[doublsIndex ^ m_Permutes[tempIndexes.w].z];
 			}
 
 		return TrilinearInterpilation(samples, uvw);
 	}
 
-	double PerlinNoise::TrilinearInterpilation(const double samples[2][2][2], const Vec3& uvw)
+	double PerlinNoise::TrilinearInterpilation(const Vec3 samples[2][2][2], const Vec3& uvw)
 	{
+		Vec3 smoothedUVW = uvw * uvw * (3.0 - 2.0 * uvw);
+
 		double accum = 0.0;
 		for (size_t i = 0; i < 2; i++)
 			for (size_t j = 0; j < 2; j++)
 			{
 				glm::dvec4 ijk(static_cast<double>(i), static_cast<double>(j), 0.0, 1.0);
-				glm::dvec4 tempUVW(uvw, uvw.z);
+				glm::dvec4 weightV(glm::dvec4(uvw, uvw.z) - ijk);
+				glm::dvec4 tempUVW(smoothedUVW, smoothedUVW.z);
 
 #if defined(RTW_AVX2) || defined(RTW_AVX512)
 				static const __m256d temp1_256bit = _mm256_set1_pd(1.0);
@@ -71,7 +73,9 @@ namespace RTW
 #endif
 
 				double tempMultXY = temp.x * temp.y;
-				accum += tempMultXY * temp.z * samples[i][j][0] + tempMultXY * temp.w * samples[i][j][1];
+				Vec3 weightVK0(weightV.x, weightV.y, weightV.z);
+				Vec3 weightVK1(weightV.x, weightV.y, weightV.w);
+				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK0) + tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK1);
 			}
 		return accum;
 	}

@@ -23,7 +23,7 @@ namespace RTW
 		const Interval minMax(1e-160, 1);
 
 		do {
-			direction = glm::linearRand(Vec3(-1), Vec3(1));
+			direction = glm::linearRand(Vec3(-1.0), Vec3(1.0));
 			lengthSqared = glm::length2(direction);
 		} while (!minMax.Surrounds(lengthSqared));
 

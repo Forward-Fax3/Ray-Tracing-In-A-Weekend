@@ -126,8 +126,8 @@ namespace RTW
 
 	void PerlinNoiseSpheres(RayHittables& hittables)
 	{
-		std::shared_ptr<BaseTexture> perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>();
-		perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(perlinNoiseTexture, 32);
+		std::shared_ptr<BaseTexture> perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(4.0);
+//		perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(perlinNoiseTexture, 32);
 		hittables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinNoiseTexture)));
 		hittables.add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(perlinNoiseTexture)));
 	}
