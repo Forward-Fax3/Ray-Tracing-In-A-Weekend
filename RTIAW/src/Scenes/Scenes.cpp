@@ -13,6 +13,7 @@
 #include "SolidColour.h"
 #include "CheckeredTexture.h"
 #include "ImageTexture.h"
+#include "PerlinNoiseTexture.h"
 
 #include "Scenes.h"
 
@@ -45,6 +46,9 @@ namespace RTW
 			return;
 		case Scenes::Earth:
 			Earth(hitables);
+			return;
+		case Scenes::PerlinNoiseSpheres:
+			PerlinNoiseSpheres(hitables);
 			return;
 		default:
 			return;
@@ -118,5 +122,12 @@ namespace RTW
 		std::shared_ptr<BaseTexture> earthTexture = std::make_shared<ImageTexture>("earthmap.jpg");
 		std::shared_ptr<BaseMaterial> earthMaterial = std::make_shared<Lambertian>(earthTexture);
 		hitables.add(std::make_shared<Sphere>(Point(0.0), 2, earthMaterial));
+	}
+
+	void PerlinNoiseSpheres(RayHittables& hittables)
+	{
+		std::shared_ptr<BaseTexture> perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>();
+		hittables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinNoiseTexture)));
+		hittables.add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(perlinNoiseTexture)));
 	}
 }

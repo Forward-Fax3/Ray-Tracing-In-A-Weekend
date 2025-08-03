@@ -50,7 +50,7 @@ namespace RTW
 		Init();
 		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
 
-		m_NumberOfPixels = static_cast<int64_t>(m_ImageWidth) * static_cast<int64_t>(m_ImageHeight);
+		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 
 		for (int16_t i = 0; i < numberOfThreads; i++)
 			g_Threads.push(std::bind(&Camera::MultiThreadRenderLoop, this, std::placeholders::_1, i, numberOfThreads, std::cref(objects)));
@@ -60,7 +60,7 @@ namespace RTW
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
 		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
-		for (int64_t i = 0; i < m_NumberOfPixels; i++)
+		for (size_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
 
 		delete[] m_ColourPixelArray;
@@ -163,9 +163,9 @@ namespace RTW
 		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
-	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, int64_t offset, int64_t increment, const RayHittable& object)
+	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const RayHittable& object)
 	{
-		for (int64_t i = offset; i < m_NumberOfPixels; i += increment)
+		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
 //			if (i % m_ImageWidth == 0)
 //				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;

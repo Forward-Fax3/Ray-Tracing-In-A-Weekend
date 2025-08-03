@@ -12,6 +12,7 @@ namespace RTW
 		LargeMovingSpheres,
 		CheckeredShperes,
 		Earth,
+		PerlinNoiseSpheres,
 	};
 
 	void SceneSelect(Scenes scene, RayHittables& hitables);
@@ -22,4 +23,6 @@ namespace RTW
 	void CheckeredShperes(RayHittables& hittables);
 
 	void Earth(RayHittables& hitables);
+
+	void PerlinNoiseSpheres(RayHittables& hittables);
 }

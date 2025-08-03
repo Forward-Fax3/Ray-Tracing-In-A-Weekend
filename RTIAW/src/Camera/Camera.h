@@ -40,7 +40,7 @@ namespace RTW
 
 		inline Colour ColourCorrection(const Colour colour) const;
 
-		void MultiThreadRenderLoop([[maybe_unused]] int id, int64_t offset, int64_t increment, const RayHittable& object);
+		void MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const RayHittable& object);
 
 	// Private Variables
 	private:
@@ -63,7 +63,7 @@ namespace RTW
 		// Only internally changeable
 		int16_t m_ImageHeight = 0;
 		double m_SampleScale = 0.0;
-		int64_t m_NumberOfPixels = 0;
+		size_t m_NumberOfPixels = 0;
 		Colour* m_ColourPixelArray = nullptr;
 		Point m_Pixel100Location = Point(0.0);
 		Vec3 m_PixelDeltaU = Vec3(0.0);

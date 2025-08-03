@@ -13,7 +13,7 @@ namespace RTW
 	public:
 		ImageTexture(const std::string& fileName);
 
-		virtual const Colour& GetColour(const UV& uv, const Point& point) const override;
+		virtual Colour GetColour(const UV& uv, const Point& point) const override;
 
 	private:
 		ImageLoader m_Image;

@@ -30,8 +30,8 @@ int main()
 	int16_t samplesPerPixel = 4;
 	int16_t maxBounceDepth = 4;
 #else
-	int16_t samplesPerPixel = 512;
-	int16_t maxBounceDepth = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	int16_t samplesPerPixel = 64;
+	int16_t maxBounceDepth = 64; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
 	RTW::Vec3 gamma(2.4);
@@ -46,7 +46,7 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
+	RTW::Scenes scene = RTW::Scenes::PerlinNoiseSpheres;
 	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);

@@ -13,7 +13,7 @@ namespace RTW
 	CheckeredTexture::CheckeredTexture(const Colour& even, const Colour& odd, double scale)
 		: m_Even(std::make_shared<SolidColour>(even)), m_Odd(std::make_shared<SolidColour>(odd)), m_InvScale(1.0 / scale) {}
 
-	const RTW::Colour& CheckeredTexture::GetColour(const UV& uv, const Point& point) const
+	Colour CheckeredTexture::GetColour(const UV& uv, const Point& point) const
 	{
 		glm::i64vec3 intPoint = point * m_InvScale;
 
