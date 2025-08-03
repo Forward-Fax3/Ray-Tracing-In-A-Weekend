@@ -16,7 +16,7 @@ namespace RTW
 		PerlinNoiseGeneratePermute(m_Permutes);
 	}
 
-	double PerlinNoise::Noise(const Point& point)
+	double PerlinNoise::Noise(const Point& point) const
 	{
 		Vec3 uvw = point - glm::floor(point);
 
@@ -47,10 +47,26 @@ namespace RTW
 				samples[i][j][1] = m_RandVec3s[doublsIndex ^ m_Permutes[tempIndexes.w].z];
 			}
 
-		return TrilinearInterpilation(samples, uvw);
+		return PerlinInterpilation(samples, uvw);
 	}
 
-	double PerlinNoise::TrilinearInterpilation(const Vec3 samples[2][2][2], const Vec3& uvw)
+	double PerlinNoise::Turbulation(const Point& point, size_t depth) const
+	{
+		double accum = 0.0;
+		double weight = 1.0;
+		Point tempPoint(point);
+
+		for (size_t i = 0; i < depth; i++)
+		{
+			accum += weight * Noise(tempPoint);
+			weight *= 0.5;
+			tempPoint *= 2.0;
+		}
+
+		return glm::abs(accum);
+	}
+
+	double PerlinNoise::PerlinInterpilation(const Vec3 samples[2][2][2], const Vec3& uvw)
 	{
 		Vec3 smoothedUVW = uvw * uvw * (3.0 - 2.0 * uvw);
 

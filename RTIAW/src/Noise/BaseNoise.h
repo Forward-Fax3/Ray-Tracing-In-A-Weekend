@@ -9,6 +9,7 @@ namespace RTW
 	public:
 		~BaseNoise() = default;
 
-		virtual double Noise(const Point& point) = 0;
+		virtual double Noise(const Point& point) const = 0;
+		virtual double Turbulation(const Point& point, size_t depth) const = 0;
 	};
 }

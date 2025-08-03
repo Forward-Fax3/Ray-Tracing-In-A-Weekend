@@ -46,7 +46,7 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::PerlinNoiseSpheres;
+	RTW::Scenes scene = RTW::Scenes::MarbleSpheres;
 	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);

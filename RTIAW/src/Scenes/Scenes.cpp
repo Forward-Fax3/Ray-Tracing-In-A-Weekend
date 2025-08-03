@@ -14,6 +14,7 @@
 #include "CheckeredTexture.h"
 #include "ImageTexture.h"
 #include "PerlinNoiseTexture.h"
+#include "MarbleTexture.h"
 
 #include "Scenes.h"
 
@@ -49,6 +50,9 @@ namespace RTW
 			return;
 		case Scenes::PerlinNoiseSpheres:
 			PerlinNoiseSpheres(hitables);
+			return;
+		case Scenes::MarbleSpheres:
+			MarbleSpheres(hitables);
 			return;
 		default:
 			return;
@@ -130,5 +134,12 @@ namespace RTW
 //		perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(perlinNoiseTexture, 32);
 		hittables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinNoiseTexture)));
 		hittables.add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(perlinNoiseTexture)));
+	}
+
+	void MarbleSpheres(RayHittables& hittables)
+	{
+		std::shared_ptr<BaseTexture> marbleTexture = std::make_shared<MarbleTexture>(4.0);
+		hittables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(marbleTexture)));
+		hittables.add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(marbleTexture)));
 	}
 }

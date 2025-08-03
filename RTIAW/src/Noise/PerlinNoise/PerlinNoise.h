@@ -10,10 +10,11 @@ namespace RTW
 	public:
 		PerlinNoise();
 
-		virtual double Noise(const Point& point) override;
+		virtual double Noise(const Point& point) const override;
+		virtual double Turbulation(const Point& point, size_t depth) const override;
 
 	private:
-		static double TrilinearInterpilation(const Vec3 samples[2][2][2], const Vec3& cords);
+		static double PerlinInterpilation(const Vec3 samples[2][2][2], const Vec3& cords);
 		static void PerlinNoiseGeneratePermute(glm::vec<3, size_t, glm::defaultp>* p);
 		static void Permute(glm::vec<3, size_t, glm::defaultp>* p, size_t n);
 
