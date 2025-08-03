@@ -416,3 +416,6 @@ FodyWeavers.xsd
 
 # project specific
 image.ppm
+
+# intel
+**/Intel® VTune™ Profiler Results/
