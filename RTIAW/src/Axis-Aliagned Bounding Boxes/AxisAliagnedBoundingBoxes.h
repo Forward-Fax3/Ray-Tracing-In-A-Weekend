@@ -22,14 +22,7 @@ namespace RTW
 
 		inline ~AxisAliagnedBoundingBoxe() { s_NumberofBoundingBoxes--; }
 
-		AxisAliagnedBoundingBoxe& operator=(const AxisAliagnedBoundingBoxe& aabb)
-		{
-			this->m_X = aabb.m_X;
-			this->m_Y = aabb.m_Y;
-			this->m_Z = aabb.m_Z;
-			this->m_LongestAxis = aabb.m_LongestAxis;
-			return *this;
-		}
+		AxisAliagnedBoundingBoxe& operator=(const AxisAliagnedBoundingBoxe& aabb);
 
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
@@ -48,6 +41,7 @@ namespace RTW
 
 	private:
 		void LongestAxisSetter();
+		void MiniumPadding();
 
 	private:
 		Interval m_X, m_Y, m_Z;

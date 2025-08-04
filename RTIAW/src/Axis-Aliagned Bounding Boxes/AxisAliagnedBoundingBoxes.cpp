@@ -38,10 +38,10 @@ namespace RTW
 #endif
 
 	AABB::AxisAliagnedBoundingBoxe(const Interval& interval)
-		: m_X(interval), m_Y(interval), m_Z(interval) { s_NumberofBoundingBoxes++; LongestAxisSetter(); }
+		: m_X(interval), m_Y(interval), m_Z(interval) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	AABB::AxisAliagnedBoundingBoxe(const Interval& x, const Interval& y, const Interval& z)
-		: m_X(x), m_Y(y), m_Z(z) { s_NumberofBoundingBoxes++; LongestAxisSetter(); }
+		: m_X(x), m_Y(y), m_Z(z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	AABB::AxisAliagnedBoundingBoxe(const Point& a, const Point& b)
 	{
@@ -49,11 +49,12 @@ namespace RTW
 		m_X = (a.x <= b.x) ? Interval(a.x, b.x) : Interval(b.x, a.x);
 		m_Y = (a.y <= b.y) ? Interval(a.y, b.y) : Interval(b.y, a.y);
 		m_Z = (a.z <= b.z) ? Interval(a.z, b.z) : Interval(b.z, a.z);
+		MiniumPadding();
 		LongestAxisSetter();
 	}
 
 	AABB::AxisAliagnedBoundingBoxe(const AABB& box0, const AABB& box1)
-		: m_X(box0.m_X, box1.m_X), m_Y(box0.m_Y, box1.m_Y), m_Z(box0.m_Z, box1.m_Z) { s_NumberofBoundingBoxes++; LongestAxisSetter(); }
+		: m_X(box0.m_X, box1.m_X), m_Y(box0.m_Y, box1.m_Y), m_Z(box0.m_Z, box1.m_Z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	const Interval& AABB::GetAxisInterval(const Axis& axis) const
 	{
@@ -208,6 +209,15 @@ namespace RTW
 #endif // RTW_AVX512
 	}
 
+	RTW::AxisAliagnedBoundingBoxe& AxisAliagnedBoundingBoxe::operator=(const AxisAliagnedBoundingBoxe& aabb)
+	{
+		this->m_X = aabb.m_X;
+		this->m_Y = aabb.m_Y;
+		this->m_Z = aabb.m_Z;
+		this->m_LongestAxis = aabb.m_LongestAxis;
+		return *this;
+	}
+
 	void AxisAliagnedBoundingBoxe::Expand(const AxisAliagnedBoundingBoxe& newAABB)
 	{
 #if (SIMD == 1)
@@ -236,6 +246,7 @@ namespace RTW
 		m_Y.Expand(newAABB.m_Y);
 #endif
 		m_Z.Expand(newAABB.m_Z);
+		MiniumPadding();
 		LongestAxisSetter();
 	}
 
@@ -244,5 +255,16 @@ namespace RTW
 		m_LongestAxis = (m_X.Size() > m_Y.Size()) ?
 					   ((m_X.Size() > m_Z.Size()) ? AABB::Axis::x : AABB::Axis::z) :
 					   ((m_Y.Size() > m_Z.Size()) ? AABB::Axis::y : AABB::Axis::z);
+	}
+
+	void AxisAliagnedBoundingBoxe::MiniumPadding()
+	{
+		static constexpr double minium = 1e-4;
+		if (m_X.Size() < minium)
+			m_X = m_X.Expand(minium);
+		if (m_Y.Size() < minium)
+			m_Y = m_Y.Expand(minium);
+		if (m_Z.Size() < minium)
+			m_Z = m_Z.Expand(minium);
 	}
 }
