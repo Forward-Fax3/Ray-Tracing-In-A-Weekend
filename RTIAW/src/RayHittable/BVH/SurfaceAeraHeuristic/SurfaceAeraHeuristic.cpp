@@ -145,7 +145,7 @@ namespace RTW
 
 	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)
 	{
-		const size_t numberOfSplits = glm::min(static_cast<size_t>(64), hittablesRange - 1);
+		const size_t numberOfSplits = glm::min(glm::max(static_cast<size_t>(512), static_cast<size_t>(glm::sqrt(hittablesRange))), hittablesRange - 1);
 		//		const size_t numberOfSplits = hittablesRange - 1;
 
 		AABB leftAABB{};
