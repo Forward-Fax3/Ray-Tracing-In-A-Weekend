@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "Ray.h"
 #include "RayHittable.h"
-#include "Hittables.h"
+#include "RayHittables.h"
 
 
 namespace RTW
@@ -16,7 +16,7 @@ namespace RTW
 		bool hasHit = false;
 		Interval tempRayDist(rayDistance);
 
-		for (const std::shared_ptr<RayHittable>& object : m_Objects)
+		for (const std::shared_ptr<BaseRayHittable>& object : m_Objects)
 			if (object->IsRayHit(ray, tempRayDist, data))
 			{
 				hasHit = true;

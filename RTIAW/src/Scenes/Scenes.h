@@ -1,5 +1,5 @@
 #pragma once
-#include "Hittables.h"
+#include "RayHittables.h"
 
 
 namespace RTW

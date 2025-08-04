@@ -25,10 +25,10 @@ namespace RTW
 
 	class RayNoHit;
 
-	class RayHittable
+	class BaseRayHittable
 	{
 	public:
-		virtual ~RayHittable() = default;
+		virtual ~BaseRayHittable() = default;
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const = 0;
 
@@ -40,10 +40,10 @@ namespace RTW
 			hitData.normal = hitData.isFrontFace ? outwardNormal : -outwardNormal;
 		}
 
-		static inline std::shared_ptr<RayHittable>& GetNoHit();
+		static inline std::shared_ptr<BaseRayHittable>& GetNoHit();
 	};
 
-	class RayNoHit : public RayHittable
+	class RayNoHit : public BaseRayHittable
 	{
 	public:
 		RayNoHit() = default;
@@ -52,14 +52,14 @@ namespace RTW
 
 		virtual const AABB& GetBoundingBox() const override { return AABB::empty; }
 
-		static inline std::shared_ptr<RayHittable>& GetNoHit() { return s_NoHit; }
+		static inline std::shared_ptr<BaseRayHittable>& GetNoHit() { return s_NoHit; }
 
 	private:
-		static std::shared_ptr<RayHittable> s_NoHit;
-		friend class RayHittable;
+		static std::shared_ptr<BaseRayHittable> s_NoHit;
+		friend class BaseRayHittable;
 	};
 
-	inline std::shared_ptr<RayHittable>& RayHittable::GetNoHit() { return RayNoHit::s_NoHit; }
+	inline std::shared_ptr<BaseRayHittable>& BaseRayHittable::GetNoHit() { return RayNoHit::s_NoHit; }
 }
 
 #if !defined(_BaseMaterial)

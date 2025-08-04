@@ -1,93 +1,16 @@
 #include <memory>
 #include <vector>
-#include <algorithm>
 #include <iostream>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/random.hpp"
-
 #include "Core.h"
-#include "AxisAliagnedBoundingBoxes.h"
 #include "RayHittable.h"
-#include "Hittables.h"
-#include "BoundingVolumeHierarchiesNode.h"
+#include "RayHittables.h"
+#include "BaseBVH.h"
+#include "SurfaceAeraHeuristic.h"
 
 
 namespace RTW
 {
-	std::atomic<size_t> BVHBase::currentDepth = 0;
-	std::atomic<size_t> BVHBase::maxDepth = 0;
-
-	ctpl::thread_pool SurfaceAreaHeuristicNode::s_Threads;
-	std::thread::id SurfaceAreaHeuristicNode::s_MainThreadID;
-
-	bool BVHBase::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
-	{
-		if (!m_AABB.IsHit(ray, rayDistance))
-			return false;
-
-		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);
-
-		if (isHit)
-			isHit |= m_Right->IsRayHit(ray, { rayDistance.GetMin(), hitData.distance }, hitData);
-		else
-			isHit |= m_Right->IsRayHit(ray, rayDistance, hitData);
-
-		return isHit;
-	}
-
-	bool BVHBase::BoxComparison(const std::shared_ptr<RayHittable>& boxA, const std::shared_ptr<RayHittable>& boxB, AABB::Axis axis)
-	{
-		Interval BoxAAxisInterval = boxA->GetBoundingBox().GetAxisInterval(axis);
-		Interval BoxBAxisInterval = boxB->GetBoundingBox().GetAxisInterval(axis);
-		return BoxAAxisInterval.GetMin() < BoxBAxisInterval.GetMin();
-	}
-
-	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(RayHittables& hittables)
-		: BoundingVolumeHierarchiesNode(hittables.GetObjects(), 0, hittables.GetObjects().size()) {
-		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created With midpoints.\n" << std::flush;
-		maxDepth = 0;
-	}
-
-	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end) 
-	{
-		m_AABB = AABB::empty;
-
-		for (size_t i = start; i < end; i++)
-			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
-
-		currentDepth++;
-		maxDepth.store(std::max(maxDepth, currentDepth));
-
-		size_t hittablesRange = end - start;
-
-		if (hittablesRange == 1)
-		{
-			m_Left = hittables[start];
-			m_Right = RayHittable::GetNoHit();
-		}
-		else if (hittablesRange == 2)
-		{
-			m_Left = hittables[start];
-			m_Right = hittables[start + 1];
-		}
-		else
-		{
-			AABB::Axis axis = m_AABB.LongestAxis();
-
-			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis
-									: (axis == AABB::Axis::y) ? CompareBoxYAxis
-									: CompareBoxZAxis;
-
-			std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
-
-			size_t midPoint = start + hittablesRange / 2;
-			m_Left = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, start, midPoint);
-			m_Right = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, midPoint, end);
-		}
-		currentDepth--;
-	}
-
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(RayHittables& hittables)
 		: SurfaceAreaHeuristicNode(hittables.GetObjects(), 0, hittables.GetObjects().size()) {
 		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created with SAH.\n" << std::flush;
@@ -96,11 +19,12 @@ namespace RTW
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(RayHittables& hittables, size_t numberOfThreads)
 		: SurfaceAreaHeuristicNode(hittables.GetObjects(), 0, hittables.GetObjects().size(), numberOfThreads) {
-		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created with SAH.\n" << std::flush;
+		// currently doesn't work with multi threading need to make a better system for it.
+//		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created with SAH.\n" << std::flush;
 		maxDepth = 0;
 	}
 
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end)
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
 		m_AABB = AABB::empty;
 
@@ -115,7 +39,7 @@ namespace RTW
 		currentDepth--;
 	}
 
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end, size_t numberOfThreads)
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t numberOfThreads)
 	{
 		(void)numberOfThreads;
 		m_AABB = AABB::empty;
@@ -126,8 +50,8 @@ namespace RTW
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
 
-//		s_MainThreadID = std::this_thread::get_id();
-//		s_Threads.resize(numberOfThreads - 1);
+		//		s_MainThreadID = std::this_thread::get_id();
+		//		s_Threads.resize(numberOfThreads - 1);
 
 		MultiThreadedCalculateBVH(hittables, start, end);
 
@@ -137,7 +61,7 @@ namespace RTW
 		currentDepth--;
 	}
 
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end, AABB& thisAABB, bool isMultithreaded /*= false*/)
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, AABB& thisAABB, bool isMultithreaded /*= false*/)
 	{
 		m_AABB = thisAABB;
 		currentDepth++;
@@ -151,14 +75,14 @@ namespace RTW
 		currentDepth--;
 	}
 
-	void SurfaceAreaHeuristicNode::SingleThreadedCalculateBVH(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end)
+	void SurfaceAreaHeuristicNode::SingleThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
 		size_t hittablesRange = end - start;
 
 		if (hittablesRange == 1)
 		{
 			m_Left = hittables[start];
-			m_Right = RayHittable::GetNoHit();
+			m_Right = BaseRayHittable::GetNoHit();
 		}
 		else if (hittablesRange == 2)
 		{
@@ -184,14 +108,14 @@ namespace RTW
 		}
 	}
 
-	void SurfaceAreaHeuristicNode::MultiThreadedCalculateBVH(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end)
+	void SurfaceAreaHeuristicNode::MultiThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
 		size_t hittablesRange = end - start;
 
 		if (hittablesRange == 1)
 		{
 			m_Left = hittables[start];
-			m_Right = RayHittable::GetNoHit();
+			m_Right = BaseRayHittable::GetNoHit();
 		}
 		else if (hittablesRange == 2)
 		{
@@ -219,10 +143,10 @@ namespace RTW
 		}
 	}
 
-	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)
+	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)
 	{
 		const size_t numberOfSplits = glm::min(static_cast<size_t>(64), hittablesRange - 1);
-//		const size_t numberOfSplits = hittablesRange - 1;
+		//		const size_t numberOfSplits = hittablesRange - 1;
 
 		AABB leftAABB{};
 		AABB rightAABB{};
@@ -269,7 +193,7 @@ namespace RTW
 		}
 	}
 
-	void SurfaceAreaHeuristicNode::multiThreadedCreateNextNodeNoReturn([[maybe_unused]] int id, std::shared_ptr<RayHittable>& childNode, std::vector<std::shared_ptr<RayHittable>>& hittables, size_t start, size_t end, AABB& nextAABB)
+	void SurfaceAreaHeuristicNode::multiThreadedCreateNextNodeNoReturn([[maybe_unused]] int id, std::shared_ptr<BaseRayHittable>& childNode, std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, AABB& nextAABB)
 	{
 		childNode = std::make_shared<SAHNode>(hittables, start, end, nextAABB, true);
 	}

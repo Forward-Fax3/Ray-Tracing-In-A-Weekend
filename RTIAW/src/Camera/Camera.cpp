@@ -22,7 +22,7 @@ namespace RTW
 	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces)
 		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_DefocusAngle(defocusAngle), m_FocusDistance(focusDistance), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_Gamma(gamma), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) {}
 
-	void Camera::Render(const RayHittable& objects)
+	void Camera::Render(const BaseRayHittable& objects)
 	{
 		Init();
 
@@ -45,7 +45,7 @@ namespace RTW
 		}
 	}
 
-	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const RayHittable& objects)
+	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const BaseRayHittable& objects)
 	{
 		Init();
 		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
@@ -102,7 +102,7 @@ namespace RTW
 		m_MaxBounces++;
 	}
 
-	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const RayHittable& object)
+	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object)
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
@@ -163,7 +163,7 @@ namespace RTW
 		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
-	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const RayHittable& object)
+	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const BaseRayHittable& object)
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{

@@ -1,7 +1,7 @@
 #include "Core.h"
 
 #include "RayHittable.h"
-#include "Hittables.h"
+#include "RayHittables.h"
 #include "Sphere.h"
 
 #include "BaseMaterial.h"

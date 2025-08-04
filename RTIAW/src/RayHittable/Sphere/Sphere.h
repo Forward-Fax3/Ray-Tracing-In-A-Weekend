@@ -16,7 +16,7 @@
 namespace RTW::Templates
 {
 	template <bool t_IsMoving>
-	class Sphere : public RayHittable
+	class Sphere : public BaseRayHittable
 	{
 	public:
 		inline Sphere<t_IsMoving>(const Point& center, double radius, std::shared_ptr<BaseMaterial> material) requires (!t_IsMoving)

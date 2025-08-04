@@ -10,5 +10,5 @@
 
 namespace RTW
 {
-	std::shared_ptr<RayHittable> RayNoHit::s_NoHit = std::make_shared<RayNoHit>();
+	std::shared_ptr<BaseRayHittable> RayNoHit::s_NoHit = std::make_shared<RayNoHit>();
 }

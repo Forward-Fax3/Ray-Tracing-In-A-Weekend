@@ -3,8 +3,9 @@
 #include <thread>
 
 #include "Core.h"
-#include "Hittables.h"
+#include "RayHittables.h"
 #include "BoundingVolumeHierarchiesNode.h"
+#include "SurfaceAeraHeuristic.h"
 #include "Camera.h"
 #include "Scenes.h"
 
@@ -46,7 +47,7 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::MarbleSpheres;
+	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
 	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
@@ -58,9 +59,9 @@ int main()
 
 	if (worldHitables.size() > 1)
 	{
-//		std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
-//		std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables);
-		std::shared_ptr<RTW::RayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables, numberOfThreads);
+//		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
+//		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables);
+		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables, numberOfThreads);
 		worldHitables.clear();
 		worldHitables.add(BVHWorldHitables);
 

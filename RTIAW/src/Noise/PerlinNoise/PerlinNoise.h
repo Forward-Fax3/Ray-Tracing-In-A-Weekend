@@ -9,6 +9,7 @@ namespace RTW
 	{
 	public:
 		PerlinNoise();
+		~PerlinNoise() override = default;
 
 		virtual double Noise(const Point& point) const override;
 		virtual double Turbulation(const Point& point, size_t depth) const override;
