@@ -6,7 +6,7 @@
 #include <immintrin.h>
 #include <atomic>
 
-#define SIMD 0
+#define SIMD 1
 #define AVX512 0 // twice as slow at the moment and I cant think of any way to make it faster
 
 
@@ -193,7 +193,7 @@ namespace RTW
 #error only supports clang and msc
 #endif
 			// store rayT back into scaler rayT
-			_mm_store_pd(const_cast<double*>(&rayT.GetAsVector().x), m128_RayT);
+			const_cast<glm::dvec2&>(rayT.GetAsVector()).data = m128_RayT;
 
 #else // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
 			if (t.x > rayT.GetMin()) 

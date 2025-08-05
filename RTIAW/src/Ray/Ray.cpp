@@ -16,6 +16,6 @@ namespace RTW
 
 	RTW::Point Ray::at(double distance) const
 	{
-		return m_Origin + distance * m_Direction;
+		return glm::fma(m_Direction, Vec3(distance), m_Origin);
 	}
 }

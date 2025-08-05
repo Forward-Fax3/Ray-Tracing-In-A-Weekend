@@ -32,11 +32,9 @@ namespace RTW
 				tempIndexes += ijk;
 
 #if (defined(RTW_AVX2) || defined (RTW_AVX512)) && (__x86_64 || __ppc64__ || _WIN64)
-				__m256i tempIndexes_256bit = _mm256_and_epi64(tempIndexes.data, _mm256_set1_epi64x(s_NumberOfPoints - 1));
-				_mm256_storeu_epi64(&tempIndexes, tempIndexes_256bit);
+				tempIndexes.data = _mm256_and_epi64(tempIndexes.data, _mm256_set1_epi64x(s_NumberOfPoints - 1));
 #elif defined(RTW_AVX2) || defined (RTW_AVX512)
-				__m128i tempIndexes_256bit = _mm128_and_epi32(tempIndexes.data, _mm128_set1_epi32(s_NumberOfPoints - 1));
-				_mm128_storeu_epi32(&tempIndexes, tempIndexes_256bit);
+				tempIndexes.data = _mm128_and_epi32(tempIndexes.data, _mm128_set1_epi32(s_NumberOfPoints - 1));
 #else
 				tempIndexes = tempIndexes & (s_NumberOfPoints - 1);
 #endif
@@ -69,6 +67,7 @@ namespace RTW
 	double PerlinNoise::PerlinInterpilation(const Vec3 samples[2][2][2], const Vec3& uvw)
 	{
 		Vec3 smoothedUVW = uvw * uvw * (3.0 - 2.0 * uvw);
+		glm::dvec4 smoothedUVWW(glm::xyzz(smoothedUVW));
 
 		double accum = 0.0;
 		for (size_t i = 0; i < 2; i++)
@@ -76,22 +75,29 @@ namespace RTW
 			{
 				glm::dvec4 ijk(static_cast<double>(i), static_cast<double>(j), 0.0, 1.0);
 				glm::dvec4 weightV(glm::dvec4(uvw, uvw.z) - ijk);
-				glm::dvec4 tempUVW(smoothedUVW, smoothedUVW.z);
 
-#if defined(RTW_AVX2) || defined(RTW_AVX512)
+#if defined(RTW_AVX2) || defined(RTW_AVX512) && !defined(__clang__) // clang optimizes better with the simple version
 				static const __m256d temp1_256bit = _mm256_set1_pd(1.0);
 				__m256d tempIJK_256bit = _mm256_sub_pd(temp1_256bit, ijk.data);
-				__m256d tempUVW_256bit = _mm256_sub_pd(temp1_256bit, tempUVW.data);
+				__m256d tempUVW_256bit = _mm256_sub_pd(temp1_256bit, smoothedUVWW.data);
 				glm::dvec4 temp{};
-				_mm256_storeu_pd(&temp.x, _mm256_fmadd_pd(ijk.data, tempUVW.data, _mm256_mul_pd(tempIJK_256bit, tempUVW_256bit)));
+				temp.data = _mm256_fmadd_pd(ijk.data, smoothedUVWW.data, _mm256_mul_pd(tempIJK_256bit, tempUVW_256bit));
 #else
-				glm::dvec4 temp(ijk * tempUVW + (1.0 - ijk) * (1.0 - tempUVW));
+				glm::dvec4 temp(ijk * smoothedUVWW + (1.0 - ijk) * (1.0 - smoothedUVWW));
 #endif
 
 				double tempMultXY = temp.x * temp.y;
-				Vec3 weightVK0(weightV.x, weightV.y, weightV.z);
-				Vec3 weightVK1(weightV.x, weightV.y, weightV.w);
-				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK0) + tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK1);
+				Vec3 weightVK[2]{};
+				weightVK[0].data = weightV.data;
+
+#if defined(RTW_AVX2) || defined(RTW_AVX512)
+				weightVK[1].data = _mm256_permute_pd(weightV.data, 0b0110);
+#else
+				weightVK[1].data.setv(0, weightV.data.getv(0));
+				glm_dvec2 weightVK01 = weightV.data.getv(1);
+				weightVK[1].data.setv(1, _mm_shuffle_pd(weightVK01, weightVK01, 0b01));
+#endif
+				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK[0]) + tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK[1]);
 			}
 		return accum;
 	}
