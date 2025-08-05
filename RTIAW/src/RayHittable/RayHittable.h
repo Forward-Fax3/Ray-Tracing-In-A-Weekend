@@ -21,6 +21,12 @@ namespace RTW
 		std::shared_ptr<BaseMaterial> material = nullptr;
 		double distance = 0.0;
 		bool isFrontFace = false;
+
+		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)
+		{
+			isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
+			normal = isFrontFace ? outwardNormal : -outwardNormal;
+		}
 	};
 
 	class RayNoHit;
@@ -33,12 +39,6 @@ namespace RTW
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const = 0;
 
 		virtual const AABB& GetBoundingBox() const = 0;
-
-		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal, HitData& hitData) const
-		{
-			hitData.isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
-			hitData.normal = hitData.isFrontFace ? outwardNormal : -outwardNormal;
-		}
 
 		static inline std::shared_ptr<BaseRayHittable>& GetNoHit();
 	};

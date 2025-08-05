@@ -64,12 +64,11 @@ namespace RTW::Templates
 
 			hitData.distance = root;
 			hitData.point = ray.at(hitData.distance);
-			Vec3 normal = (hitData.point - center) / m_Radius;
-
-			SetFaceNormal(ray, normal, hitData);
-			hitData.uv = GetUV(hitData.normal);
-
 			hitData.material = m_Material;
+
+			Vec3 normal = (hitData.point - center) / m_Radius;
+			hitData.SetFaceNormal(ray, normal);
+			hitData.uv = GetUV(hitData.normal);
 
 			return true;
 		}

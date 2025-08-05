@@ -6,6 +6,7 @@
 
 #include "ctpl_stl.h"
 
+// globally disable nameless struct warning
 #pragma warning (disable: 4201)
 
 
@@ -18,6 +19,21 @@ namespace RTW
 	using UV = glm::dvec2;
 //	using UV = glm::vec2;
 	static constexpr double doubleInf = std::numeric_limits<double>::infinity();
+
+	struct UVvec3
+	{
+		UVvec3(Vec3 u, Vec3 v) : u(u), v(v) {}
+
+		union
+		{
+			struct
+			{
+				Vec3 u;
+				Vec3 v;
+			};
+			Vec3 uv[2];
+		};
+	};
 
 	Vec3 RandomOnHemisphere(const Vec3& normal);
 

@@ -22,6 +22,8 @@ namespace RTW
 		inline bool Contains(const double x) const { return m_Min <= x && x <= m_Max; }
 		inline bool Contains(const Interval& other) const
 			{ return m_Min <= other.m_Min && other.m_Max <= m_Max; }
+		inline bool Contains(const UV& uv) const
+		{ return Contains(uv.x) && Contains(uv.y); }
 
 		inline bool Surrounds(const double x) const { return m_Min < x && x < m_Max; }
 		inline bool Surrounds(const Interval& other) const
@@ -32,9 +34,9 @@ namespace RTW
 		inline Colour Clamp(const Colour& x) const { return glm::clamp(x, Vec3(m_Min), Vec3(m_Max)); }
 
 		[[nodiscard]] inline Interval Expand(double dalta) const
-			{ return { m_Min + dalta * 0.5, m_Max + dalta * 0.5 }; }
+			{ return { m_Min - dalta * 0.5, m_Max + dalta * 0.5 }; }
 		[[nodiscard]] inline Interval Expand(double minIncrease, double maxIncrease) const
-			{ return { m_Min + minIncrease, m_Max + maxIncrease }; }
+			{ return { m_Min - minIncrease, m_Max + maxIncrease }; }
 		inline void Expand(const Interval& newInterval)
 			{ m_Min = glm::min(m_Min, newInterval.m_Min); m_Max = glm::max(m_Max, newInterval.m_Max); }
 

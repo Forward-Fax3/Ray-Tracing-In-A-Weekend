@@ -17,12 +17,14 @@ int main()
 	double aspectRatio = 16.0 / 9.0;
 	int16_t imageWidth = 1920;
 
-	double FOV = 50.0;
+//	double FOV = 50.0;
+	double FOV = 80.0;
 //	RTW::Vec3 lookFrom(0.0, 0.0, 1.0);
 //	RTW::Vec3 LookAt(0.0, 0.0, 0.0);
 //	RTW::Vec3 VUp(0.0, 1.0, 0.0);
 
-	RTW::Vec3 lookFrom(13.0, 2.0, 3.0);
+//	RTW::Vec3 lookFrom(13.0, 2.0, 3.0);
+	RTW::Vec3 lookFrom(0.0, 0.0, 9.0);
 //	RTW::Vec3 lookFrom(1.0, 200.0, 1.0);
 	RTW::Vec3 LookAt(0.0);
 	RTW::Vec3 VUp(0.0, 1.0, 0.0);
@@ -47,7 +49,7 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
+	RTW::Scenes scene = RTW::Scenes::Parallelograms;
 	RTW::SceneSelect(scene, worldHitables);
 
 	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);

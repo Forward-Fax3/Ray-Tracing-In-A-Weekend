@@ -3,6 +3,7 @@
 #include "RayHittable.h"
 #include "RayHittables.h"
 #include "Sphere.h"
+#include "Parallelogram.h"
 
 #include "BaseMaterial.h"
 #include "Lambertian.h"
@@ -53,6 +54,9 @@ namespace RTW
 			return;
 		case Scenes::MarbleSpheres:
 			MarbleSpheres(hitables);
+			return;
+		case Scenes::Parallelograms:
+			Parallelograms(hitables);
 			return;
 		default:
 			return;
@@ -141,5 +145,29 @@ namespace RTW
 		std::shared_ptr<BaseTexture> marbleTexture = std::make_shared<MarbleTexture>(4.0);
 		hittables.add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(marbleTexture)));
 		hittables.add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(marbleTexture)));
+	}
+
+	void Parallelograms(RayHittables& hittables)
+	{
+		// Materials
+		std::shared_ptr<BaseMaterial> leftRed = std::make_shared<Lambertian>(Colour(1.0, 0.2, 0.2));
+		std::shared_ptr<BaseMaterial> backGreen = std::make_shared<Lambertian>(Colour(0.2, 1.0, 0.2));
+		std::shared_ptr<BaseMaterial> rightBlue = std::make_shared<Lambertian>(Colour(0.2, 0.2, 1.0));
+		std::shared_ptr<BaseMaterial> topOrange = std::make_shared<Lambertian>(Colour(1.0, 0.5, 0.0));
+		std::shared_ptr<BaseMaterial> bottomTeal = std::make_shared<Lambertian>(Colour(0.2, 0.8, 0.8));
+
+		// UV Points
+		UVvec3 leftUV(Vec3(0.0, 0.0, -4.0), Vec3(0, 4, 0));
+		UVvec3 backUV(Vec3(4, 0, 0), Vec3(0, 4, 0));
+		UVvec3 rightUV(Vec3(0, 0, 4), Vec3(0, 4, 0));
+		UVvec3 topUV(Vec3(4, 0, 0), Vec3(0, 0, 4));
+		UVvec3 bottomUV(Vec3(4, 0, 0), Vec3(0, 0, -4));
+
+		// Quads
+		hittables.add(std::make_shared<Parallelogram>(Point(-3, -2, 5), leftUV, leftRed));
+		hittables.add(std::make_shared<Parallelogram>(Point(-2, -2, 0), backUV, backGreen));
+		hittables.add(std::make_shared<Parallelogram>(Point(3, -2, 1), rightUV, rightBlue));
+		hittables.add(std::make_shared<Parallelogram>(Point(-2, 3, 1), topUV, topOrange));
+		hittables.add(std::make_shared<Parallelogram>(Point(-2, -3, 5), bottomUV, bottomTeal));
 	}
 }

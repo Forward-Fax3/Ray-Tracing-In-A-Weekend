@@ -14,6 +14,7 @@ namespace RTW
 		Earth,
 		PerlinNoiseSpheres,
 		MarbleSpheres,
+		Parallelograms,
 	};
 
 	void SceneSelect(Scenes scene, RayHittables& hitables);
@@ -28,4 +29,6 @@ namespace RTW
 	void PerlinNoiseSpheres(RayHittables& hittables);
 
 	void MarbleSpheres(RayHittables& hittables);
+
+	void Parallelograms(RayHittables& hittables);
 }
