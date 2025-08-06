@@ -16,33 +16,15 @@ int main()
 
 	RTW::CameraData cameraData{};
 
-//	cameraData.AspectRatio = 16.0 / 9.0;
-	cameraData.AspectRatio = 1.0;
 	cameraData.ImageWidth = 1920;
-
-	cameraData.FOV = 40.0;
-//	cameraData.FOV = 50.0;
-//	cameraData.FOV = 80.0;
-//	cameraData.LookFrom = RTW::Point(0.0, 0.0, 1.0);
-//	cameraData.LookAt = RTW::Point(0.0, 0.0, 0.0);
-//	cameraData.VUp = RTW::Point(0.0, 1.0, 0.0);
-
-	cameraData.LookFrom = RTW::Point(278.0, 278.0, -800.0);
-//	cameraData.LookFrom = RTW::Point(13.0, 2.0, 3.0);
-//	cameraData.LookFrom = RTW::Point(0.0, 0.0, 9.0);
-//	cameraData.LookFrom = RTW::Point(1.0, 200.0, 1.0);
-	cameraData.LookAt = RTW::Point(278, 278, 0);
-//	cameraData.LookAt = RTW::Point(0.0);
 	cameraData.VUp = RTW::Vec3(0.0, 1.0, 0.0);
-
-	cameraData.BackgroundColour = RTW::Colour(0.0);
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
 	cameraData.SamplesPerPixel = 64;
-	cameraData.MaxBounces = 64; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
 	cameraData.Gamma = RTW::Vec3(2.4);
@@ -57,8 +39,8 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelBox;
-	RTW::SceneSelect(scene, worldHitables);
+	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
+	RTW::SceneSelect(scene, worldHitables, cameraData);
 
 	RTW::Camera camera(cameraData);
 
