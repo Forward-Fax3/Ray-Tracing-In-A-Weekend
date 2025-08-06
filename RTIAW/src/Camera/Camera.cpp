@@ -16,11 +16,12 @@
 namespace RTW
 {
 	Camera::Camera()
-		: m_AspectRatio(0.0), m_FOV(0.0), m_DefocusAngle(0.0), m_FocusDistance(0.0), m_LookFrom(0.0), m_LookAt(0.0), m_VUp(0.0), m_Gamma(0.0), m_ImageWidth(0), m_SamplesPerPixel(0), m_MaxBounces(0) {}
+		: m_AspectRatio(0.0), m_FOV(0.0), m_DefocusAngle(0.0), m_FocusDistance(0.0), m_LookFrom(0.0), m_LookAt(0.0), m_VUp(0.0), m_Gamma(0.0), m_BackgroundColour(0.0), m_ImageWidth(0), m_SamplesPerPixel(0), m_MaxBounces(0) { }
 
 
-	Camera::Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces)
-		: m_AspectRatio(AspectRatio), m_FOV(FOV), m_DefocusAngle(defocusAngle), m_FocusDistance(focusDistance), m_LookFrom(lookFrom), m_LookAt(lookAt), m_VUp(VUp), m_Gamma(gamma), m_ImageWidth(imageWidth), m_SamplesPerPixel(samplesPerPixel), m_MaxBounces(maxBounces) {}
+	Camera::Camera(const CameraData& data)
+		: m_AspectRatio(data.AspectRatio), m_FOV(data.FOV), m_DefocusAngle(data.DefocusAngle), m_FocusDistance(data.FocusDistance), m_LookFrom(data.LookFrom), m_LookAt(data.LookAt), m_VUp(data.VUp),
+		m_Gamma(data.Gamma), m_BackgroundColour(data.BackgroundColour), m_ImageWidth(data.ImageWidth), m_SamplesPerPixel(data.SamplesPerPixel), m_MaxBounces(data.MaxBounces) { }
 
 	void Camera::Render(const BaseRayHittable& objects)
 	{
@@ -95,7 +96,7 @@ namespace RTW
 
 		m_Pixel100Location = viewportUpperLeft + 0.5 * (m_PixelDeltaU + m_PixelDeltaV);
 
-		double defocusRadius = m_FocusDistance * std::tan(glm::radians(m_DefocusAngle * 0.5));
+		double defocusRadius = m_FocusDistance * glm::tan(glm::radians(m_DefocusAngle * 0.5));
 		m_DefocusDiskU = m_U * defocusRadius;
 		m_DefocusDiskV = m_V * defocusRadius;
 
@@ -108,31 +109,17 @@ namespace RTW
 			return { 0.0, 0.0, 0.0 };
 
 		HitData data;
-		if (object.IsRayHit(ray, Interval(0.001, doubleInf), data))
-		{
-			Ray newRay;
-			Colour colour;
-			return data.material->Scatter(ray, data, colour, newRay) ?
-				colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
-		}
+		if (!object.IsRayHit(ray, Interval(0.001, doubleInf), data))
+			return m_BackgroundColour;
 
-//		if (object.IsRayHit(ray, Interval(0.001, doubleInf), data))
-//		{
-//			Ray newRay;
-//			Colour colour;
-//			Colour returnColour(0.0);
-//
-//			int16_t maxNewRays = 3;
-//
-//			for (int16_t i = 0; i < maxNewRays; i++)
-//				returnColour += data.material->Scatter(ray, data, colour, newRay) ? colour * RayColour(newRay, bouncesLeft - 1, object) : Colour(0.0);
-//
-//			return returnColour / static_cast<double>(maxNewRays);
-//		}
-			
-		Vec3 normalizedDirection = glm::normalize(ray.direction());
-		double a = 0.5 * (normalizedDirection.y + 1.0);
-		return Colour(1.0 - a) + a * Colour(0.5, 0.7, 1.0);
+		Ray newRay;
+		Colour attenuation{};
+		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
+
+		if (!data.material->Scatter(ray, data, attenuation, newRay))
+			return emittedColour;
+
+		return emittedColour + attenuation * RayColour(newRay, bouncesLeft - 1, object);
 	}
 
 	Ray Camera::CreateRay(int16_t j, int16_t i)

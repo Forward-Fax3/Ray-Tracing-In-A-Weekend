@@ -14,33 +14,41 @@ int main()
 {
 	auto startTime = std::chrono::high_resolution_clock().now();
 
-	double aspectRatio = 16.0 / 9.0;
-	int16_t imageWidth = 1920;
+	RTW::CameraData cameraData{};
 
-//	double FOV = 50.0;
-	double FOV = 80.0;
-//	RTW::Vec3 lookFrom(0.0, 0.0, 1.0);
-//	RTW::Vec3 LookAt(0.0, 0.0, 0.0);
-//	RTW::Vec3 VUp(0.0, 1.0, 0.0);
+//	cameraData.AspectRatio = 16.0 / 9.0;
+	cameraData.AspectRatio = 1.0;
+	cameraData.ImageWidth = 1920;
 
-//	RTW::Vec3 lookFrom(13.0, 2.0, 3.0);
-	RTW::Vec3 lookFrom(0.0, 0.0, 9.0);
-//	RTW::Vec3 lookFrom(1.0, 200.0, 1.0);
-	RTW::Vec3 LookAt(0.0);
-	RTW::Vec3 VUp(0.0, 1.0, 0.0);
+	cameraData.FOV = 40.0;
+//	cameraData.FOV = 50.0;
+//	cameraData.FOV = 80.0;
+//	cameraData.LookFrom = RTW::Point(0.0, 0.0, 1.0);
+//	cameraData.LookAt = RTW::Point(0.0, 0.0, 0.0);
+//	cameraData.VUp = RTW::Point(0.0, 1.0, 0.0);
+
+	cameraData.LookFrom = RTW::Point(278.0, 278.0, -800.0);
+//	cameraData.LookFrom = RTW::Point(13.0, 2.0, 3.0);
+//	cameraData.LookFrom = RTW::Point(0.0, 0.0, 9.0);
+//	cameraData.LookFrom = RTW::Point(1.0, 200.0, 1.0);
+	cameraData.LookAt = RTW::Point(278, 278, 0);
+//	cameraData.LookAt = RTW::Point(0.0);
+	cameraData.VUp = RTW::Vec3(0.0, 1.0, 0.0);
+
+	cameraData.BackgroundColour = RTW::Colour(0.0);
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
-	int16_t samplesPerPixel = 4;
-	int16_t maxBounceDepth = 4;
+	cameraData.SamplesPerPixel = 4;
+	cameraData.MaxBounces = 4;
 #else
-	int16_t samplesPerPixel = 64;
-	int16_t maxBounceDepth = 64; // ridiculously high bounces doesn't seem to have much of an affect on performance
+	cameraData.SamplesPerPixel = 64;
+	cameraData.MaxBounces = 64; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
-	RTW::Vec3 gamma(2.4);
+	cameraData.Gamma = RTW::Vec3(2.4);
 
-	double defocusAngle = 0.0;
-	double focusDistance = 0.0;
+	cameraData.DefocusAngle = 0.0;
+	cameraData.FocusDistance = 0.0;
 
 	[[maybe_unused]] uint32_t numberOfThreads = std::thread::hardware_concurrency();
 //	[[maybe_unused]] uint32_t numberOfThreads = 1;
@@ -49,10 +57,10 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::Parallelograms;
+	RTW::Scenes scene = RTW::Scenes::CornelBox;
 	RTW::SceneSelect(scene, worldHitables);
 
-	RTW::Camera camera(aspectRatio, imageWidth, FOV, defocusAngle, focusDistance, lookFrom, LookAt, VUp, gamma, samplesPerPixel, maxBounceDepth);
+	RTW::Camera camera(cameraData);
 
 	auto finishTime = std::chrono::high_resolution_clock().now();
 	std::clog << "Scene set up took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() <<

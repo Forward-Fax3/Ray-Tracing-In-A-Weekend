@@ -20,20 +20,8 @@ namespace RTW
 //	using UV = glm::vec2;
 	static constexpr double doubleInf = std::numeric_limits<double>::infinity();
 
-	struct UVvec3
-	{
-		UVvec3(Vec3 u, Vec3 v) : u(u), v(v) {}
-
-		union
-		{
-			struct
-			{
-				Vec3 u;
-				Vec3 v;
-			};
-			Vec3 uv[2];
-		};
-	};
+	using UVvec3 = glm::dmat2x3;
+	using UVWvec3 = glm::dmat3;
 
 	Vec3 RandomOnHemisphere(const Vec3& normal);
 

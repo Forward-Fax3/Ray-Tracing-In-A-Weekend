@@ -9,6 +9,7 @@
 #include "Lambertian.h"
 #include "Metal.h"
 #include "Dielectric.h"
+#include "DiffusedLight.h"
 
 #include "BaseTexture.h"
 #include "SolidColour.h"
@@ -57,6 +58,12 @@ namespace RTW
 			return;
 		case Scenes::Parallelograms:
 			Parallelograms(hitables);
+			return;
+		case Scenes::LightTest:
+			LightTest(hitables);
+			return;
+		case Scenes::CornelBox:
+			CornelBox(hitables);
 			return;
 		default:
 			return;
@@ -169,5 +176,30 @@ namespace RTW
 		hittables.add(std::make_shared<Parallelogram>(Point(3, -2, 1), rightUV, rightBlue));
 		hittables.add(std::make_shared<Parallelogram>(Point(-2, 3, 1), topUV, topOrange));
 		hittables.add(std::make_shared<Parallelogram>(Point(-2, -3, 5), bottomUV, bottomTeal));
+	}
+
+	void LightTest(RayHittables& hittables)
+	{
+		std::shared_ptr<BaseTexture> pertext = std::make_shared<MarbleTexture>(4.0);
+		hittables.add(std::make_shared<Sphere>(Point(0.0, -1000.0, 0.0), 1000.0, std::make_shared<Lambertian>(pertext)));
+		hittables.add(std::make_shared<Sphere>(Point(0.0, 2.0, 0), 2.0, std::make_shared<Lambertian>(pertext)));
+
+		auto difflight = std::make_shared<DiffusedLight>(Colour(20.0));
+		hittables.add(std::make_shared<Parallelogram>(Point(3.0, 1.0, -2.0), UVvec3(Vec3(2.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0)), difflight));
+	}
+
+	void CornelBox(RayHittables& hittables)
+	{
+		auto red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
+		auto white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
+		auto green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
+		auto light = std::make_shared<DiffusedLight>(Colour(15, 15, 15));
+
+		hittables.add(std::make_shared<Parallelogram>(Point(555, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), green));
+		hittables.add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), red));
+		hittables.add(std::make_shared<Parallelogram>(Point(343, 554, 332), UVvec3(Vec3(-130, 0, 0), Vec3(0, 0, -105)), light));
+		hittables.add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(555, 0, 0), Vec3(0, 0, 555)), white));
+		hittables.add(std::make_shared<Parallelogram>(Point(555, 555, 555), UVvec3(Vec3(-555, 0, 0), Vec3(0, 0, -555)), white));
+		hittables.add(std::make_shared<Parallelogram>(Point(0, 0, 555), UVvec3(Vec3(555, 0, 0), Vec3(0, 555, 0)), white));
 	}
 }

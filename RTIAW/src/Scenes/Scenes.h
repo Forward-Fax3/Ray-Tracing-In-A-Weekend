@@ -15,6 +15,8 @@ namespace RTW
 		PerlinNoiseSpheres,
 		MarbleSpheres,
 		Parallelograms,
+		LightTest,
+		CornelBox,
 	};
 
 	void SceneSelect(Scenes scene, RayHittables& hitables);
@@ -31,4 +33,8 @@ namespace RTW
 	void MarbleSpheres(RayHittables& hittables);
 
 	void Parallelograms(RayHittables& hittables);
+
+	void LightTest(RayHittables& hittables);
+
+	void CornelBox(RayHittables& hittables);
 }

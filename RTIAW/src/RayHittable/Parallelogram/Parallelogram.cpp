@@ -11,7 +11,7 @@ namespace RTW
 	Parallelogram::Parallelogram(const Point& Q, const UVvec3& uv, const std::shared_ptr<BaseMaterial>& material)
 		: m_Material(material), m_UV(uv), m_Q(Q)
 	{
-		Vec3 n = glm::cross(m_UV.u, m_UV.v);
+		Vec3 n = glm::cross(m_UV[0], m_UV[1]);
 		m_Normal = glm::normalize(n);
 		m_D = glm::dot(m_Normal, m_Q);
 		m_W = n / glm::dot(n, n);
@@ -49,14 +49,14 @@ namespace RTW
 	void Parallelogram::CreateAABB()
 	{
 		AABB AABBs[2] = {
-			{ m_Q, m_Q + m_UV.u + m_UV.v },
-			{ m_Q + m_UV.u, m_Q + m_UV.v}
+			{ m_Q, m_Q + m_UV[0] + m_UV[1]},
+			{ m_Q + m_UV[0], m_Q + m_UV[1]}
 		};
 		m_AABB = AABB(AABBs[0], AABBs[1]);
 	}
 
 	UV Parallelogram::CalculateUV(const Point& p) const
 	{
-		return { glm::dot(m_W, glm::cross(p, m_UV.v)), glm::dot(m_W, glm::cross(m_UV.u, p)) };
+		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p))};
 	}
 }

@@ -7,27 +7,44 @@
 
 namespace RTW
 {
+	struct CameraData
+	{
+		double AspectRatio;
+		double FOV;
+		double DefocusAngle;
+		double FocusDistance;
+		Point LookFrom;
+		Point LookAt;
+		Vec3 VUp;
+		Vec3 Gamma;
+		Colour BackgroundColour;
+		int16_t ImageWidth;
+		int16_t SamplesPerPixel;
+		int16_t MaxBounces;
+	};
+
 	class Camera
 	{
 	public:
+		Camera(const CameraData& data);
 		Camera();
-		Camera(double AspectRatio, int16_t imageWidth, double FOV, double defocusAngle, double focusDistance, Point lookFrom, Point lookAt, Vec3 VUp, Vec3 gamma, int16_t samplesPerPixel, int16_t maxBounces);
 
 		void Render(const BaseRayHittable& objects);
 		void RenderMultiThreaded(const int32_t numberOfThreads, const BaseRayHittable& objects);
 
 		inline void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
 		inline void SetFOV(const double FOV) { m_FOV = FOV; }
-		inline void SetDefocusAngle(const double defocusAngle) { m_DefocusAngle = defocusAngle; }
-		inline void SetFocusDistance(const double focusDistance) { m_FocusDistance = focusDistance; }
+		inline void SetDefocusAngle(const double DefocusAngle) { m_DefocusAngle = DefocusAngle; }
+		inline void SetFocusDistance(const double FocusDistance) { m_FocusDistance = FocusDistance; }
 		inline void SetPosition(const Point position) { m_Position = position; }
-		inline void SetLookFrom(const Point lookFrom) { m_LookFrom = lookFrom; }
-		inline void SetLookAt(const Point lookAt) { m_LookAt = lookAt; }
+		inline void SetLookFrom(const Point LookFrom) { m_LookFrom = LookFrom; }
+		inline void SetLookAt(const Point LookAt) { m_LookAt = LookAt; }
 		inline void SetUp(const Vec3 VUp) { m_VUp = VUp; }
-		inline void SetGamma(const Vec3 gamma) { m_Gamma = gamma; }
-		inline void SetImageWidth(const int16_t imageWidth) { m_ImageWidth = imageWidth; }
-		inline void SetSamplesPerPixel(const int16_t samplesPerPixel) { m_SamplesPerPixel = samplesPerPixel; }
-		inline void SetMaxBounces(const int16_t maxBounces) { m_MaxBounces = maxBounces; }
+		inline void SetGamma(const Vec3 Gamma) { m_Gamma = Gamma; }
+		inline void SetImageWidth(const int16_t ImageWidth) { m_ImageWidth = ImageWidth; }
+		inline void SetSamplesPerPixel(const int16_t SamplesPerPixel) { m_SamplesPerPixel = SamplesPerPixel; }
+		inline void SetMaxBounces(const int16_t MaxBounces) { m_MaxBounces = MaxBounces; }
+		inline void SetBAckgroundColour(const Colour& colour) { m_BackgroundColour = colour; };
 
 	// Private helper functions
 	private:
@@ -56,6 +73,7 @@ namespace RTW
 		Point m_LookAt;
 		Vec3 m_VUp;
 		Vec3 m_Gamma;
+		Colour m_BackgroundColour;
 		int16_t m_ImageWidth;
 		int16_t m_SamplesPerPixel;
 		int16_t m_MaxBounces;
