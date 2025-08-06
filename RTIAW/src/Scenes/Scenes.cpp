@@ -223,10 +223,10 @@ namespace RTW
 		auto difflight = std::make_shared<DiffusedLight>(Colour(20.0));
 		hittables.add(std::make_shared<Parallelogram>(Point(3.0, 1.0, -2.0), UVvec3(Vec3(2.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0)), difflight));
 
-		cameraData.AspectRatio = 1.0;
-		cameraData.FOV = 40.0;
-		cameraData.LookFrom = RTW::Point(278.0, 278.0, -800.0);
-		cameraData.LookAt = RTW::Point(278, 278, 0);
+		cameraData.AspectRatio = 16.0 / 9.0;
+		cameraData.FOV = 20.0;
+		cameraData.LookFrom = RTW::Point(26.0, 3.0, 6.0);
+		cameraData.LookAt = RTW::Point(0.0, 2.0, 0.0);
 		cameraData.BackgroundColour = RTW::Colour(0.0);
 	}
 

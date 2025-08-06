@@ -39,7 +39,7 @@ int main()
 	RTW::RayHittables worldHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::Earth;
+	RTW::Scenes scene = RTW::Scenes::CornelBox;
 	RTW::SceneSelect(scene, worldHitables, cameraData);
 
 	RTW::Camera camera(cameraData);
