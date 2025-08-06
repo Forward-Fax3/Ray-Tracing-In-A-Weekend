@@ -1,5 +1,6 @@
 #pragma once
 #include "RayHittables.h"
+#include "Camera.h"
 
 
 namespace RTW
@@ -19,22 +20,22 @@ namespace RTW
 		CornelBox,
 	};
 
-	void SceneSelect(Scenes scene, RayHittables& hitables);
+	void SceneSelect(Scenes scene, RayHittables& hitables, CameraData& cameraData);
 
 	template <bool t_IsMoving, int t_RangeOfSmallBalls>
-	void CollectionOfSpheres(RayHittables& hitables);
+	void CollectionOfSpheres(RayHittables& hittables, CameraData& cameraData);
 
-	void CheckeredShperes(RayHittables& hittables);
+	void CheckeredShperes(RayHittables& hittables, CameraData& cameraData);
 
-	void Earth(RayHittables& hitables);
+	void Earth(RayHittables& hittables, CameraData& cameraData);
 
-	void PerlinNoiseSpheres(RayHittables& hittables);
+	void PerlinNoiseSpheres(RayHittables& hittables, CameraData& cameraData);
 
-	void MarbleSpheres(RayHittables& hittables);
+	void MarbleSpheres(RayHittables& hittables, CameraData& cameraData);
 
-	void Parallelograms(RayHittables& hittables);
+	void Parallelograms(RayHittables& hittables, CameraData& cameraData);
 
-	void LightTest(RayHittables& hittables);
+	void LightTest(RayHittables& hittables, CameraData& cameraData);
 
-	void CornelBox(RayHittables& hittables);
+	void CornelBox(RayHittables& hittables, CameraData& cameraData);
 }
