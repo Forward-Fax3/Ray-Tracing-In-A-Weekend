@@ -34,8 +34,6 @@ namespace RTW
 		void SingleThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		void MultiThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		void CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit);
-
-		static void multiThreadedCreateNextNodeNoReturn(int id, std::shared_ptr<BaseRayHittable>& childNode, std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, AABB& nextAABB);
 	};
 
 	using SAHNode = SurfaceAreaHeuristicNode;

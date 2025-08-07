@@ -97,7 +97,7 @@ namespace RTW
 			if (bestSplit.axis != AABB::Axis::z)
 			{
 				auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
-				std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
+				std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
 			}
 
 			m_Left = (bestSplit.SplitPosition == 1) ? hittables[start] :
@@ -116,31 +116,33 @@ namespace RTW
 		{
 			m_Left = hittables[start];
 			m_Right = BaseRayHittable::GetNoHit();
+			return;
 		}
-		else if (hittablesRange == 2)
+		if (hittablesRange == 2)
 		{
 			m_Left = hittables[start];
 			m_Right = hittables[start + 1];
+			return;
 		}
-		else
+		
+		BestSplit bestSplit{};
+		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
+
+		if (bestSplit.axis != AABB::Axis::z)
 		{
-			BestSplit bestSplit{};
-			CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
-
-			if (bestSplit.axis != AABB::Axis::z)
-			{
-				auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
-				std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
-			}
-
-			if (bestSplit.SplitPosition == 1)
-				m_Left = hittables[start];
-			else
-				g_Threads.push(SurfaceAreaHeuristicNode::multiThreadedCreateNextNodeNoReturn, std::ref(m_Left), std::ref(hittables), start, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
-
-			m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
-				std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB, true);
+			auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
+			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
 		}
+
+		if (bestSplit.SplitPosition == 1)
+			m_Left = hittables[start];
+		else
+			g_Threads.push([&, start](int, size_t lambdaEnd, AABB lambdaAABB) {
+					m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
+				}, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
+
+		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
+			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB, true);
 	}
 
 	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)
@@ -151,15 +153,15 @@ namespace RTW
 		AABB leftAABB{};
 		AABB rightAABB{};
 
-		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
 		const double invertedIncermentedNumberOsSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
+		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
 
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; axis++)
 		{
 			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis :
 				(axis == AABB::Axis::y) ? CompareBoxYAxis : CompareBoxZAxis;
 
-			std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
+			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
 			{
@@ -191,10 +193,5 @@ namespace RTW
 				}
 			}
 		}
-	}
-
-	void SurfaceAreaHeuristicNode::multiThreadedCreateNextNodeNoReturn([[maybe_unused]] int id, std::shared_ptr<BaseRayHittable>& childNode, std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, AABB& nextAABB)
-	{
-		childNode = std::make_shared<SAHNode>(hittables, start, end, nextAABB, true);
 	}
 }
