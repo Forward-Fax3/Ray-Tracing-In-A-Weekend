@@ -83,29 +83,29 @@ namespace RTW
 		{
 			m_Left = hittables[start];
 			m_Right = BaseRayHittable::GetNoHit();
+			return;
 		}
-		else if (hittablesRange == 2)
+		if (hittablesRange == 2)
 		{
 			m_Left = hittables[start];
 			m_Right = hittables[start + 1];
+			return;
 		}
-		else
+
+		BestSplit bestSplit{};
+		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
+
+		if (bestSplit.axis != AABB::Axis::z)
 		{
-			BestSplit bestSplit{};
-			CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
-
-			if (bestSplit.axis != AABB::Axis::z)
-			{
-				auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
-				std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
-			}
-
-			m_Left = (bestSplit.SplitPosition == 1) ? hittables[start] :
-				std::make_shared<SurfaceAreaHeuristicNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
-
-			m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
-				std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB);
+			auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
+			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
 		}
+
+		m_Left = (bestSplit.SplitPosition == 1) ? hittables[start] :
+			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
+
+		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
+			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB);
 	}
 
 	void SurfaceAreaHeuristicNode::MultiThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
