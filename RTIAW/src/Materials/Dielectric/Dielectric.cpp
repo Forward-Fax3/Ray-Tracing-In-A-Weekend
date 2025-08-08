@@ -18,8 +18,7 @@ namespace RTW
 		double ri = data.isFrontFace ? (1.0 / m_RefractionIndex) : m_RefractionIndex;
 
 		Vec3 normalDirection = glm::normalize(ray.direction());
-//		double cosTheta = glm::min(dot(-normalDirection, data.normal), 1.0);
-		double cosTheta = glm::min(dot(-normalDirection, data.normal), 1.0);
+		double cosTheta = glm::min(glm::dot(-normalDirection, data.normal), 1.0);
 		double sinTheta = glm::sqrt(1.0 - cosTheta * cosTheta);
 
 		Vec3 refracted = ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0) ?

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <type_traits>
+#include <array>
 
 #include "glm/glm.hpp"
 #include "glm/gtx/norm.hpp"
@@ -25,11 +26,11 @@ namespace RTW::Templates
 		inline Sphere<t_IsMoving>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material) requires (t_IsMoving)
 			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material)
 		{
-			AABB box[2] = {
-				{ m_Center.at(0.0) - radius, m_Center.at(0.0) + radius },
-				{ m_Center.at(1.0) - radius, m_Center.at(1.0) + radius }
+			std::array<AABB, 2> box{
+				AABB(m_Center.at(0.0) - radius, m_Center.at(0.0) + radius),
+				AABB(m_Center.at(1.0) - radius, m_Center.at(1.0) + radius)
 			};
-			m_AABB = { box[0], box[1] };
+			m_AABB = AABB(box[0], box[1]);
 		}
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override

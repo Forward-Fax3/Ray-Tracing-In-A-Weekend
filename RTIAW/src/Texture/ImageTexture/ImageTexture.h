@@ -11,9 +11,9 @@ namespace RTW
 	class ImageTexture : public BaseTexture
 	{
 	public:
-		ImageTexture(const std::string& fileName);
+		explicit ImageTexture(const std::string& fileName);
 
-		virtual Colour GetColour(const UV& uv, const Point& point) const override;
+		Colour GetColour(const UV& uv, const Point& point) const override;
 
 	private:
 		ImageLoader m_Image;

@@ -4,6 +4,7 @@
 #include "Parallelogram.h"
 
 #include <memory>
+#include <array>
 
 
 namespace RTW
@@ -48,9 +49,9 @@ namespace RTW
 	
 	void Parallelogram::CreateAABB()
 	{
-		AABB AABBs[2] = {
-			{ m_Q, m_Q + m_UV[0] + m_UV[1]},
-			{ m_Q + m_UV[0], m_Q + m_UV[1]}
+		std::array<AABB, 2> AABBs{
+			AABB(m_Q, m_Q + m_UV[0] + m_UV[1]),
+			AABB(m_Q + m_UV[0], m_Q + m_UV[1])
 		};
 		m_AABB = AABB(AABBs[0], AABBs[1]);
 	}

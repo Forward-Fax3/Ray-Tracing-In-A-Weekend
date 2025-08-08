@@ -13,10 +13,10 @@ namespace RTW
 	class Lambertian : public BaseMaterial
 	{
 	public:
-		Lambertian(const Colour& albedo);
-		Lambertian(std::shared_ptr<BaseTexture> texture);
+		explicit Lambertian(const Colour& albedo);
+		explicit Lambertian(std::shared_ptr<BaseTexture> texture);
 
-		virtual bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
+		bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
 
 	private:
 		std::shared_ptr<BaseTexture> m_Texture;

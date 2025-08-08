@@ -2,7 +2,6 @@
 #include "Core.h"
 
 
-
 namespace RTW
 {
 	class BaseTexture

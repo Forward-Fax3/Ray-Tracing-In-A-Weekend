@@ -13,7 +13,7 @@ namespace RTW
         CheckeredTexture(std::shared_ptr<BaseTexture> even, std::shared_ptr<BaseTexture> odd, double scale = 1.0);
         CheckeredTexture(const Colour& even, const Colour& odd, double scale = 1.0);
 
-        virtual Colour GetColour(const UV& uv, const Point& point) const override;
+        Colour GetColour(const UV& uv, const Point& point) const override;
 
     private:
         std::shared_ptr<BaseTexture> m_Even;

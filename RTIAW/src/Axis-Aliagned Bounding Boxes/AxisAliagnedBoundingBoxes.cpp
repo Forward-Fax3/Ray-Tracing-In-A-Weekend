@@ -12,10 +12,10 @@
 
 namespace RTW
 {
-	std::atomic<size_t> AxisAliagnedBoundingBoxe::s_NumberofBoundingBoxes = 0;
+	std::atomic<size_t> AxisAliagnedBoundingBoxes::s_NumberofBoundingBoxes = 0;
 
-	const AABB AABB::empty = { Interval::Empty };
-	const AABB AABB::univers = { Interval::Univers };
+	const AABB AABB::empty(Interval::Empty);
+	const AABB AABB::univers(Interval::Univers);
 
 #if defined(RTW_AVX512) & (AVX512 == 1)
 	static bool CheckOrderedPairs0To5(__m512d vec) {
@@ -37,13 +37,13 @@ namespace RTW
 	}
 #endif
 
-	AABB::AxisAliagnedBoundingBoxe(const Interval& interval)
+	AABB::AxisAliagnedBoundingBoxes(const Interval& interval)
 		: m_X(interval), m_Y(interval), m_Z(interval) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
-	AABB::AxisAliagnedBoundingBoxe(const Interval& x, const Interval& y, const Interval& z)
+	AABB::AxisAliagnedBoundingBoxes(const Interval& x, const Interval& y, const Interval& z)
 		: m_X(x), m_Y(y), m_Z(z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
-	AABB::AxisAliagnedBoundingBoxe(const Point& a, const Point& b)
+	AABB::AxisAliagnedBoundingBoxes(const Point& a, const Point& b)
 	{
 		s_NumberofBoundingBoxes++;
 		m_X = (a.x <= b.x) ? Interval(a.x, b.x) : Interval(b.x, a.x);
@@ -53,7 +53,7 @@ namespace RTW
 		LongestAxisSetter();
 	}
 
-	AABB::AxisAliagnedBoundingBoxe(const AABB& box0, const AABB& box1)
+	AABB::AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& box0, const AxisAliagnedBoundingBoxes& box1)
 		: m_X(box0.m_X, box1.m_X), m_Y(box0.m_Y, box1.m_Y), m_Z(box0.m_Z, box1.m_Z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	const Interval& AABB::GetAxisInterval(const Axis& axis) const
@@ -193,7 +193,7 @@ namespace RTW
 #error only supports clang and msc
 #endif
 			// store rayT back into scaler rayT
-			const_cast<glm::dvec2&>(rayT.GetAsVector()).data = m128_RayT;
+			rayT.SetMinMax(m128_RayT);
 
 #else // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
 			if (t.x > rayT.GetMin()) 
@@ -209,16 +209,9 @@ namespace RTW
 #endif // RTW_AVX512
 	}
 
-	RTW::AxisAliagnedBoundingBoxe& AxisAliagnedBoundingBoxe::operator=(const AxisAliagnedBoundingBoxe& aabb)
-	{
-		this->m_X = aabb.m_X;
-		this->m_Y = aabb.m_Y;
-		this->m_Z = aabb.m_Z;
-		this->m_LongestAxis = aabb.m_LongestAxis;
-		return *this;
-	}
+	RTW::AxisAliagnedBoundingBoxes& AxisAliagnedBoundingBoxes::operator=(const AxisAliagnedBoundingBoxes& aabb) = default;
 
-	void AxisAliagnedBoundingBoxe::Expand(const AxisAliagnedBoundingBoxe& newAABB)
+	void AxisAliagnedBoundingBoxes::Expand(const AxisAliagnedBoundingBoxes& newAABB)
 	{
 #if (SIMD == 1)
 		__m128d mins = { m_X.GetMin(), m_Y.GetMin() };
@@ -250,14 +243,14 @@ namespace RTW
 		LongestAxisSetter();
 	}
 
-	void AxisAliagnedBoundingBoxe::LongestAxisSetter()
+	void AxisAliagnedBoundingBoxes::LongestAxisSetter()
 	{
 		m_LongestAxis = (m_X.Size() > m_Y.Size()) ?
 					   ((m_X.Size() > m_Z.Size()) ? AABB::Axis::x : AABB::Axis::z) :
 					   ((m_Y.Size() > m_Z.Size()) ? AABB::Axis::y : AABB::Axis::z);
 	}
 
-	void AxisAliagnedBoundingBoxe::MiniumPadding()
+	void AxisAliagnedBoundingBoxes::MiniumPadding()
 	{
 		static constexpr double minium = 1e-4;
 		if (m_X.Size() < minium)

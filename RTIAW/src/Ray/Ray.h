@@ -10,8 +10,8 @@ namespace RTW
 	{
 	public:
 		Ray();
-		Ray(Point origin, Vec3 direction);
-		Ray(Point origin, Vec3 direction, double time);
+		Ray(const Point& origin, const Vec3& direction);
+		Ray(const Point& origin, const Vec3& direction, double time);
 
 		inline const Point& origin() const { return m_Origin; }
 		inline const Vec3& direction() const { return m_Direction; }

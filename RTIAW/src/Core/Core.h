@@ -8,6 +8,7 @@
 
 // globally disable nameless struct warning
 #pragma warning (disable: 4201)
+// @SuppressWarnings("S6232")
 
 
 namespace RTW
@@ -48,14 +49,14 @@ namespace RTW
 //		return out;
 //	}
 
-	inline __mmask8 ScaleBits(__mmask8 in, size_t scale)
+	inline __mmask8 ScaleBits(const __mmask8 in, size_t scale)
 	{
 		unsigned mask = 0x0FF;
 		__mmask8 out = in;
 		constexpr uint8_t N = sizeof(__mmask8) * 2;
 		for (; scale != 0; scale /= 2)
 		{
-			__mmask8 shift = static_cast<__mmask8>(scale * (N - 1));
+			auto shift = static_cast<__mmask8>(scale * (N - 1));
 			mask &= ~(mask << scale);
 			mask |= mask << (scale * N);
 			out = (out | out << shift) & mask;

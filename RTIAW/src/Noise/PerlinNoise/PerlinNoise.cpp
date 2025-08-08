@@ -5,30 +5,33 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
 
+#include <array>
+
 
 namespace RTW
 {
 	PerlinNoise::PerlinNoise()
 	{
-		for (size_t i = 0; i < s_NumberOfPoints; i++)
-			m_RandVec3s[i] = glm::normalize(glm::linearRand(Vec3(-1.0), Vec3(1.0)));
+		std::ranges::for_each(m_RandVec3s, [](Vec3& randVec) {
+			randVec = glm::normalize(glm::linearRand(Vec3(-1.0), Vec3(1.0)));
+		});
 
 		PerlinNoiseGeneratePermute(m_Permutes);
 	}
 
 	double PerlinNoise::Noise(const Point& point) const
 	{
-		Vec3 uvw = point - glm::floor(point);
+		Vec3 uvw(point - glm::floor(point));
 
 		auto indexes = static_cast<glm::vec<3, size_t, glm::defaultp>>(glm::floor(point));
 
-		Vec3 samples[2][2][2]{};
+		std::array<std::array<std::array<Vec3, 2>, 2>, 2> samples{{{}}};
 
 		for (size_t i = 0; i < 2; i++)
 			for (size_t j = 0; j < 2; j++)
 			{
 				glm::vec<4, size_t, glm::defaultp> ijk(i, j, 0, 1);
-				glm::vec<4, size_t, glm::defaultp> tempIndexes(indexes, indexes.z);
+				glm::vec<4, size_t, glm::defaultp> tempIndexes(glm::xyzz(indexes));
 				tempIndexes += ijk;
 
 #if (defined(RTW_AVX2) || defined (RTW_AVX512)) && (__x86_64 || __ppc64__ || _WIN64)
@@ -64,7 +67,7 @@ namespace RTW
 		return glm::abs(accum);
 	}
 
-	double PerlinNoise::PerlinInterpilation(const Vec3 samples[2][2][2], const Vec3& uvw)
+	double PerlinNoise::PerlinInterpilation(const std::array<std::array<std::array<Vec3, 2>, 2>, 2>& samples, const Vec3& uvw)
 	{
 		Vec3 smoothedUVW = uvw * uvw * (3.0 - 2.0 * uvw);
 		glm::dvec4 smoothedUVWW(glm::xyzz(smoothedUVW));
@@ -87,7 +90,7 @@ namespace RTW
 #endif
 
 				double tempMultXY = temp.x * temp.y;
-				Vec3 weightVK[2]{};
+				std::array<Vec3, 2> weightVK{};
 				weightVK[0].data = weightV.data;
 
 #if defined(RTW_AVX2) || defined(RTW_AVX512)
@@ -102,17 +105,17 @@ namespace RTW
 		return accum;
 	}
 
-	void PerlinNoise::PerlinNoiseGeneratePermute(glm::vec<3, size_t, glm::defaultp>* p)
+	void PerlinNoise::PerlinNoiseGeneratePermute(std::array<glm::vec<3, size_t, glm::defaultp>, s_NumberOfPoints>& p)
 	{
 		for (size_t i = 0; i < s_NumberOfPoints; i++)
 			p[i] = glm::vec<3, size_t, glm::defaultp>(i);
 
-		Permute(p, s_NumberOfPoints);
+		Permute(p);
 	}
 
-	void PerlinNoise::Permute(glm::vec<3, size_t, glm::defaultp>* p, size_t n)
+	void PerlinNoise::Permute(std::array<glm::vec<3, size_t, glm::defaultp>, s_NumberOfPoints>& p)
 	{
-		for (size_t i = n - 1; i > 0; i--)
+		for (size_t i = p.size() - 1; i > 0; i--)
 		{
 			glm::vec<3, size_t, glm::defaultp> target = linearRand(glm::vec<3, size_t, glm::defaultp>(0), glm::vec<3, size_t, glm::defaultp>(i));
 			std::swap(p[i].x, p[target.x].x);

@@ -4,9 +4,15 @@
 #include "Ray.h"
 #include "RayHittable.h"
 
+#ifndef _HITDATA
+#include "RayHittable.h"
+#endif
+
 
 namespace RTW
 {
+	struct HitData;
+
 	class BaseMaterial
 	{
 	public:

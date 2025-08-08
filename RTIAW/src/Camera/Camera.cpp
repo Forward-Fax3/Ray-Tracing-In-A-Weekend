@@ -38,7 +38,7 @@ namespace RTW
 				Colour colour(0.0);
 				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 				{
-					Ray ray = CreateRay(j, i);
+					Ray ray = CreateRay(i, j);
 					colour += RayColour(ray, m_MaxBounces, objects);
 				}
 				WriteColour(std::cout, ColourCorrection(colour));
@@ -49,12 +49,13 @@ namespace RTW
 	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const BaseRayHittable& objects)
 	{
 		Init();
-		m_ColourPixelArray = new Colour[m_ImageWidth * m_ImageHeight];
-
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
+		m_ColourPixelArray.reserve(m_NumberOfPixels);
 
 		for (int16_t i = 0; i < numberOfThreads; i++)
-			g_Threads.push(std::bind(&Camera::MultiThreadRenderLoop, this, std::placeholders::_1, i, numberOfThreads, std::cref(objects)));
+			g_Threads.push([this, i, numberOfThreads, &objects](int) {
+				this->MultiThreadRenderLoop(i, numberOfThreads, objects);
+			});
 
 		g_Threads.stop(true); // Waits for all threads to finish.
 
@@ -63,8 +64,6 @@ namespace RTW
 		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
 		for (size_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
-
-		delete[] m_ColourPixelArray;
 	}
 
 	void Camera::Init()
@@ -103,7 +102,7 @@ namespace RTW
 		m_MaxBounces++;
 	}
 
-	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object)
+	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object) const
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
@@ -122,7 +121,7 @@ namespace RTW
 		return emittedColour + attenuation * RayColour(newRay, bouncesLeft - 1, object);
 	}
 
-	Ray Camera::CreateRay(int16_t j, int16_t i)
+	Ray Camera::CreateRay(int16_t i, int16_t j) const
 	{
 		glm::dvec2 offset = SampleSquare() + glm::dvec2(j, i);
 		Vec3 pixelSample = m_Pixel100Location + offset.x * m_PixelDeltaU + offset.y * m_PixelDeltaV;
@@ -134,7 +133,7 @@ namespace RTW
 		return { rayOrigin, rayDirection, rayTime};
 	}
 
-	glm::dvec2 Camera::SampleSquare()
+	glm::dvec2 Camera::SampleSquare() const
 	{
 		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
 	}
@@ -145,12 +144,12 @@ namespace RTW
 		return m_Position + point.x * m_DefocusDiskU + point.y * m_DefocusDiskV;
 	}
 
-	Colour Camera::ColourCorrection(const Colour colour) const
+	Colour Camera::ColourCorrection(const Colour& colour) const
 	{
 		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
-	void Camera::MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const BaseRayHittable& object)
+	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const BaseRayHittable& object)
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
@@ -160,7 +159,7 @@ namespace RTW
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 			{
-				Ray ray = CreateRay(i % m_ImageWidth, static_cast<int16_t>(i / m_ImageWidth));
+				Ray ray = CreateRay(static_cast<int16_t>(i / m_ImageWidth), i % m_ImageWidth);
 				colour += RayColour(ray, m_MaxBounces, object);
 			}
 			m_ColourPixelArray[i] = ColourCorrection(colour);

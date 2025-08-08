@@ -20,11 +20,6 @@ namespace RTW
 		std::cerr << "Unable to open file: " << fileName << '.' << std::flush;
 	}
 
-	ImageLoader::~ImageLoader()
-	{
-		delete[] m_Colours;
-	}
-
 	bool ImageLoader::Load(const std::string& filePath)
 	{
 		stbi_set_flip_vertically_on_load(true);
@@ -36,13 +31,13 @@ namespace RTW
 		if (data == nullptr) return false;
 
 		m_ImageSize = tempSizes;
-		m_Colours = new Colour[m_ImageSize.x * m_ImageSize.y];
+		m_Colours.reserve(m_ImageSize.x * m_ImageSize.y);
 		
 		for (size_t i = 0, j = 0; j < m_ImageSize.x * m_ImageSize.y * 3; i++, j += 3)
 		{
 			m_Colours[i].r = data[j + 0];
 			m_Colours[i].g = data[j + 1];
-			m_Colours[i].b = data[j + 2]; 
+			m_Colours[i].b = data[j + 2];
 		}
 
 		STBI_FREE(data);
@@ -54,6 +49,6 @@ namespace RTW
 	const Colour& ImageLoader::GetPixelColour(glm::i64vec2 pixelCoordinates) const
 	{
 		static const Colour errorMegenta(1.0, 0.0, 1.0);
-		return (m_Colours != nullptr) ? m_Colours[m_NumberOfPixelsPerScanline * pixelCoordinates.y + pixelCoordinates.x] : errorMegenta;
+		return (m_Colours.empty()) ? m_Colours[m_NumberOfPixelsPerScanline * pixelCoordinates.y + pixelCoordinates.x] : errorMegenta;
 	}
 }

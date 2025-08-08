@@ -10,10 +10,10 @@ namespace RTW
     class DiffusedLight :  public BaseMaterial
     {
     public:
-        DiffusedLight(const std::shared_ptr<BaseTexture>& texture);
-        DiffusedLight(const Colour& colour);
+        explicit DiffusedLight(const std::shared_ptr<BaseTexture>& texture);
+        explicit DiffusedLight(const Colour& colour);
 
-        virtual Colour EmittedColour(const UV& uv, const Point& point) const override;
+        Colour EmittedColour(const UV& uv, const Point& point) const override;
 
     private:
         std::shared_ptr<BaseTexture> m_Texture;

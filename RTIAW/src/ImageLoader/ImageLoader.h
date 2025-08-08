@@ -7,6 +7,7 @@
 #include <string_view>
 
 #include <cstdint>
+#include <vector>
 
 
 namespace RTW
@@ -15,8 +16,8 @@ namespace RTW
 	{
 	public:
 		ImageLoader() = delete;
-		ImageLoader(const std::string& fileName);
-		~ImageLoader();
+		explicit ImageLoader(const std::string& fileName);
+		~ImageLoader() = default;
 
 		bool Load(const std::string& filePath);
 
@@ -28,6 +29,6 @@ namespace RTW
 	private:
 		glm::u64vec2 m_ImageSize = glm::u64vec2(0);
 		size_t m_NumberOfPixelsPerScanline = 0;
-		Colour* m_Colours = nullptr;
+		std::vector<Colour> m_Colours;
 	};
 }

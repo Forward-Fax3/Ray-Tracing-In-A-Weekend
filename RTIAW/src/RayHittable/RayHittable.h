@@ -1,4 +1,5 @@
 #pragma once
+#define _HITDATA
 #include <memory>
 
 #include "glm/glm.hpp"
@@ -7,6 +8,10 @@
 #include "Interval.h"
 #include "AxisAliagnedBoundingBoxes.h"
 #include "Ray.h"
+
+#ifndef _BaseMaterial
+#include "BaseMaterial.h"
+#endif
 
 
 namespace RTW
@@ -40,7 +45,7 @@ namespace RTW
 
 		virtual const AABB& GetBoundingBox() const = 0;
 
-		static inline std::shared_ptr<BaseRayHittable>& GetNoHit();
+		static std::shared_ptr<BaseRayHittable>& GetNoHit();
 	};
 
 	class RayNoHit : public BaseRayHittable
@@ -48,9 +53,9 @@ namespace RTW
 	public:
 		RayNoHit() = default;
 
-		virtual bool IsRayHit([[maybe_unused]] const Ray& ray, [[maybe_unused]] const Interval& rayDistance, [[maybe_unused]] HitData& hitData) const override { return false; }
+		bool IsRayHit([[maybe_unused]] const Ray& ray, [[maybe_unused]] const Interval& rayDistance, [[maybe_unused]] HitData& hitData) const override { return false; }
 
-		virtual const AABB& GetBoundingBox() const override { return AABB::empty; }
+		const AABB& GetBoundingBox() const override { return AABB::empty; }
 
 		static inline std::shared_ptr<BaseRayHittable>& GetNoHit() { return s_NoHit; }
 
@@ -61,7 +66,3 @@ namespace RTW
 
 	inline std::shared_ptr<BaseRayHittable>& BaseRayHittable::GetNoHit() { return RayNoHit::s_NoHit; }
 }
-
-#if !defined(_BaseMaterial)
-#include "BaseMaterial.h"
-#endif

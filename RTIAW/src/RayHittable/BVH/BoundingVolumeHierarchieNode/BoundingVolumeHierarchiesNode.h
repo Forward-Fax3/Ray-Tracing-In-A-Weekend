@@ -13,7 +13,7 @@ namespace RTW
 	class BoundingVolumeHierarchiesNode : public BVHBase
 	{
 	public:
-		BoundingVolumeHierarchiesNode(RayHittables& hittables);
+		explicit BoundingVolumeHierarchiesNode(RayHittables& hittables);
 		BoundingVolumeHierarchiesNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 	};
 

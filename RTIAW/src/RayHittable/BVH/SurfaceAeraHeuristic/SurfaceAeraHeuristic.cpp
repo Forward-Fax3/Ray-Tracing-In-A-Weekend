@@ -50,9 +50,6 @@ namespace RTW
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
 
-		//		s_MainThreadID = std::this_thread::get_id();
-		//		s_Threads.resize(numberOfThreads - 1);
-
 		MultiThreadedCalculateBVH(hittables, start, end);
 
 		while (g_Threads.n_idle() != static_cast<int>(std::thread::hardware_concurrency()))
@@ -61,7 +58,7 @@ namespace RTW
 		currentDepth--;
 	}
 
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, AABB& thisAABB, bool isMultithreaded /*= false*/)
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
 	{
 		m_AABB = thisAABB;
 		currentDepth++;
@@ -137,7 +134,7 @@ namespace RTW
 		if (bestSplit.SplitPosition == 1)
 			m_Left = hittables[start];
 		else
-			g_Threads.push([&, start](int, size_t lambdaEnd, AABB lambdaAABB) {
+			g_Threads.push([this, &hittables, start](int, size_t lambdaEnd, AABB lambdaAABB) {
 					m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
 				}, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
 
@@ -145,10 +142,9 @@ namespace RTW
 			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB, true);
 	}
 
-	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)
+	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit) const
 	{
 		const size_t numberOfSplits = glm::min(glm::max(static_cast<size_t>(512), static_cast<size_t>(glm::sqrt(hittablesRange))), hittablesRange - 1);
-		//		const size_t numberOfSplits = hittablesRange - 1;
 
 		AABB leftAABB{};
 		AABB rightAABB{};
@@ -156,7 +152,7 @@ namespace RTW
 		const double invertedIncermentedNumberOsSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
 		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
 
-		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; axis++)
+		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{
 			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis :
 				(axis == AABB::Axis::y) ? CompareBoxYAxis : CompareBoxZAxis;
@@ -168,20 +164,20 @@ namespace RTW
 				leftAABB = AABB::empty;
 				rightAABB = AABB::empty;
 
-				size_t splitPosition = static_cast<size_t>((static_cast<double>(split) * static_cast<double>(hittablesRange)) * invertedIncermentedNumberOsSplits);
+				auto splitPosition = static_cast<size_t>((static_cast<double>(split) * static_cast<double>(hittablesRange)) * invertedIncermentedNumberOsSplits);
 
 				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
 					leftAABB.Expand((*i)->GetBoundingBox());
 				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
 					rightAABB.Expand((*i)->GetBoundingBox());
 
-				double leftSufaceArea = leftAABB.GetSurfaceArea();
+				double leftSurfaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();
 
-				double leftNumberOfItems = static_cast<double>(splitPosition);
-				double rightNumbeOfItems = static_cast<double>(hittablesRange - splitPosition);
+				auto leftNumberOfItems = static_cast<double>(splitPosition);
+				auto rightNumberOfItems = static_cast<double>(hittablesRange - splitPosition);
 
-				double cost = 0.25 + (leftNumberOfItems * leftSufaceArea + rightNumbeOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
+				double cost = 0.25 + (leftNumberOfItems * leftSurfaceArea + rightNumberOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
 
 				if (cost < bestSplit.Cost)
 				{

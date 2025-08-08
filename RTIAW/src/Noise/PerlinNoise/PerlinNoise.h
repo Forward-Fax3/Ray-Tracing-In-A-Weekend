@@ -2,26 +2,30 @@
 #include "Core.h"
 #include "BaseNoise.h"
 
+#include <array>
+
 
 namespace RTW
 {
 	class PerlinNoise : public BaseNoise
 	{
+	private:
+		static constexpr size_t s_NumberOfPoints = 256;
+
 	public:
 		PerlinNoise();
 		~PerlinNoise() override = default;
 
-		virtual double Noise(const Point& point) const override;
-		virtual double Turbulation(const Point& point, size_t depth) const override;
+		double Noise(const Point& point) const override;
+		double Turbulation(const Point& point, size_t depth) const override;
 
 	private:
-		static double PerlinInterpilation(const Vec3 samples[2][2][2], const Vec3& cords);
-		static void PerlinNoiseGeneratePermute(glm::vec<3, size_t, glm::defaultp>* p);
-		static void Permute(glm::vec<3, size_t, glm::defaultp>* p, size_t n);
+		static double PerlinInterpilation(const std::array<std::array<std::array<Vec3, 2>, 2>, 2>& samples, const Vec3& cords);
+		static void PerlinNoiseGeneratePermute(std::array<glm::vec<3, size_t, glm::defaultp>, s_NumberOfPoints>& p);
+		static void Permute(std::array<glm::vec<3, size_t, glm::defaultp>, s_NumberOfPoints>& p);
 
 	private:
-		static constexpr size_t s_NumberOfPoints = 256;
-		Vec3 m_RandVec3s[s_NumberOfPoints];
-		glm::vec<3, size_t, glm::defaultp> m_Permutes[s_NumberOfPoints];
+		std::array<Vec3, s_NumberOfPoints> m_RandVec3s;
+		std::array<glm::vec<3, size_t, glm::defaultp>, s_NumberOfPoints> m_Permutes;
 	};
 }

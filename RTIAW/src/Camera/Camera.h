@@ -4,6 +4,8 @@
 #include "Ray.h"
 #include "RayHittable.h"
 
+#include <vector>
+
 
 namespace RTW
 {
@@ -26,7 +28,7 @@ namespace RTW
 	class Camera
 	{
 	public:
-		Camera(const CameraData& data);
+		explicit Camera(const CameraData& data);
 		Camera();
 
 		void Render(const BaseRayHittable& objects);
@@ -36,11 +38,11 @@ namespace RTW
 		inline void SetFOV(const double FOV) { m_FOV = FOV; }
 		inline void SetDefocusAngle(const double DefocusAngle) { m_DefocusAngle = DefocusAngle; }
 		inline void SetFocusDistance(const double FocusDistance) { m_FocusDistance = FocusDistance; }
-		inline void SetPosition(const Point position) { m_Position = position; }
-		inline void SetLookFrom(const Point LookFrom) { m_LookFrom = LookFrom; }
-		inline void SetLookAt(const Point LookAt) { m_LookAt = LookAt; }
-		inline void SetUp(const Vec3 VUp) { m_VUp = VUp; }
-		inline void SetGamma(const Vec3 Gamma) { m_Gamma = Gamma; }
+		inline void SetPosition(const Point& position) { m_Position = position; }
+		inline void SetLookFrom(const Point& LookFrom) { m_LookFrom = LookFrom; }
+		inline void SetLookAt(const Point& LookAt) { m_LookAt = LookAt; }
+		inline void SetUp(const Vec3& VUp) { m_VUp = VUp; }
+		inline void SetGamma(const Vec3& Gamma) { m_Gamma = Gamma; }
 		inline void SetImageWidth(const int16_t ImageWidth) { m_ImageWidth = ImageWidth; }
 		inline void SetSamplesPerPixel(const int16_t SamplesPerPixel) { m_SamplesPerPixel = SamplesPerPixel; }
 		inline void SetMaxBounces(const int16_t MaxBounces) { m_MaxBounces = MaxBounces; }
@@ -50,14 +52,14 @@ namespace RTW
 	private:
 		void Init();
 
-		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object);
-		Ray CreateRay(int16_t i, int16_t j);
-		glm::dvec2 SampleSquare();
+		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object) const;
+		Ray CreateRay(int16_t i, int16_t j) const;
+		glm::dvec2 SampleSquare() const;
 		Point DefocusDiskSample() const;
 
-		inline Colour ColourCorrection(const Colour colour) const;
+		inline Colour ColourCorrection(const Colour& colour) const;
 
-		void MultiThreadRenderLoop([[maybe_unused]] int id, size_t offset, size_t increment, const BaseRayHittable& object);
+		void MultiThreadRenderLoop(size_t offset, size_t increment, const BaseRayHittable& object);
 
 	// Private Variables
 	private:
@@ -82,7 +84,7 @@ namespace RTW
 		int16_t m_ImageHeight = 0;
 		double m_SampleScale = 0.0;
 		size_t m_NumberOfPixels = 0;
-		Colour* m_ColourPixelArray = nullptr;
+		std::vector<Colour> m_ColourPixelArray;
 		Point m_Pixel100Location = Point(0.0);
 		Vec3 m_PixelDeltaU = Vec3(0.0);
 		Vec3 m_PixelDeltaV = Vec3(0.0);

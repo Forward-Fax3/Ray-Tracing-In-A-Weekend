@@ -14,9 +14,9 @@ namespace RTW
 		Parallelogram(const Point& Q, const UVvec3& uv, const std::shared_ptr<BaseMaterial>& material);
 		~Parallelogram() override = default;
 
-		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
+		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
-		virtual const AABB& GetBoundingBox() const override { return m_AABB; }
+		const AABB& GetBoundingBox() const override { return m_AABB; }
 
 	private:
 		void CreateAABB();

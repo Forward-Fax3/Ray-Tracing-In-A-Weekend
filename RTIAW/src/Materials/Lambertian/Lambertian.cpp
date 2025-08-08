@@ -12,8 +12,8 @@ namespace RTW
 {
 	inline static bool operator<(const Vec3& lhs, const double rhs)
 	{
-		Vec3 abslhs = glm::abs(lhs);
-		return abslhs.x < rhs && abslhs.y < rhs && abslhs.z < rhs;
+		Vec3 abslhs(glm::abs(lhs));
+		return (abslhs.x < rhs) && (abslhs.y < rhs) && (abslhs.z < rhs);
 	}
 
 	Lambertian::Lambertian(const Colour& albedo)
