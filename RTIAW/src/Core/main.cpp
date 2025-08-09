@@ -36,11 +36,11 @@ int main()
 //	[[maybe_unused]] uint32_t numberOfThreads = 1;
 	RTW::g_Threads.resize(numberOfThreads);
 
-	RTW::RayHittables worldHitables;
+	std::shared_ptr<RTW::RayHittables> sceneHitables;
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::Earth;
-	RTW::SceneSelect(scene, worldHitables, cameraData);
+	RTW::Scenes scene = RTW::Scenes::PerlinNoiseSpheres;
+	RTW::SceneSelect(scene, *sceneHitables, cameraData); // TODO: make SceneSelect take a std::shared_ptr<RTW::RayHittables> instead of RTW::RayHittables&
 
 	RTW::Camera camera(cameraData);
 
@@ -49,25 +49,28 @@ int main()
 		" seconds\nNumberOfBoundingBoxes: " << RTW::AABB::GetNumberofBBs() << ".\n";
 	startTime = std::chrono::high_resolution_clock::now();
 
-	if (worldHitables.size() > 1)
+	std::shared_ptr<RTW::BaseRayHittable> worldHittables;
+
+	if (sceneHitables->size() > 1)
 	{
-//		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::BVHNode>(worldHitables);
-		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables);
-//		std::shared_ptr<RTW::BaseRayHittable> BVHWorldHitables = std::make_shared<RTW::SAHNode>(worldHitables, numberOfThreads);
-		worldHitables.clear();
-		worldHitables.add(BVHWorldHitables);
+//		worldHittables = std::make_shared<RTW::BVHNode>(sceneHitables);
+		worldHittables = std::make_shared<RTW::SAHNode>(sceneHitables);
+//		worldHittables = std::make_shared<RTW::SAHNode>(sceneHitables, numberOfThreads);
+		sceneHitables->clear();
 
 		finishTime = std::chrono::high_resolution_clock::now();
 		std::clog << "BVH set up took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds\n";
 		startTime = std::chrono::high_resolution_clock::now();
 	}
+	else
+		worldHittables = sceneHitables;
 
-//	camera.Render(worldHitables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHitables);
+	camera.Render(*sceneHitables); // TODO: same as about but for render
+//	camera.RenderMultiThreaded(*numberOfThreads, sceneHitables);
 
 	finishTime = std::chrono::high_resolution_clock::now();
 
 	std::clog << "\rRay tracing time Took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
-	worldHitables.clear();
+	sceneHitables->clear();
 	std::cin.get();
 }

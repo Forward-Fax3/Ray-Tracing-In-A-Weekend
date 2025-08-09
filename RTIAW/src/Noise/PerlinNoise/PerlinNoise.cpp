@@ -77,7 +77,7 @@ namespace RTW
 			for (size_t j = 0; j < 2; j++)
 			{
 				glm::dvec4 ijk(static_cast<double>(i), static_cast<double>(j), 0.0, 1.0);
-				glm::dvec4 weightV(glm::dvec4(uvw, uvw.z) - ijk);
+				glm::dvec4 weightV(glm::xyzz(uvw) - ijk);
 
 #if defined(RTW_AVX2) || defined(RTW_AVX512) && !defined(__clang__) // clang optimizes better with the simple version
 				static const __m256d temp1_256bit = _mm256_set1_pd(1.0);
