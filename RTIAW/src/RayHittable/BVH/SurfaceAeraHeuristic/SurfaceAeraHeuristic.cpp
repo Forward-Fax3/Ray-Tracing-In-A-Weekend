@@ -170,6 +170,8 @@ namespace RTW
 					leftAABB.Expand((*i)->GetBoundingBox());
 				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
 					rightAABB.Expand((*i)->GetBoundingBox());
+				for (size_t i = start + splitPosition; i < end; i++)
+					rightAABB = { rightAABB, hittables[i]->GetBoundingBox() };
 
 				double leftSurfaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();
