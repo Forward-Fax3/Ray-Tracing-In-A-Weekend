@@ -63,7 +63,7 @@ namespace RTW
 		m_AABB = thisAABB;
 
 		for (size_t i = start; i < end; i++)
-			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
+			m_AABB.Expand(hittables[i]->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -162,20 +162,17 @@ namespace RTW
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
 			{
-				leftAABB = AABB::empty;
-				rightAABB = AABB::empty;
+				leftAABB = rightAABB = AABB(Interval::Empty);
 
 				auto splitPosition = static_cast<size_t>(static_cast<double>(split) * static_cast<double>(hittablesRange) * invertedIncermentedNumberOfSplits);
 
-//				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
-//					leftAABB.Expand((*i)->GetBoundingBox());
-//				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
-//					rightAABB.Expand((*i)->GetBoundingBox());
+				[[unlikely]] if (axis == AABB::Axis::x && splitPosition == 2)
+					__debugbreak();
 
-				for (size_t i = start; i < splitPosition; i++)
-					leftAABB = { leftAABB, hittables[i]->GetBoundingBox() };
-				for (size_t i = start + splitPosition; i < end; i++)
-					rightAABB = { rightAABB, hittables[i]->GetBoundingBox() };
+				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
+					leftAABB.Expand((*i)->GetBoundingBox());
+				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
+					rightAABB.Expand((*i)->GetBoundingBox());
 
 				double leftSurfaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();

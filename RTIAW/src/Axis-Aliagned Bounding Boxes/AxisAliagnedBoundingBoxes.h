@@ -24,13 +24,15 @@ namespace RTW
 
 		AxisAliagnedBoundingBoxes& operator=(const AxisAliagnedBoundingBoxes& aabb);
 
+		bool IsBigger(const AxisAliagnedBoundingBoxes& otherAABB) const;
+
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
 		bool IsHit(const Ray& ray, Interval rayT) const;
 
 		void Expand(const AxisAliagnedBoundingBoxes& newAABB);
 
-		double GetSurfaceArea() const { return 2.0 * (m_X.Size() * m_Y.Size() + m_X.Size() * m_Z.Size() + m_Y.Size() * m_Z.Size()); }
+		inline double GetSurfaceArea() const { return 2.0 * (m_X.Size() * m_Y.Size() + m_X.Size() * m_Z.Size() + m_Y.Size() * m_Z.Size()); }
 
 		AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
 

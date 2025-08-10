@@ -23,7 +23,7 @@ int main()
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 64;
+	cameraData.SamplesPerPixel = 8;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -33,13 +33,12 @@ int main()
 	cameraData.FocusDistance = 0.0;
 
 	[[maybe_unused]] uint32_t numberOfThreads = std::thread::hardware_concurrency();
-//	[[maybe_unused]] uint32_t numberOfThreads = 1;
 	RTW::g_Threads.resize(numberOfThreads);
 
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::Parallelograms;
+	RTW::Scenes scene = RTW::Scenes::CornelBox;
 	RTW::SceneSelect(scene, *sceneHitables, cameraData); // TODO: make SceneSelect take a std::shared_ptr<RTW::RayHittables> instead of RTW::RayHittables&
 
 	RTW::Camera camera(cameraData);
