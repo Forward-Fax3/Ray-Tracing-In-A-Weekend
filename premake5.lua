@@ -123,6 +123,8 @@ project "RTIAW"
 		}
 		optimize "Off"
 		symbols "On"
+		inlining "Explicit"
+		linktimeoptimization "Off"
 	
 	filter { "configurations:Release" }
 		runtime "Release"

@@ -74,7 +74,12 @@ namespace RTW::Templates
 			return true;
 		}
 
-		inline virtual const AABB& GetBoundingBox() const override { return m_AABB; }
+		inline const AABB& GetBoundingBox() const override { return m_AABB; }
+		inline void SetBoundingBox(const AABB& newAABB) override
+		{
+			if (newAABB.IsBigger(this->m_AABB))
+				m_AABB = newAABB;
+		}
 
 	private:
 		static inline UV GetUV(const Point& point)

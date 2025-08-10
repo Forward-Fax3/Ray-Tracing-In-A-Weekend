@@ -35,15 +35,7 @@ namespace RTW
 				glm::vec<4, glm::int64, glm::defaultp> ijk(i, j, 0, 1);
 				glm::vec<4, glm::int64, glm::defaultp> tempIndexes(glm::xyzz(indexes));
 				tempIndexes += ijk;
-
-#if (defined(RTW_AVX2) || defined (RTW_AVX512)) && SIMD
-				tempIndexes.data = _mm256_and_si256(tempIndexes.data, _mm256_set1_epi64x(s_NumberOfPoints - 1));
-#elif defined(RTW_SSE2) && SIMD
-				tempIndexes.data.setv(0, _mm_and_si128(tempIndexes.data.getv(0), glm::vec<2, size_t, glm::defaultp>(s_NumberOfPoints - 1).data));
-				tempIndexes.data.setv(1, _mm_and_si128(tempIndexes.data.getv(1), glm::vec<2, size_t, glm::defaultp>(s_NumberOfPoints - 1).data));
-#else
 				tempIndexes = tempIndexes & (static_cast<glm::int64>(s_NumberOfPoints) - 1);
-#endif
 
 				size_t doublsIndex = m_Permutes[tempIndexes.x].x ^ m_Permutes[tempIndexes.y].y;
 
