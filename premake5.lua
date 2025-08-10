@@ -10,7 +10,7 @@ newoption
 }
 
 workspace "RTIAW"
-	architecture "x64"
+	architecture "x86_64"
 
 	configurations
 	{
@@ -25,6 +25,8 @@ workspace "RTIAW"
 		"AVX2",
 		"SSE2"
 	}
+
+	floatingpoint "strict"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
@@ -133,6 +135,8 @@ project "RTIAW"
 		}
 		optimize "Speed"
 		symbols "On"
+		inlining "auto"
+		linktimeoptimization "On"
 
 	filter { "configurations:Dist" }
 		runtime "Release"
@@ -145,6 +149,8 @@ project "RTIAW"
 		linktimeoptimization "on"
 		optimize "Speed"
 		symbols "Off"
+		inlining "auto"
+		linktimeoptimization "On"
 	
 	filter { "platforms:AVX512" }
 --		vectorextensions "AVX512" currently not supported need to use buildoptions instead

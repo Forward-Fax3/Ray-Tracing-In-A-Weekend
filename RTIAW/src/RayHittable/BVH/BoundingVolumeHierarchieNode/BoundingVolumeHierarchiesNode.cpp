@@ -25,8 +25,8 @@ namespace RTW
 	{
 		m_AABB = AABB::empty;
 
-		for (size_t i = start; i < end; i++)
-			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
+		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
+			m_AABB.Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -37,26 +37,27 @@ namespace RTW
 		{
 			m_Left = hittables[start];
 			m_Right = BaseRayHittable::GetNoHit();
+			currentDepth--;
+			return;
 		}
-		else if (hittablesRange == 2)
+		if (hittablesRange == 2)
 		{
 			m_Left = hittables[start];
 			m_Right = hittables[start + 1];
+			currentDepth--;
+			return;
 		}
-		else
-		{
-			AABB::Axis axis = m_AABB.LongestAxis();
 
-			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis
-									: (axis == AABB::Axis::y) ? CompareBoxYAxis
-									: CompareBoxZAxis;
+		AABB::Axis axis = m_AABB.LongestAxis();
 
-			std::sort(std::begin(hittables) + start, std::begin(hittables) + end, compartionFunction);
+		std::sort(std::begin(hittables) + start, std::begin(hittables) + end, [axis](auto boxA, auto boxB) -> bool {
+			return BoxComparison(boxA, boxB, axis);
+		});
 
-			size_t midPoint = start + hittablesRange / 2;
-			m_Left = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, start, midPoint);
-			m_Right = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, midPoint, end);
-		}
+		size_t midPoint = start + hittablesRange / 2;
+		m_Left = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, start, midPoint);
+		m_Right = std::make_shared<BoundingVolumeHierarchiesNode>(hittables, midPoint, end);
+
 		currentDepth--;
 	}
 }

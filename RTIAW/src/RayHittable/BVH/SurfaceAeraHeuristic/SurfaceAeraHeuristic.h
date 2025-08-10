@@ -13,7 +13,7 @@ namespace RTW
 	class SurfaceAreaHeuristicNode : public BVHBase
 	{
 	public:
-		SurfaceAreaHeuristicNode(RayHittables& hittables);
+		explicit SurfaceAreaHeuristicNode(RayHittables& hittables);
 		SurfaceAreaHeuristicNode(RayHittables& hittables, size_t numberOfThreads);
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t numberOfThreads);

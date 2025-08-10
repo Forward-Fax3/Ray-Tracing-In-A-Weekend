@@ -210,7 +210,8 @@ namespace RTW
 	}
 
 	RTW::AxisAliagnedBoundingBoxes& AxisAliagnedBoundingBoxes::operator=(const AxisAliagnedBoundingBoxes& aabb) = default;
-
+#undef SIMD
+#define SIMD 0
 	void AxisAliagnedBoundingBoxes::Expand(const AxisAliagnedBoundingBoxes& newAABB)
 	{
 #if (SIMD == 1)

@@ -61,6 +61,10 @@ namespace RTW
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
 	{
 		m_AABB = thisAABB;
+
+		for (size_t i = start; i < end; i++)
+			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
+
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
 
@@ -92,11 +96,10 @@ namespace RTW
 		BestSplit bestSplit{};
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::z)
-		{
-			auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
-			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
-		}
+		if (bestSplit.axis != AABB::Axis::x)
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
+				return BoxComparison(boxA, boxB, axis);
+			});
 
 		m_Left = (bestSplit.SplitPosition == 1) ? hittables[start] :
 			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
@@ -125,17 +128,16 @@ namespace RTW
 		BestSplit bestSplit{};
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::z)
-		{
-			auto compartionFunction = (bestSplit.axis == AABB::Axis::x) ? CompareBoxXAxis : CompareBoxYAxis;
-			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
-		}
+		if (bestSplit.axis != AABB::Axis::x)
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
+				return BoxComparison(boxA, boxB, axis);
+			});
 
 		if (bestSplit.SplitPosition == 1)
 			m_Left = hittables[start];
 		else
 			g_Threads.push([this, &hittables, start](int, size_t lambdaEnd, AABB lambdaAABB) {
-					m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
+					this->m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
 				}, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
 
 		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
@@ -149,27 +151,31 @@ namespace RTW
 		AABB leftAABB{};
 		AABB rightAABB{};
 
-		const double invertedIncermentedNumberOsSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
+		const double invertedIncermentedNumberOfSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
 		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
 
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{
-			auto compartionFunction = (axis == AABB::Axis::x) ? CompareBoxXAxis :
-				(axis == AABB::Axis::y) ? CompareBoxYAxis : CompareBoxZAxis;
-
-			std::sort(hittables.begin() + start, hittables.begin() + end, compartionFunction);
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis](auto boxA, auto boxB) -> bool {
+				return BoxComparison(boxA, boxB, axis);
+			});
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
 			{
 				leftAABB = AABB::empty;
 				rightAABB = AABB::empty;
 
-				auto splitPosition = static_cast<size_t>((static_cast<double>(split) * static_cast<double>(hittablesRange)) * invertedIncermentedNumberOsSplits);
+				auto splitPosition = static_cast<size_t>(static_cast<double>(split) * static_cast<double>(hittablesRange) * invertedIncermentedNumberOfSplits);
 
-				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
-					leftAABB.Expand((*i)->GetBoundingBox());
-				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
-					rightAABB.Expand((*i)->GetBoundingBox());
+//				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
+//					leftAABB.Expand((*i)->GetBoundingBox());
+//				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
+//					rightAABB.Expand((*i)->GetBoundingBox());
+
+				for (size_t i = start; i < splitPosition; i++)
+					leftAABB = { leftAABB, hittables[i]->GetBoundingBox() };
+				for (size_t i = start + splitPosition; i < end; i++)
+					rightAABB = { rightAABB, hittables[i]->GetBoundingBox() };
 
 				double leftSurfaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();

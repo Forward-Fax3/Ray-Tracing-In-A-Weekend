@@ -49,7 +49,7 @@ namespace RTW
 		return true;
 	}
 
-	const Colour& ImageLoader::GetPixelColour(glm::i64vec2 pixelCoordinates) const
+	const Colour& ImageLoader::GetPixelColour(glm::u64vec2 pixelCoordinates) const
 	{
 		static const Colour errorMegenta(1.0, 0.0, 1.0);
 		return (m_Colours.empty()) ? m_Colours[m_NumberOfPixelsPerScanline * pixelCoordinates.y + pixelCoordinates.x] : errorMegenta;

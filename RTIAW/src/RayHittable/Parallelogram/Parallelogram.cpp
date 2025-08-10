@@ -9,7 +9,7 @@
 
 namespace RTW
 {
-	Parallelogram::Parallelogram(const Point& Q, const UVvec3& uv, const std::shared_ptr<BaseMaterial>& material)
+	Parallelogram::Parallelogram(const Point& Q, const UVvec3& uv, std::shared_ptr<BaseMaterial> material)
 		: m_Material(material), m_UV(uv), m_Q(Q)
 	{
 		Vec3 n = glm::cross(m_UV[0], m_UV[1]);

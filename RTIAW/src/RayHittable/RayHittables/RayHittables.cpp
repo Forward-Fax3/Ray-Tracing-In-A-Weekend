@@ -16,7 +16,7 @@ namespace RTW
 		bool hasHit = false;
 		Interval tempRayDist(rayDistance);
 
-		for (const std::shared_ptr<BaseRayHittable>& object : m_Objects)
+		for (auto& object : m_Objects)
 			if (object->IsRayHit(ray, tempRayDist, data))
 			{
 				hasHit = true;

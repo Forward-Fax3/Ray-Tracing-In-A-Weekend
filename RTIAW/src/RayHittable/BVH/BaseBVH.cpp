@@ -23,7 +23,7 @@ namespace RTW
 		return isHit;
 	}
 
-	bool BVHBase::BoxComparison(const std::shared_ptr<BaseRayHittable>& boxA, const std::shared_ptr<BaseRayHittable>& boxB, AABB::Axis axis)
+	bool BVHBase::BoxComparison(std::shared_ptr<BaseRayHittable> boxA, std::shared_ptr<BaseRayHittable> boxB, AABB::Axis axis)
 	{
 		Interval BoxAAxisInterval = boxA->GetBoundingBox().GetAxisInterval(axis);
 		Interval BoxBAxisInterval = boxB->GetBoundingBox().GetAxisInterval(axis);

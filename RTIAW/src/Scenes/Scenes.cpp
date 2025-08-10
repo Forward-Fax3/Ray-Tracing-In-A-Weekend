@@ -207,7 +207,7 @@ namespace RTW
 		hittables.add(std::make_shared<Parallelogram>(Point(-2, 3, 1), topUV, topOrange));
 		hittables.add(std::make_shared<Parallelogram>(Point(-2, -3, 5), bottomUV, bottomTeal));
 
-		cameraData.AspectRatio = 16.0 / 9.0;
+		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 80.0;
 		cameraData.LookFrom = RTW::Point(0.0, 0.0, 9.0);
 		cameraData.LookAt = RTW::Point(0.0);

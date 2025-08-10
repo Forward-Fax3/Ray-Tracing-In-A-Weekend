@@ -7,6 +7,8 @@
 
 #include <array>
 
+#define SIMD 0
+
 
 namespace RTW
 {
@@ -23,23 +25,24 @@ namespace RTW
 	{
 		Vec3 uvw(point - glm::floor(point));
 
-		auto indexes = static_cast<glm::vec<3, size_t, glm::defaultp>>(glm::floor(point));
+		auto indexes = static_cast<glm::vec<3, glm::int64, glm::defaultp>>(glm::floor(point));
 
 		std::array<std::array<std::array<Vec3, 2>, 2>, 2> samples{{{}}};
 
 		for (size_t i = 0; i < 2; i++)
 			for (size_t j = 0; j < 2; j++)
 			{
-				glm::vec<4, size_t, glm::defaultp> ijk(i, j, 0, 1);
-				glm::vec<4, size_t, glm::defaultp> tempIndexes(glm::xyzz(indexes));
+				glm::vec<4, glm::int64, glm::defaultp> ijk(i, j, 0, 1);
+				glm::vec<4, glm::int64, glm::defaultp> tempIndexes(glm::xyzz(indexes));
 				tempIndexes += ijk;
 
-#if (defined(RTW_AVX2) || defined (RTW_AVX512)) && (__x86_64 || __ppc64__ || _WIN64)
-				tempIndexes.data = _mm256_and_epi64(tempIndexes.data, _mm256_set1_epi64x(s_NumberOfPoints - 1));
-#elif defined(RTW_AVX2) || defined (RTW_AVX512)
-				tempIndexes.data = _mm128_and_epi32(tempIndexes.data, _mm128_set1_epi32(s_NumberOfPoints - 1));
+#if (defined(RTW_AVX2) || defined (RTW_AVX512)) && SIMD
+				tempIndexes.data = _mm256_and_si256(tempIndexes.data, _mm256_set1_epi64x(s_NumberOfPoints - 1));
+#elif defined(RTW_SSE2) && SIMD
+				tempIndexes.data.setv(0, _mm_and_si128(tempIndexes.data.getv(0), glm::vec<2, size_t, glm::defaultp>(s_NumberOfPoints - 1).data));
+				tempIndexes.data.setv(1, _mm_and_si128(tempIndexes.data.getv(1), glm::vec<2, size_t, glm::defaultp>(s_NumberOfPoints - 1).data));
 #else
-				tempIndexes = tempIndexes & (s_NumberOfPoints - 1);
+				tempIndexes = tempIndexes & (static_cast<glm::int64>(s_NumberOfPoints) - 1);
 #endif
 
 				size_t doublsIndex = m_Permutes[tempIndexes.x].x ^ m_Permutes[tempIndexes.y].y;
@@ -79,7 +82,7 @@ namespace RTW
 				glm::dvec4 ijk(static_cast<double>(i), static_cast<double>(j), 0.0, 1.0);
 				glm::dvec4 weightV(glm::xyzz(uvw) - ijk);
 
-#if defined(RTW_AVX2) || defined(RTW_AVX512) && !defined(__clang__) // clang optimizes better with the simple version
+#if defined(RTW_AVX2) || defined(RTW_AVX512) && !defined(__clang__) && SIMD // clang optimizes better with the simple version
 				static const __m256d temp1_256bit = _mm256_set1_pd(1.0);
 				__m256d tempIJK_256bit = _mm256_sub_pd(temp1_256bit, ijk.data);
 				__m256d tempUVW_256bit = _mm256_sub_pd(temp1_256bit, smoothedUVWW.data);
@@ -93,14 +96,17 @@ namespace RTW
 				std::array<Vec3, 2> weightVK{};
 				weightVK[0].data = weightV.data;
 
-#if defined(RTW_AVX2) || defined(RTW_AVX512)
+#if defined(RTW_AVX2) || defined(RTW_AVX512) && SIMD
 				weightVK[1].data = _mm256_permute_pd(weightV.data, 0b0110);
-#else
+#elif defined(RTW_SSE2) && SIMD
 				weightVK[1].data.setv(0, weightV.data.getv(0));
 				glm_dvec2 weightVK01 = weightV.data.getv(1);
 				weightVK[1].data.setv(1, _mm_shuffle_pd(weightVK01, weightVK01, 0b01));
+#else
+				weightVK[1] = Vec3(weightV.x, weightV.y, weightV.w);
 #endif
-				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK[0]) + tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK[1]);
+				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK[0]) +
+					tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK[1]);
 			}
 		return accum;
 	}

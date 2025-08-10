@@ -35,6 +35,9 @@ namespace RTW
 
 			for (int16_t j = 0; j < m_ImageWidth; j++)
 			{
+				//if (i == (m_ImageHeight * 9) / 10 && j == (m_ImageWidth * 5) / 10)
+				//	__debugbreak();
+
 				Colour colour(0.0);
 				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 				{
@@ -50,7 +53,7 @@ namespace RTW
 	{
 		Init();
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
-		m_ColourPixelArray.reserve(m_NumberOfPixels);
+		m_ColourPixelArray.resize(m_NumberOfPixels);
 
 		for (int16_t i = 0; i < numberOfThreads; i++)
 			g_Threads.push([this, i, numberOfThreads, &objects](int) {
@@ -110,15 +113,17 @@ namespace RTW
 		HitData data;
 		if (!object.IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
+//		else
+//			return glm::abs(data.normal);
 
-		Ray newRay;
+		Ray bounceRay;
 		Colour attenuation{};
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 
-		if (!data.material->Scatter(ray, data, attenuation, newRay))
+		if (!data.material->Scatter(ray, data, attenuation, bounceRay))
 			return emittedColour;
 
-		return emittedColour + attenuation * RayColour(newRay, bouncesLeft - 1, object);
+		return emittedColour + attenuation * RayColour(bounceRay, bouncesLeft - 1, object);
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j) const

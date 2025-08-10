@@ -21,14 +21,14 @@ namespace RTW
 
 		bool Load(const std::string& filePath);
 
-		const Colour& GetPixelColour(glm::i64vec2 pixelCoordinates) const;
+		const Colour& GetPixelColour(glm::u64vec2 pixelCoordinates) const;
 
-		inline size_t GetWidth() const { return m_ImageSize.x; }
-		inline size_t GetHeight() const { return m_ImageSize.y; }
+		inline uint64_t GetWidth() const { return m_ImageSize.x; }
+		inline uint64_t GetHeight() const { return m_ImageSize.y; }
 		
 	private:
 		glm::u64vec2 m_ImageSize = glm::u64vec2(0);
-		size_t m_NumberOfPixelsPerScanline = 0;
+		int64_t m_NumberOfPixelsPerScanline = 0;
 		std::vector<Colour> m_Colours;
 	};
 }

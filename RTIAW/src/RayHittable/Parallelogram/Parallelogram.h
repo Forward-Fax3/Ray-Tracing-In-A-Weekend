@@ -11,7 +11,7 @@ namespace RTW
 	class Parallelogram : public BaseRayHittable
 	{
 	public:
-		Parallelogram(const Point& Q, const UVvec3& uv, const std::shared_ptr<BaseMaterial>& material);
+		Parallelogram(const Point& Q, const UVvec3& uv, std::shared_ptr<BaseMaterial> material);
 		~Parallelogram() override = default;
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
