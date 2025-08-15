@@ -158,18 +158,18 @@ namespace RTW
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
 			{
-				auto splitPosition = static_cast<size_t>(static_cast<double>(split) * static_cast<double>(hittablesRange) * invertedIncermentedNumberOfSplits);
+				const auto splitPosition = static_cast<size_t>(static_cast<double>(split) * static_cast<double>(hittablesRange) * invertedIncermentedNumberOfSplits);
 
 				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
 					leftAABB.Expand((*i)->GetBoundingBox());
 				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
 					rightAABB.Expand((*i)->GetBoundingBox());
 
-				double leftSurfaceArea = leftAABB.GetSurfaceArea();
-				double rightSurfaceArea = rightAABB.GetSurfaceArea();
+				const double leftSurfaceArea = leftAABB.GetSurfaceArea();
+				const double rightSurfaceArea = rightAABB.GetSurfaceArea();
 
-				auto leftNumberOfItems = static_cast<double>(splitPosition);
-				auto rightNumberOfItems = static_cast<double>(hittablesRange - splitPosition);
+				const auto leftNumberOfItems = static_cast<double>(splitPosition);
+				const auto rightNumberOfItems = static_cast<double>(hittablesRange - splitPosition);
 
 				const double cost = 0.25 + (leftNumberOfItems * leftSurfaceArea + rightNumberOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
 

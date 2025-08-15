@@ -66,12 +66,14 @@ namespace RTW
 	{
 		switch (axis)
 		{
-		case Axis::x:
+		using enum Axis;
+		case x:
 			return m_X;
-		case Axis::y:
+		case y:
 			return m_Y;
-		case Axis::z:
+		case z:
 			return m_Z;
+		case none:
 		default:
 			return Interval::Univers;
 		}
