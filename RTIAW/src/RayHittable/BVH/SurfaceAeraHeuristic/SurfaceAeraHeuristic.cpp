@@ -26,10 +26,8 @@ namespace RTW
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
-		m_AABB = AABB::empty;
-
 		for (size_t i = start; i < end; i++)
-			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
+			m_AABB.Expand(hittables[i]->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -42,10 +40,9 @@ namespace RTW
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t numberOfThreads)
 	{
 		(void)numberOfThreads;
-		m_AABB = AABB::empty;
 
 		for (size_t i = start; i < end; i++)
-			m_AABB = { m_AABB, hittables[i]->GetBoundingBox() };
+			m_AABB.Expand(hittables[i]->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -59,11 +56,10 @@ namespace RTW
 	}
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
+		: BVHBase(thisAABB)
 	{
-		m_AABB = thisAABB;
-
-		for (size_t i = start; i < end; i++)
-			m_AABB.Expand(hittables[i]->GetBoundingBox());
+//		for (size_t i = start; i < end; i++)
+//			m_AABB.Expand(hittables[i]->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -93,7 +89,7 @@ namespace RTW
 			return;
 		}
 
-		BestSplit bestSplit{};
+		BestSplit bestSplit;
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
 		if (bestSplit.axis != AABB::Axis::x)
@@ -136,9 +132,9 @@ namespace RTW
 		if (bestSplit.SplitPosition == 1)
 			m_Left = hittables[start];
 		else
-			g_Threads.push([this, &hittables, start](int, size_t lambdaEnd, AABB lambdaAABB) {
+			g_Threads.push([this, &hittables, start, lambdaEnd = start + bestSplit.SplitPosition, lambdaAABB = bestSplit.LeftAABB](int) {
 					this->m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
-				}, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
+				});
 
 		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
 			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB, true);
@@ -148,8 +144,8 @@ namespace RTW
 	{
 		const size_t numberOfSplits = glm::min(glm::max(static_cast<size_t>(512), static_cast<size_t>(glm::sqrt(hittablesRange))), hittablesRange - 1);
 
-		AABB leftAABB{};
-		AABB rightAABB{};
+		AABB leftAABB;
+		AABB rightAABB;
 
 		const double invertedIncermentedNumberOfSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
 		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
@@ -162,16 +158,12 @@ namespace RTW
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
 			{
-				leftAABB = rightAABB = AABB(Interval::Empty);
-
 				auto splitPosition = static_cast<size_t>(static_cast<double>(split) * static_cast<double>(hittablesRange) * invertedIncermentedNumberOfSplits);
 
 				for (auto i = hittables.begin() + start; i != hittables.begin() + start + splitPosition; i++)
 					leftAABB.Expand((*i)->GetBoundingBox());
 				for (auto i = hittables.begin() + start + splitPosition; i != hittables.begin() + end; i++)
 					rightAABB.Expand((*i)->GetBoundingBox());
-				for (size_t i = start + splitPosition; i < end; i++)
-					rightAABB = { rightAABB, hittables[i]->GetBoundingBox() };
 
 				double leftSurfaceArea = leftAABB.GetSurfaceArea();
 				double rightSurfaceArea = rightAABB.GetSurfaceArea();
@@ -179,7 +171,7 @@ namespace RTW
 				auto leftNumberOfItems = static_cast<double>(splitPosition);
 				auto rightNumberOfItems = static_cast<double>(hittablesRange - splitPosition);
 
-				double cost = 0.25 + (leftNumberOfItems * leftSurfaceArea + rightNumberOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
+				const double cost = 0.25 + (leftNumberOfItems * leftSurfaceArea + rightNumberOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
 
 				if (cost < bestSplit.Cost)
 				{
@@ -189,6 +181,8 @@ namespace RTW
 					bestSplit.SplitPosition = splitPosition;
 					bestSplit.axis = axis;
 				}
+
+				leftAABB = rightAABB = AABB::empty;
 			}
 		}
 	}

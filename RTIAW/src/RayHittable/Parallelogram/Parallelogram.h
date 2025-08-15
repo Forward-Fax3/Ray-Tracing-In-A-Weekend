@@ -8,7 +8,7 @@
 
 namespace RTW
 {
-	class Parallelogram : public BaseRayHittable
+	class Parallelogram final : public BaseRayHittable
 	{
 	public:
 		Parallelogram(const Point& Q, const UVvec3& uv, std::shared_ptr<BaseMaterial> material);

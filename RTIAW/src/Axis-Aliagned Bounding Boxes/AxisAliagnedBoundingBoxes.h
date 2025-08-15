@@ -14,15 +14,16 @@ namespace RTW
 		enum class Axis : uint8_t { x = 0, y, z, none };
 
 	public:
-		inline AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes++; }
+		inline explicit AxisAliagnedBoundingBoxes() { s_NumberOfBoundingBoxes++; }
 		explicit AxisAliagnedBoundingBoxes(const Interval& interval);
 		AxisAliagnedBoundingBoxes(const Interval& x, const Interval& y, const Interval& z);
 		AxisAliagnedBoundingBoxes(const Point& a, const Point& b);
 		AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& box0, const AxisAliagnedBoundingBoxes& box1);
+		AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& other);
 
-		inline ~AxisAliagnedBoundingBoxes() { s_NumberofBoundingBoxes--; }
+		inline ~AxisAliagnedBoundingBoxes() { s_NumberOfBoundingBoxes--; }
 
-		AxisAliagnedBoundingBoxes& operator=(const AxisAliagnedBoundingBoxes& aabb);
+		AxisAliagnedBoundingBoxes& operator=(const AxisAliagnedBoundingBoxes& aabb) = default;
 
 		bool IsBigger(const AxisAliagnedBoundingBoxes& otherAABB) const;
 
@@ -36,8 +37,8 @@ namespace RTW
 
 		AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
 
-		static inline size_t GetNumberofBBs() { return s_NumberofBoundingBoxes; }
-		static inline void ResetNumberOfBBs() { s_NumberofBoundingBoxes = 0; }
+		static inline size_t GetNumberofBBs() { return s_NumberOfBoundingBoxes; }
+		static inline void ResetNumberOfBBs() { s_NumberOfBoundingBoxes = 0; }
 
 		static const AxisAliagnedBoundingBoxes empty;
 		static const AxisAliagnedBoundingBoxes univers;
@@ -52,7 +53,8 @@ namespace RTW
 		Interval m_Z;
 		Axis m_LongestAxis = Axis::none;
 
-		static std::atomic<size_t> s_NumberofBoundingBoxes;
+		static std::atomic<size_t> s_NumberOfBoundingBoxes
+			;
 	};
 
 	using AABB = AxisAliagnedBoundingBoxes;

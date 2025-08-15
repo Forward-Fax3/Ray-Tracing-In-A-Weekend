@@ -10,7 +10,7 @@
 namespace RTW
 {
 	// Surface Area Heuristic based BVH (fast but slow to create)
-	class SurfaceAreaHeuristicNode : public BVHBase
+	class SurfaceAreaHeuristicNode final : public BVHBase
 	{
 	public:
 		explicit SurfaceAreaHeuristicNode(RayHittables& hittables);
@@ -23,8 +23,10 @@ namespace RTW
 	private:
 		struct BestSplit
 		{
-			AABB LeftAABB{};
-			AABB RightAABB{};
+			BestSplit() = default;
+
+			AABB LeftAABB;
+			AABB RightAABB;
 			size_t SplitPosition = 0;
 			double Cost = doubleInf;
 			AABB::Axis axis = AABB::Axis::none;

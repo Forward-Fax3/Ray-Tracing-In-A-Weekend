@@ -40,7 +40,7 @@ namespace RTW
 		if (!Interval(-1e-3, 1e-3).Contains(BoxAAxisIntervalMax - BoxBAxisIntervalMax))
 			return BoxAAxisIntervalMax < BoxBAxisIntervalMax;
 
-		AABB tempBoxA = boxA->GetBoundingBox();
+		AABB tempBoxA(boxA->GetBoundingBox());
 		switch (axis)
 		{
 		case AABB::Axis::x:

@@ -23,8 +23,6 @@ namespace RTW
 
 	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end) 
 	{
-		m_AABB = AABB::empty;
-
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
 			m_AABB.Expand((*i)->GetBoundingBox());
 

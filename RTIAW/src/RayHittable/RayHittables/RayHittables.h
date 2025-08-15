@@ -16,7 +16,7 @@ namespace RTW
 		explicit inline RayHittables(std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); }
 
 		constexpr void reserve(size_t size) { m_Objects.reserve(size); }
-		inline void add(const std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); m_AABB = { m_AABB, object->GetBoundingBox() }; }
+		inline void add(const std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); m_AABB.Expand(object->GetBoundingBox()); }
 
 		inline size_t size() const { return m_Objects.size(); }
 		inline void clear() { m_Objects.clear(); m_AABB = AABB::empty; }

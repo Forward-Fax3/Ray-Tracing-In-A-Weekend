@@ -12,7 +12,7 @@
 
 namespace RTW
 {
-	std::atomic<size_t> AxisAliagnedBoundingBoxes::s_NumberofBoundingBoxes = 0;
+	std::atomic<size_t> AxisAliagnedBoundingBoxes::s_NumberOfBoundingBoxes = 0;
 
 	const AABB AABB::empty(Interval::Empty);
 	const AABB AABB::univers(Interval::Univers);
@@ -38,14 +38,14 @@ namespace RTW
 #endif
 
 	AABB::AxisAliagnedBoundingBoxes(const Interval& interval)
-		: m_X(interval), m_Y(interval), m_Z(interval) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
+		: m_X(interval), m_Y(interval), m_Z(interval) { s_NumberOfBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	AABB::AxisAliagnedBoundingBoxes(const Interval& x, const Interval& y, const Interval& z)
-		: m_X(x), m_Y(y), m_Z(z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
+		: m_X(x), m_Y(y), m_Z(z) { s_NumberOfBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	AABB::AxisAliagnedBoundingBoxes(const Point& a, const Point& b)
 	{
-		s_NumberofBoundingBoxes++;
+		s_NumberOfBoundingBoxes++;
 		m_X = (a.x <= b.x) ? Interval(a.x, b.x) : Interval(b.x, a.x);
 		m_Y = (a.y <= b.y) ? Interval(a.y, b.y) : Interval(b.y, a.y);
 		m_Z = (a.z <= b.z) ? Interval(a.z, b.z) : Interval(b.z, a.z);
@@ -53,8 +53,14 @@ namespace RTW
 		LongestAxisSetter();
 	}
 
+	AxisAliagnedBoundingBoxes::AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& otherAABB)
+		: m_X(otherAABB.m_X), m_Y(otherAABB.m_Y), m_Z(otherAABB.m_Z), m_LongestAxis(otherAABB.m_LongestAxis)
+	{
+		s_NumberOfBoundingBoxes++;
+	}
+
 	AABB::AxisAliagnedBoundingBoxes(const AxisAliagnedBoundingBoxes& box0, const AxisAliagnedBoundingBoxes& box1)
-		: m_X(box0.m_X, box1.m_X), m_Y(box0.m_Y, box1.m_Y), m_Z(box0.m_Z, box1.m_Z) { s_NumberofBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
+		: m_X(box0.m_X, box1.m_X), m_Y(box0.m_Y, box1.m_Y), m_Z(box0.m_Z, box1.m_Z) { s_NumberOfBoundingBoxes++; MiniumPadding(); LongestAxisSetter(); }
 
 	const Interval& AABB::GetAxisInterval(const Axis& axis) const
 	{
@@ -209,11 +215,6 @@ namespace RTW
 #endif // RTW_AVX512
 	}
 
-	RTW::AxisAliagnedBoundingBoxes& AxisAliagnedBoundingBoxes::operator=(const AxisAliagnedBoundingBoxes& aabb) = default;
-
-#undef SIMD
-#define SIMD 0
-
 	bool AxisAliagnedBoundingBoxes::IsBigger(const AxisAliagnedBoundingBoxes& otherAABB) const
 	{
 		bool returnBool = true;
@@ -222,6 +223,9 @@ namespace RTW
 		returnBool &= !this->m_Z.Contains(otherAABB.m_Z);
 		return returnBool;
 	}
+
+#undef SIMD
+#define SIMD 0
 
 	void AxisAliagnedBoundingBoxes::Expand(const AxisAliagnedBoundingBoxes& newAABB)
 	{
