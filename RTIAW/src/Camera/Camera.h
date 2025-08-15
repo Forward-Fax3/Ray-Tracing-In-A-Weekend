@@ -31,8 +31,8 @@ namespace RTW
 		explicit Camera(const CameraData& data);
 		Camera();
 
-		void Render(const BaseRayHittable& objects);
-		void RenderMultiThreaded(const int32_t numberOfThreads, const BaseRayHittable& objects);
+		void Render(const std::shared_ptr<BaseRayHittable> objects);
+		void RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects);
 
 		inline void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
 		inline void SetFOV(const double FOV) { m_FOV = FOV; }
@@ -52,14 +52,14 @@ namespace RTW
 	private:
 		void Init();
 
-		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object) const;
+		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const;
 		Ray CreateRay(int16_t i, int16_t j) const;
 		glm::dvec2 SampleSquare() const;
 		Point DefocusDiskSample() const;
 
 		inline Colour ColourCorrection(const Colour& colour) const;
 
-		void MultiThreadRenderLoop(size_t offset, size_t increment, const BaseRayHittable& object);
+		void MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object);
 
 	// Private Variables
 	private:

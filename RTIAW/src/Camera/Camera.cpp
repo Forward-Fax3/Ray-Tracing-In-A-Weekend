@@ -23,7 +23,7 @@ namespace RTW
 		: m_AspectRatio(data.AspectRatio), m_FOV(data.FOV), m_DefocusAngle(data.DefocusAngle), m_FocusDistance(data.FocusDistance), m_LookFrom(data.LookFrom), m_LookAt(data.LookAt), m_VUp(data.VUp),
 		m_Gamma(data.Gamma), m_BackgroundColour(data.BackgroundColour), m_ImageWidth(data.ImageWidth), m_SamplesPerPixel(data.SamplesPerPixel), m_MaxBounces(data.MaxBounces) { }
 
-	void Camera::Render(const BaseRayHittable& objects)
+	void Camera::Render(const std::shared_ptr<BaseRayHittable> objects)
 	{
 		Init();
 
@@ -49,14 +49,14 @@ namespace RTW
 		}
 	}
 
-	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const BaseRayHittable& objects)
+	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects)
 	{
 		Init();
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 		m_ColourPixelArray.resize(m_NumberOfPixels);
 
 		for (int16_t i = 0; i < numberOfThreads; i++)
-			g_Threads.push([this, i, numberOfThreads, &objects](int) {
+			g_Threads.push([this, i, numberOfThreads, objects](int) {
 				this->MultiThreadRenderLoop(i, numberOfThreads, objects);
 			});
 
@@ -105,13 +105,13 @@ namespace RTW
 		m_MaxBounces++;
 	}
 
-	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const BaseRayHittable& object) const
+	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
 
 		HitData data;
-		if (!object.IsRayHit(ray, Interval(0.001, doubleInf), data))
+		if (!object->IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
 //		else
 //			return glm::abs(data.normal);
@@ -154,7 +154,7 @@ namespace RTW
 		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
 	}
 
-	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const BaseRayHittable& object)
+	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object)
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{

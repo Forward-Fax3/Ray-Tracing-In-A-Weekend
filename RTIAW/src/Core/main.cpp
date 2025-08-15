@@ -39,7 +39,7 @@ int main()
 
 	// Scene Selection
 	RTW::Scenes scene = RTW::Scenes::Parallelograms;
-	RTW::SceneSelect(scene, *sceneHitables, cameraData); // TODO: make SceneSelect take a std::shared_ptr<RTW::RayHittables> instead of RTW::RayHittables&
+	RTW::SceneSelect(scene, sceneHitables, cameraData);
 
 	RTW::Camera camera(cameraData);
 
@@ -52,9 +52,9 @@ int main()
 
 	if (sceneHitables->size() > 1)
 	{
-//		worldHittables = std::make_shared<RTW::BVHNode>(*sceneHitables);
-//		worldHittables = std::make_shared<RTW::SAHNode>(*sceneHitables);
-		worldHittables = std::make_shared<RTW::SAHNode>(*sceneHitables, numberOfThreads);
+//		worldHittables = std::make_shared<RTW::BVHNode>(sceneHitables);
+		worldHittables = std::make_shared<RTW::SAHNode>(sceneHitables);
+//		worldHittables = std::make_shared<RTW::SAHNode>(sceneHitables, numberOfThreads);
 		sceneHitables->clear();
 
 		finishTime = std::chrono::high_resolution_clock::now();
@@ -64,8 +64,8 @@ int main()
 	else
 		worldHittables = sceneHitables;
 
-//	camera.Render(*worldHittables); // TODO: same as about but for render
-	camera.RenderMultiThreaded(numberOfThreads, *worldHittables);
+//	camera.Render(worldHittables);
+	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
 
 	finishTime = std::chrono::high_resolution_clock::now();
 

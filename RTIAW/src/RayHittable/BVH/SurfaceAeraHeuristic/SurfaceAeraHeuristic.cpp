@@ -11,14 +11,14 @@
 
 namespace RTW
 {
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(RayHittables& hittables)
-		: SurfaceAreaHeuristicNode(hittables.GetObjects(), 0, hittables.GetObjects().size()) {
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::shared_ptr<RayHittables> hittables)
+		: SurfaceAreaHeuristicNode(hittables->GetObjects(), 0, hittables->GetObjects().size()) {
 		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created with SAH.\n" << std::flush;
 		maxDepth = 0;
 	}
 
-	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(RayHittables& hittables, size_t numberOfThreads)
-		: SurfaceAreaHeuristicNode(hittables.GetObjects(), 0, hittables.GetObjects().size(), numberOfThreads) {
+	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::shared_ptr<RayHittables> hittables, size_t numberOfThreads)
+		: SurfaceAreaHeuristicNode(hittables->GetObjects(), 0, hittables->GetObjects().size(), numberOfThreads) {
 		// currently doesn't work with multi threading need to make a better system for it.
 //		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created with SAH.\n" << std::flush;
 		maxDepth = 0;
@@ -26,8 +26,10 @@ namespace RTW
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
-		for (size_t i = start; i < end; i++)
-			m_AABB.Expand(hittables[i]->GetBoundingBox());
+		m_AABB = AABB::empty;
+
+		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
+			m_AABB.Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -41,8 +43,8 @@ namespace RTW
 	{
 		(void)numberOfThreads;
 
-		for (size_t i = start; i < end; i++)
-			m_AABB.Expand(hittables[i]->GetBoundingBox());
+		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
+			m_AABB.Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -60,6 +62,9 @@ namespace RTW
 	{
 //		for (size_t i = start; i < end; i++)
 //			m_AABB.Expand(hittables[i]->GetBoundingBox());
+
+		//for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
+		//	leftAABB.Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));

@@ -15,8 +15,8 @@
 
 namespace RTW
 {
-	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(RayHittables& hittables)
-		: BoundingVolumeHierarchiesNode(hittables.GetObjects(), 0, hittables.GetObjects().size()) {
+	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(std::shared_ptr<RayHittables> hittables)
+		: BoundingVolumeHierarchiesNode(hittables->GetObjects(), 0, hittables->GetObjects().size()) {
 		std::clog << "number of bounding boxes: " << AABB::GetNumberofBBs() << ", max depth: " << maxDepth << ". Created With midpoints.\n" << std::flush;
 		maxDepth = 0;
 	}
