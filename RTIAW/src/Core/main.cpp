@@ -64,8 +64,8 @@ int main()
 	else
 		worldHittables = sceneHitables;
 
-//	camera.Render(worldHittables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
+	camera.Render(worldHittables);
+//	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
 
 	finishTime = std::chrono::high_resolution_clock::now();
 

@@ -35,10 +35,10 @@ namespace RTW
 		inline UV     Clamp(const UV& uv)    const { return glm::clamp(uv, UV(m_Min), UV(m_Max)); }
 		inline Colour Clamp(const Colour& x) const { return glm::clamp(x, Vec3(m_Min), Vec3(m_Max)); }
 
-		[[nodiscard]] inline Interval Expand(double dalta) const
-			{ return { m_Min - dalta * 0.5, m_Max + dalta * 0.5 }; }
-		[[nodiscard]] inline Interval Expand(double minIncrease, double maxIncrease) const
-			{ return { m_Min - minIncrease, m_Max + maxIncrease }; }
+		inline void Expand(double dalta)
+			{ this->m_Min -= dalta * 0.5; this->m_Max += dalta * 0.5; }
+		inline void Expand(double minIncrease, double maxIncrease)
+			{ this->m_Min -= minIncrease; this->m_Max += maxIncrease; }
 		inline void Expand(const Interval& newInterval)
 			{ m_Min = glm::min(m_Min, newInterval.m_Min); m_Max = glm::max(m_Max, newInterval.m_Max); }
 

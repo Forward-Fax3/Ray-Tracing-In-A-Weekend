@@ -30,7 +30,7 @@ namespace RTW
 		return direction / lengthSqared;
 	}
 
-	RTW::Vec3 RandomOnUnitDisk()
+	Vec3 RandomOnUnitDisk()
 	{
 		Point point(0.0);
 		do {

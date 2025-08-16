@@ -113,8 +113,6 @@ namespace RTW
 		HitData data;
 		if (!object->IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
-//		else
-//			return glm::abs(data.normal);
 
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 

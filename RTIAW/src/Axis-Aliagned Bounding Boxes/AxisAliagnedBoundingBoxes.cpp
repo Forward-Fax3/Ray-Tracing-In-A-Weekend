@@ -272,10 +272,10 @@ namespace RTW
 	{
 		static constexpr double minium = 1e-4;
 		if (m_X.Size() < minium)
-			m_X = m_X.Expand(minium);
+			m_X.Expand(minium);
 		if (m_Y.Size() < minium)
-			m_Y = m_Y.Expand(minium);
+			m_Y.Expand(minium);
 		if (m_Z.Size() < minium)
-			m_Z = m_Z.Expand(minium);
+			m_Z.Expand(minium);
 	}
 }
