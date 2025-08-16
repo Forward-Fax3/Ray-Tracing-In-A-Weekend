@@ -25,7 +25,7 @@ namespace RTW
 		inline bool Contains(const Interval& other) const
 			{ return m_Min <= other.m_Min && other.m_Max <= m_Max; }
 		inline bool Contains(const UV& uv) const
-		{ return Contains(uv.x) && Contains(uv.y); }
+			{ return Contains(uv.x) && Contains(uv.y); }
 
 		inline bool Surrounds(const double x) const { return m_Min < x && x < m_Max; }
 		inline bool Surrounds(const Interval& other) const

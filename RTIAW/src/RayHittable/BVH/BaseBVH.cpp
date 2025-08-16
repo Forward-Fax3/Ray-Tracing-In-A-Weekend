@@ -31,35 +31,12 @@ namespace RTW
 		double BoxAAxisIntervalMin = BoxAAxisInterval.GetMin();
 		double BoxBAxisIntervalMin = BoxBAxisInterval.GetMin();
 
-		if (!Interval(-1e-3, 1e-3).Contains(BoxAAxisIntervalMin - BoxBAxisIntervalMin))
+		if (!Interval(-1e-4, 1e-4).Contains(BoxAAxisIntervalMin - BoxBAxisIntervalMin))
 			return BoxAAxisIntervalMin < BoxBAxisIntervalMin;
 
 		double BoxAAxisIntervalMax = BoxAAxisInterval.GetMax();
 		double BoxBAxisIntervalMax = BoxBAxisInterval.GetMax();
 
-		if (!Interval(-1e-3, 1e-3).Contains(BoxAAxisIntervalMax - BoxBAxisIntervalMax))
-			return BoxAAxisIntervalMax < BoxBAxisIntervalMax;
-
-		AABB tempBoxA(boxA->GetBoundingBox());
-		switch (axis)
-		{
-		case AABB::Axis::x:
-			tempBoxA.Expand(AABB(Interval(tempBoxA.GetAxisInterval(AABB::Axis::x).GetMin() - 1e-4, 0.0), Interval(0.0, 0.0), Interval(0.0, 0.0)));
-			break;
-		case AABB::Axis::y:
-			tempBoxA.Expand(AABB(Interval(0.0, 0.0), Interval(tempBoxA.GetAxisInterval(AABB::Axis::y).GetMin() - 1e-4, 0.0), Interval(0.0, 0.0)));
-			break;
-		case AABB::Axis::z:
-			tempBoxA.Expand(AABB(Interval(0.0, 0.0), Interval(0.0, 0.0), Interval(tempBoxA.GetAxisInterval(AABB::Axis::z).GetMin() - 1e-4, 0.0)));
-			break;
-		case AABB::Axis::none:
-		default:
-			__debugbreak(); // should be impossible
-		}
-
-		boxA->SetBoundingBox(tempBoxA);
-		BoxAAxisIntervalMin = boxA->GetBoundingBox().GetAxisInterval(axis).GetMin();
-
-		return BoxAAxisIntervalMin < BoxBAxisIntervalMin;
+		return BoxAAxisIntervalMax < BoxBAxisIntervalMax;
 	}
 }

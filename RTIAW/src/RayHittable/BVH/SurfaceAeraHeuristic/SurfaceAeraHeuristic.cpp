@@ -63,8 +63,8 @@ namespace RTW
 //		for (size_t i = start; i < end; i++)
 //			m_AABB.Expand(hittables[i]->GetBoundingBox());
 
-		//for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
-		//	leftAABB.Expand((*i)->GetBoundingBox());
+		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
+			m_AABB.Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -97,7 +97,7 @@ namespace RTW
 		BestSplit bestSplit;
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::x)
+		if (bestSplit.axis != AABB::Axis::z)
 			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
@@ -129,7 +129,7 @@ namespace RTW
 		BestSplit bestSplit{};
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::x)
+		if (bestSplit.axis != AABB::Axis::z)
 			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});

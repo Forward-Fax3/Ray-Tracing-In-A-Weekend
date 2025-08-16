@@ -33,7 +33,7 @@ namespace RTW::Templates
 			m_AABB = AABB(box[0], box[1]);
 		}
 
-		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override
+		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override
 		{
 //			if (!m_AABB.IsHit(ray, rayDistance))
 //				return false;

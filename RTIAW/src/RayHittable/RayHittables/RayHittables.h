@@ -18,6 +18,9 @@ namespace RTW
 		constexpr void reserve(size_t size) { m_Objects.reserve(size); }
 		inline void add(const std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); m_AABB.Expand(object->GetBoundingBox()); }
 
+		// add buffers to AABBs so that comparisons that need to be axis aligned don't end up having the same value
+		void addBuffer();
+
 		inline size_t size() const { return m_Objects.size(); }
 		inline void clear() { m_Objects.clear(); m_AABB = AABB::empty; }
 
@@ -32,7 +35,11 @@ namespace RTW
 				m_AABB = newAABB;
 		}
 
-	private:
+	private: // Functions
+		static bool BoxComparison(std::shared_ptr<BaseRayHittable> boxA, std::shared_ptr<BaseRayHittable> boxB, AABB::Axis axis);
+		static bool BoxExpand(std::shared_ptr<BaseRayHittable> boxA, std::shared_ptr<BaseRayHittable> boxB, AABB::Axis axis);
+
+	private: // Data
 		std::vector<std::shared_ptr<BaseRayHittable>> m_Objects;
 		AABB m_AABB;
 	};
