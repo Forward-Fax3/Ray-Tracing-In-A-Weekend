@@ -11,7 +11,7 @@ namespace RTW
 	public:
 		explicit Dielectric(double refactionIndex);
 
-		bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
+		std::pair<const bool, const Colour> Scatter(Ray& ray, const HitData& data) const override;
 
 	private:
 		static Vec3 refract(const Vec3& uv, const Vec3& normal, double etaiOverEtat);

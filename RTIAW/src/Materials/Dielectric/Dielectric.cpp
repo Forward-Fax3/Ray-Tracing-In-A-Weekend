@@ -12,21 +12,20 @@ namespace RTW
 	Dielectric::Dielectric(double refactionIndex)
 		: m_RefractionIndex(refactionIndex) {}
 
-	bool Dielectric::Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const
+	std::pair<const bool, const Colour> Dielectric::Scatter(Ray& ray, const HitData& data) const
 	{
-		colour = Colour(1.0);
 		double ri = data.isFrontFace ? (1.0 / m_RefractionIndex) : m_RefractionIndex;
 
 		Vec3 normalDirection = glm::normalize(ray.direction());
 		double cosTheta = glm::min(glm::dot(-normalDirection, data.normal), 1.0);
 		double sinTheta = glm::sqrt(1.0 - cosTheta * cosTheta);
 
-		Vec3 refracted = ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0) ?
+		Vec3 newDirection = ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0) ?
 			glm::reflect(normalDirection, data.normal) :
 			glm::refract(normalDirection, data.normal, ri);
 
-		scatter = Ray(data.point, refracted, ray.time());
-		return true;
+		ray = Ray(data.point, newDirection, ray.time());
+		return { true, { 1.0, 1.0, 1.0 } };
 	}
 
 	Vec3 Dielectric::refract(const Vec3& uv, const Vec3& normal, double etaOverEtaPrime)

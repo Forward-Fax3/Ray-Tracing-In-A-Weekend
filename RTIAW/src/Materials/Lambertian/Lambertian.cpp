@@ -22,15 +22,14 @@ namespace RTW
 	Lambertian::Lambertian(std::shared_ptr<BaseTexture> texture)
 		: m_Texture(texture) {}
 
-	bool Lambertian::Scatter([[maybe_unused]] const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const
+	std::pair<const bool, const Colour> Lambertian::Scatter(Ray& ray, const HitData& data) const
 	{
 		Vec3 scatterDirection = data.normal + RandomUnitVector();
 		double minValue = 1e-8;
 
 		scatterDirection = scatterDirection < minValue ? data.normal : scatterDirection;
 
-		scatter = Ray(data.point, scatterDirection, ray.time());
-		colour = m_Texture->GetColour(data.uv, data.point);
-		return true;
+		ray = Ray(data.point, scatterDirection, ray.time());
+		return { true, m_Texture->GetColour(data.uv, data.point) };
 	}
 }

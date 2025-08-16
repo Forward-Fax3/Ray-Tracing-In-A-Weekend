@@ -4,6 +4,8 @@
 #include "Ray.h"
 #include "RayHittable.h"
 
+#include <utility>
+
 #ifndef _HITDATA
 #include "RayHittable.h"
 #endif
@@ -19,7 +21,8 @@ namespace RTW
 		BaseMaterial() = default;
 		virtual ~BaseMaterial() = default;
 
-		virtual bool Scatter([[maybe_unused]] const Ray& ray, [[maybe_unused]] const HitData& data, [[maybe_unused]] Colour& colour, [[maybe_unused]] Ray& scatter) const { return false; }
+		virtual std::pair<const bool, const Colour> Scatter([[maybe_unused]] Ray& ray, [[maybe_unused]] const HitData& data) const
+			{ return { false, {0.0, 0.0, 0.0} }; }
 
 		virtual Colour EmittedColour([[maybe_unused]] const UV& uv, [[maybe_unused]] const Point& point) const { return Colour(0.0); }
 	};

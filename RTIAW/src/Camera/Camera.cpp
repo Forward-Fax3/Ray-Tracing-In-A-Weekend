@@ -105,7 +105,7 @@ namespace RTW
 		m_MaxBounces++;
 	}
 
-	Colour Camera::RayColour(const Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const
+	Colour Camera::RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
@@ -116,14 +116,14 @@ namespace RTW
 //		else
 //			return glm::abs(data.normal);
 
-		Ray bounceRay;
-		Colour attenuation{};
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 
-		if (!data.material->Scatter(ray, data, attenuation, bounceRay))
+		const auto [bounced, attenuation] = data.material->Scatter(ray, data);
+
+		if (!bounced)
 			return emittedColour;
 
-		return emittedColour + attenuation * RayColour(bounceRay, bouncesLeft - 1, object);
+		return emittedColour + attenuation * RayColour(ray, bouncesLeft - 1, object);
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j) const

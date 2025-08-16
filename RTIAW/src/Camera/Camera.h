@@ -52,7 +52,7 @@ namespace RTW
 	private:
 		void Init();
 
-		Colour RayColour(const Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const;
+		Colour RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const;
 		Ray CreateRay(int16_t i, int16_t j) const;
 		glm::dvec2 SampleSquare() const;
 		Point DefocusDiskSample() const;

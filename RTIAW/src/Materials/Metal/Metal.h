@@ -12,7 +12,7 @@ namespace RTW
 	public:
 		Metal(const Colour& albedo, double fuzz);
 
-		bool Scatter(const Ray& ray, const HitData& data, Colour& colour, Ray& scatter) const override;
+		std::pair<const bool, const Colour> Scatter(Ray& ray, const HitData& data) const override;
 
 	private:
 		Colour m_Albido;
