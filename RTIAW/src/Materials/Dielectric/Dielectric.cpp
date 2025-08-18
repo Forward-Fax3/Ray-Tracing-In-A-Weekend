@@ -5,12 +5,19 @@
 #include "Core.h"
 #include "Ray.h"
 #include "Dielectric.h"
+#include "SolidColour.h"
 
 
 namespace RTW
 {
 	Dielectric::Dielectric(double refactionIndex)
-		: m_RefractionIndex(refactionIndex) {}
+		: m_RefractionIndex(refactionIndex), m_Texture(std::make_shared<SolidColour>(Colour(1.0))) { }
+
+	Dielectric::Dielectric(double refactionIndex, const Colour& colour)
+		: m_RefractionIndex(refactionIndex), m_Texture(std::make_shared<SolidColour>(colour)) {}
+
+	Dielectric::Dielectric(double refactionIndex, std::shared_ptr<BaseTexture> texture)
+		: m_RefractionIndex(refactionIndex), m_Texture(texture)	{}
 
 	std::pair<const bool, const Colour> Dielectric::Scatter(Ray& ray, const HitData& data) const
 	{
@@ -20,12 +27,12 @@ namespace RTW
 		double cosTheta = glm::min(glm::dot(-normalDirection, data.normal), 1.0);
 		double sinTheta = glm::sqrt(1.0 - cosTheta * cosTheta);
 
-		Vec3 newDirection = ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0) ?
+		Vec3 newDirection = (ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0)) ?
 			glm::reflect(normalDirection, data.normal) :
 			glm::refract(normalDirection, data.normal, ri);
 
 		ray = Ray(data.point, newDirection, ray.time());
-		return { true, { 1.0, 1.0, 1.0 } };
+		return { true, m_Texture->GetColour(data.uv, data.point) };
 	}
 
 	Vec3 Dielectric::refract(const Vec3& uv, const Vec3& normal, double etaOverEtaPrime)
@@ -42,5 +49,4 @@ namespace RTW
 		r0 *= r0;
 		return r0 + (1 - r0) * glm::pow(1 - cos, 5);
 	}
-
 }

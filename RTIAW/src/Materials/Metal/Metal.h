@@ -3,6 +3,9 @@
 #include "Ray.h"
 #include "RayHittable.h"
 #include "BaseMaterial.h"
+#include "BaseTexture.h"
+
+#include <memory>
 
 
 namespace RTW
@@ -10,12 +13,14 @@ namespace RTW
 	class Metal : public BaseMaterial
 	{
 	public:
+		Metal(double fuzz);
 		Metal(const Colour& albedo, double fuzz);
+		Metal(std::shared_ptr<BaseTexture> texture, double fuzz);
 
 		std::pair<const bool, const Colour> Scatter(Ray& ray, const HitData& data) const override;
 
 	private:
-		Colour m_Albido;
+		std::shared_ptr<BaseTexture> m_Texture;
 		double m_Fuzz;
 	};
 }

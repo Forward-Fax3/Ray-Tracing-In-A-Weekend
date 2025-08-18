@@ -2,6 +2,9 @@
 #include "Core.h"
 #include "Ray.h"
 #include "BaseMaterial.h"
+#include "BaseTexture.h"
+
+#include <memory>
 
 
 namespace RTW
@@ -10,6 +13,8 @@ namespace RTW
 	{
 	public:
 		explicit Dielectric(double refactionIndex);
+		explicit Dielectric(double refactionIndex, const Colour& colour);
+		explicit Dielectric(double refactionIndex, std::shared_ptr<BaseTexture> texture);
 
 		std::pair<const bool, const Colour> Scatter(Ray& ray, const HitData& data) const override;
 
@@ -20,5 +25,6 @@ namespace RTW
 
 	private:
 		double m_RefractionIndex;
+		std::shared_ptr<BaseTexture> m_Texture;
 	};
 }
