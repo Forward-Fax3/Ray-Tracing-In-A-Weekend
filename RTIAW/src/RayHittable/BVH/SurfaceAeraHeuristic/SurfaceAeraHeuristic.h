@@ -18,7 +18,16 @@ namespace RTW
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t numberOfThreads);
 
+		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
+
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded = false);
+
+		const AABB& GetBoundingBox() const override { return m_AABB; }
+		inline void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen. 
+		{
+			if (newAABB.IsBigger(this->m_AABB))
+				m_AABB = newAABB;
+		}
 
 	private:
 		struct BestSplit
@@ -36,6 +45,11 @@ namespace RTW
 		void SingleThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		void MultiThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end);
 		void CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit)const ;
+
+	private:
+		std::shared_ptr<BaseRayHittable> m_Left;
+		std::shared_ptr<BaseRayHittable> m_Right;
+		AABB m_AABB;
 	};
 
 	using SAHNode = SurfaceAreaHeuristicNode;

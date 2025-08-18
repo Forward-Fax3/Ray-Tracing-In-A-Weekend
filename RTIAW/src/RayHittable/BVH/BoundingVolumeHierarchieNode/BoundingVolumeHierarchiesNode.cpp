@@ -58,4 +58,19 @@ namespace RTW
 
 		currentDepth--;
 	}
+
+	bool BoundingVolumeHierarchiesNode::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
+	{
+		if (!m_AABB.IsHit(ray, rayDistance))
+			return false;
+
+		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);
+
+		if (isHit)
+			isHit |= m_Right->IsRayHit(ray, { rayDistance.GetMin(), hitData.distance }, hitData);
+		else
+			isHit |= m_Right->IsRayHit(ray, rayDistance, hitData);
+
+		return isHit;
+	}
 }

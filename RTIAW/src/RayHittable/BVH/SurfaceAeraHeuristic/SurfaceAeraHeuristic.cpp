@@ -58,7 +58,7 @@ namespace RTW
 	}
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
-		: BVHBase(thisAABB)
+		: m_AABB(thisAABB)
 	{
 //		for (size_t i = start; i < end; i++)
 //			m_AABB.Expand(hittables[i]->GetBoundingBox());
@@ -75,6 +75,21 @@ namespace RTW
 			SingleThreadedCalculateBVH(hittables, start, end);
 
 		currentDepth--;
+	}
+
+	bool SurfaceAreaHeuristicNode::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
+	{
+		if (!m_AABB.IsHit(ray, rayDistance))
+			return false;
+
+		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);
+
+		if (isHit)
+			isHit |= m_Right->IsRayHit(ray, { rayDistance.GetMin(), hitData.distance }, hitData);
+		else
+			isHit |= m_Right->IsRayHit(ray, rayDistance, hitData);
+
+		return isHit;
 	}
 
 	void SurfaceAreaHeuristicNode::SingleThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
@@ -136,6 +151,8 @@ namespace RTW
 
 		if (bestSplit.SplitPosition == 1)
 			m_Left = hittables[start];
+		else if (bestSplit.SplitPosition < 64)
+			m_Left = std::make_shared<SAHNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB, true);
 		else
 			g_Threads.push([this, &hittables, start, lambdaEnd = start + bestSplit.SplitPosition, lambdaAABB = bestSplit.LeftAABB](int) {
 					this->m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
