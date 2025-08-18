@@ -168,8 +168,10 @@ namespace RTW
 	{
 		const size_t numberOfSplits = glm::min(glm::max(static_cast<size_t>(512), static_cast<size_t>(glm::sqrt(hittablesRange))), hittablesRange - 1);
 
-		AABB leftAABB;
-		AABB rightAABB;
+		auto AABBAllocation(std::make_unique<AABB[]>(2));
+
+		AABB& leftAABB = AABBAllocation[0];
+		AABB& rightAABB = AABBAllocation[1];
 
 		const double invertedIncermentedNumberOfSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
 		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
