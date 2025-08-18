@@ -263,9 +263,10 @@ namespace RTW
 
 	void AxisAliagnedBoundingBoxes::LongestAxisSetter()
 	{
-		m_LongestAxis = (m_X.Size() > m_Y.Size()) ?
-					   ((m_X.Size() > m_Z.Size()) ? AABB::Axis::x : AABB::Axis::z) :
-					   ((m_Y.Size() > m_Z.Size()) ? AABB::Axis::y : AABB::Axis::z);
+		if (m_X.Size() > m_Y.Size())
+			m_LongestAxis = (m_X.Size() > m_Z.Size()) ? AABB::Axis::x : AABB::Axis::z;
+		else
+			m_LongestAxis = (m_Y.Size() > m_Z.Size()) ? AABB::Axis::y : AABB::Axis::z;
 	}
 
 	void AxisAliagnedBoundingBoxes::MiniumPadding()

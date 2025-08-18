@@ -7,7 +7,7 @@
 #include "glm/gtx/norm.hpp"
 #include "glm/gtc/constants.hpp"
 #include "glm/trigonometric.hpp"
-#include "glm//gtx/compatibility.hpp"
+#include "glm/gtx/compatibility.hpp"
 
 #include "Core.h"
 #include "Ray.h"
@@ -23,14 +23,10 @@ namespace RTW::Templates
 		inline Sphere<t_IsMoving>(const Point& center, double radius, std::shared_ptr<BaseMaterial> material) requires (!t_IsMoving)
 			: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material), m_AABB(center - radius, center + radius) {}
 
-		inline Sphere<t_IsMoving>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material) requires (t_IsMoving)
-			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material)
+		inline Sphere<t_IsMoving>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material) requires t_IsMoving
+			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material), m_AABB(m_Center.at(0.0) - radius, m_Center.at(0.0) + radius)
 		{
-			std::array<AABB, 2> box{
-				AABB(m_Center.at(0.0) - radius, m_Center.at(0.0) + radius),
-				AABB(m_Center.at(1.0) - radius, m_Center.at(1.0) + radius)
-			};
-			m_AABB = AABB(box[0], box[1]);
+			m_AABB.Expand(AABB(m_Center.at(1.0) - radius, m_Center.at(1.0) + radius));
 		}
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override

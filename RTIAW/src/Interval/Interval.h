@@ -13,11 +13,13 @@ namespace RTW
 		inline Interval(Interval&& old) noexcept : m_Min(old.m_Min), m_Max(old.m_Max)
 			{ old.m_MinMax.data = Empty.m_MinMax.data; }
 		inline Interval(const Interval& a, const Interval& b)
-			: m_Min((a.m_Min <= b.m_Min) ? a.m_Min : b.m_Min), m_Max((a.m_Max >= b.m_Max) ? a.m_Max : b.m_Max) {}
+			: m_Min(glm::min(a.m_Min, b.m_Min)), m_Max(glm::max(a.m_Max, b.m_Max)) {}
 
-		~Interval() = default;
+		inline ~Interval()
+			{ this->m_MinMax.data = Empty.m_MinMax.data; }
 
-		inline Interval& operator=(const Interval& original) { this->m_Min = original.m_Min; this->m_Max = original.m_Max; return *this; }
+		inline Interval& operator=(const Interval& original) { this->m_MinMax.data = original.m_MinMax.data; return *this; }
+		inline Interval& operator=(Interval&& old) noexcept { this->m_MinMax.data = old.m_MinMax.data; old.m_MinMax.data = Empty.m_MinMax.data; return *this; }
 
 		inline double Size() const { return m_Max - m_Min; }
 
@@ -46,9 +48,10 @@ namespace RTW
 		inline double GetMin() const { return m_Min; }
 		inline const glm::dvec2& GetAsVector() const { return m_MinMax; }
 
-		inline void SetMax(const double max) { m_Max = max; }
 		inline void SetMin(const double min) { m_Min = min; }
+		inline void SetMax(const double max) { m_Max = max; }
 		inline void SetMinMax(const double min, const double max) { m_Min = min; m_Max = max; }
+		inline void SetMinMax(const glm::dvec2 minMax) { m_MinMax.data = minMax.data; }
 		inline void SetMinMax(const __m128d minMax) { m_MinMax.data = minMax; }
 
 		static const Interval Empty;

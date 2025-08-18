@@ -57,8 +57,7 @@ namespace RTW
 		bool IsRayHit([[maybe_unused]] const Ray& ray, [[maybe_unused]] const Interval& rayDistance, [[maybe_unused]] HitData& hitData) const override { return false; }
 
 		const AABB& GetBoundingBox() const override { return AABB::empty; }
-		inline void SetBoundingBox(const AABB& newAABB) override // not possible newAABB will be ignored
-		{(void)newAABB;}
+		inline void SetBoundingBox([[maybe_unused]] const AABB& newAABB) override {} // not possible newAABB will be ignored
 
 		static inline std::shared_ptr<BaseRayHittable>& GetNoHit() { return s_NoHit; }
 
