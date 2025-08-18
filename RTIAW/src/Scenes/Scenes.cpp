@@ -235,7 +235,8 @@ namespace RTW
 		auto red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
 		auto white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
 		auto green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-		auto light = std::make_shared<DiffusedLight>(Colour(15, 15, 15));
+		std::shared_ptr<BaseTexture> earthTexture = std::make_shared<ImageTexture>("earthmap.jpg");
+		auto light = std::make_shared<DiffusedLight>(earthTexture, 15);
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), green));
 		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), red));

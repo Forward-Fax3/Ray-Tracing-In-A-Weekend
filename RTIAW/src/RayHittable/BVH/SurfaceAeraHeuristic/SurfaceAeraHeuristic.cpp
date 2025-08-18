@@ -109,19 +109,19 @@ namespace RTW
 			return;
 		}
 
-		BestSplit bestSplit;
+		auto bestSplit(std::make_shared<BestSplit>());
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
+		if (bestSplit->axis != AABB::Axis::z)
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto boxA, auto boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
 
-		m_Left = (bestSplit.SplitPosition == 1) ? hittables[start] :
-			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB);
+		m_Left = (bestSplit->SplitPosition == 1) ? hittables[start] :
+			std::make_shared<SAHNode>(hittables, start, start + bestSplit->SplitPosition, bestSplit->LeftAABB);
 
-		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
-			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB);
+		m_Right = (end - bestSplit->SplitPosition == 1) ? hittables[end - 1] :
+			std::make_shared<SAHNode>(hittables, start + bestSplit->SplitPosition, end, bestSplit->RightAABB);
 	}
 
 	void SurfaceAreaHeuristicNode::MultiThreadedCalculateBVH(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
@@ -141,28 +141,30 @@ namespace RTW
 			return;
 		}
 		
-		BestSplit bestSplit{};
+		auto bestSplit(std::make_shared<BestSplit>());
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
-		if (bestSplit.axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit.axis](auto boxA, auto boxB) -> bool {
+		if (bestSplit->axis != AABB::Axis::z)
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto boxA, auto boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
 
-		if (bestSplit.SplitPosition == 1)
-			m_Left = hittables[start];
-		else if (bestSplit.SplitPosition < 64)
-			m_Left = std::make_shared<SAHNode>(hittables, start, start + bestSplit.SplitPosition, bestSplit.LeftAABB, true);
+		if (bestSplit->SplitPosition < 64)
+			m_Left = (bestSplit->SplitPosition == 1) ? hittables[start]:
+					  std::make_shared<SAHNode>(hittables, start, start + bestSplit->SplitPosition, bestSplit->LeftAABB);
 		else
-			g_Threads.push([this, &hittables, start, lambdaEnd = start + bestSplit.SplitPosition, lambdaAABB = bestSplit.LeftAABB](int) {
+			g_Threads.push([this, &hittables, start, lambdaEnd = start + bestSplit->SplitPosition, lambdaAABB = bestSplit->LeftAABB](int) {
 					this->m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
 				});
 
-		m_Right = (end - bestSplit.SplitPosition == 1) ? hittables[end - 1] :
-			std::make_shared<SurfaceAreaHeuristicNode>(hittables, start + bestSplit.SplitPosition, end, bestSplit.RightAABB, true);
+		if (end - bestSplit->SplitPosition < 64)
+			m_Right = (end - bestSplit->SplitPosition == 1) ? hittables[end - 1] :
+					   std::make_shared<SAHNode>(hittables, start + bestSplit->SplitPosition, end, bestSplit->RightAABB);
+		else
+			m_Right = std::make_shared<SAHNode>(hittables, start + bestSplit->SplitPosition, end, bestSplit->RightAABB, true);
 	}
 
-	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, BestSplit& bestSplit) const
+	void SurfaceAreaHeuristicNode::CalculateBestSplit(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, size_t hittablesRange, std::shared_ptr<BestSplit> bestSplit) const
 	{
 		const size_t numberOfSplits = glm::min(glm::max(static_cast<size_t>(512), static_cast<size_t>(glm::sqrt(hittablesRange))), hittablesRange - 1);
 
@@ -195,13 +197,13 @@ namespace RTW
 
 				const double cost = 0.25 + (leftNumberOfItems * leftSurfaceArea + rightNumberOfItems * rightSurfaceArea) * thisAABBInvertedSurfaceArea;
 
-				if (cost < bestSplit.Cost)
+				if (cost < bestSplit->Cost)
 				{
-					bestSplit.LeftAABB = leftAABB;
-					bestSplit.RightAABB = rightAABB;
-					bestSplit.Cost = cost;
-					bestSplit.SplitPosition = splitPosition;
-					bestSplit.axis = axis;
+					bestSplit->LeftAABB = leftAABB;
+					bestSplit->RightAABB = rightAABB;
+					bestSplit->Cost = cost;
+					bestSplit->SplitPosition = splitPosition;
+					bestSplit->axis = axis;
 				}
 
 				leftAABB = rightAABB = AABB::empty;

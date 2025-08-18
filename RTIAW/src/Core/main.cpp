@@ -38,7 +38,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelBox;
+	RTW::Scenes scene = RTW::Scenes::LargeCollectionOfSpheres;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
