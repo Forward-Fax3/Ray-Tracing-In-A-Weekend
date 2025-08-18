@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdint.h>
+#include <limits>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/random.hpp"
@@ -27,7 +28,7 @@ namespace RTW
 	{
 		Init();
 
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
+		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << '\n' << std::numeric_limits<uint16_t>::max() << '\n';
 
 		for (int16_t i = 0; i < m_ImageHeight; i++)
 		{
@@ -64,7 +65,7 @@ namespace RTW
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
 
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << "\n1023\n";
+		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << '\n' << std::numeric_limits<uint16_t>::max() << '\n';
 		for (size_t i = 0; i < m_NumberOfPixels; i++)
 			WriteColour(std::cout, m_ColourPixelArray[i]);
 	}
@@ -133,7 +134,7 @@ namespace RTW
 		Vec3 rayDirection = pixelSample - rayOrigin;
 		double rayTime = glm::linearRand(0.0, 1.0);
 
-		return { rayOrigin, rayDirection, rayTime};
+		return { rayOrigin, rayDirection, rayTime };
 	}
 
 	glm::dvec2 Camera::SampleSquare() const
@@ -149,7 +150,7 @@ namespace RTW
 
 	Colour Camera::ColourCorrection(const Colour& colour) const
 	{
-		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * 1024.0;
+		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * static_cast<double>(std::numeric_limits<uint16_t>::max());
 	}
 
 	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object)
