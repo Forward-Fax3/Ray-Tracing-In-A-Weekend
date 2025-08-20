@@ -16,7 +16,8 @@ namespace RTW
 		explicit inline RayHittables(std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); }
 
 		constexpr void reserve(size_t size) { m_Objects.reserve(size); }
-		inline void add(const std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); m_AABB.Expand(object->GetBoundingBox()); }
+		void add(const std::shared_ptr<BaseRayHittable>& object);
+		void add(const std::shared_ptr<RayHittables>& object);
 
 		// add buffers to AABBs so that comparisons that need to be axis aligned don't end up having the same value
 		void addBuffer();

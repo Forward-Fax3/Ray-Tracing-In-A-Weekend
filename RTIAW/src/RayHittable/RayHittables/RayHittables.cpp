@@ -26,6 +26,29 @@ namespace RTW
 		return hasHit;
 	}
 
+	void RayHittables::add(const std::shared_ptr<BaseRayHittable>& object)
+	{
+		// checks if object is actually a RayHittables if so call the RayHittables specialization
+		if (const auto rayHittables(dynamic_pointer_cast<RayHittables>(object)); rayHittables != nullptr)
+		{
+			this->add(rayHittables);
+			return;
+		}
+
+		m_Objects.emplace_back(object);
+		m_AABB.Expand(object->GetBoundingBox());
+	}
+
+	void RayHittables::add(const std::shared_ptr<RayHittables>& newHittables)
+	{
+		this->m_Objects.reserve(this->size() + newHittables->size());
+
+		for (const auto& object : newHittables->GetObjects())
+			this->m_Objects.emplace_back(object);
+
+		this->m_AABB.Expand(newHittables->m_AABB);
+	}
+
 	void RayHittables::addBuffer()
 	{
 		if (m_Objects.empty())
