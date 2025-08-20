@@ -20,10 +20,10 @@ namespace RTW
 
 	struct HitData
 	{
-		Point point = Point(0.0);
-		Vec3 normal = Vec3(0.0);
-		UV uv = UV(0.0);
-		std::shared_ptr<BaseMaterial> material = nullptr;
+		Point point;
+		Vec3 normal;
+		UV uv;
+		std::shared_ptr<BaseMaterial> material;
 		double distance = 0.0;
 		bool isFrontFace = false;
 
