@@ -8,10 +8,10 @@
 namespace RTW
 {
 	CheckeredTexture::CheckeredTexture(std::shared_ptr<BaseTexture> even, std::shared_ptr<BaseTexture> odd, double scale)
-		: m_Even(even), m_Odd(odd), m_InvScale(1.0 / scale) {}
+		: m_InvScale(1.0 / scale), m_Even(even), m_Odd(odd) {}
 
 	CheckeredTexture::CheckeredTexture(const Colour& even, const Colour& odd, double scale)
-		: m_Even(std::make_shared<SolidColour>(even)), m_Odd(std::make_shared<SolidColour>(odd)), m_InvScale(1.0 / scale) {}
+		: m_InvScale(1.0 / scale), m_Even(std::make_shared<SolidColour>(even)), m_Odd(std::make_shared<SolidColour>(odd)) {}
 
 	Colour CheckeredTexture::GetColour(const UV& uv, const Point& point) const
 	{

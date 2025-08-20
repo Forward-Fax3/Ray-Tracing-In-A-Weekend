@@ -15,9 +15,9 @@ namespace RTW
 
         Colour GetColour(const UV& uv, const Point& point) const override;
 
-    private:
+	private:
+		double m_InvScale;
         std::shared_ptr<BaseTexture> m_Even;
         std::shared_ptr<BaseTexture> m_Odd;
-        double m_InvScale;
     };
 }
