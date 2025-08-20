@@ -32,7 +32,7 @@ int main()
 	cameraData.DefocusAngle = 0.0;
 	cameraData.FocusDistance = 0.0;
 
-	[[maybe_unused]] uint32_t numberOfThreads = std::thread::hardware_concurrency();
+	uint32_t numberOfThreads = std::thread::hardware_concurrency();
 	RTW::g_Threads.resize(numberOfThreads);
 
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());

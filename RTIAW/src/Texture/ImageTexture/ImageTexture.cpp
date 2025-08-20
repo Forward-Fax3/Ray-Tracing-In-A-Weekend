@@ -14,7 +14,7 @@ namespace RTW
 	ImageTexture::ImageTexture(const std::string& fileName)
 		: m_Image(fileName) {}
 
-	Colour ImageTexture::GetColour(const UV& uv, [[maybe_unused]] const Point& point) const
+	Colour ImageTexture::GetColour(const UV& uv, const Point&) const
 	{
 		static const Colour errorCyan(0.0, 1.0, 1.0);
 		if (m_Image.GetHeight() == 0) return errorCyan;
