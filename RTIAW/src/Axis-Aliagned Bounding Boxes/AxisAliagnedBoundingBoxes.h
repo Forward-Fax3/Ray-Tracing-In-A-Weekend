@@ -53,8 +53,7 @@ namespace RTW
 		Interval m_Z;
 		Axis m_LongestAxis = Axis::none;
 
-		static std::atomic<size_t> s_NumberOfBoundingBoxes
-			;
+		static std::atomic<size_t> s_NumberOfBoundingBoxes;
 	};
 
 	using AABB = AxisAliagnedBoundingBoxes;

@@ -22,7 +22,7 @@ namespace RTW
 	Lambertian::Lambertian(std::shared_ptr<BaseTexture> texture)
 		: m_Texture(texture) {}
 
-	std::pair<const bool, const Colour> Lambertian::Scatter(Ray& ray, const HitData& data) const
+	ScatterReturn Lambertian::Scatter(Ray& ray, const HitData& data) const
 	{
 		Vec3 scatterDirection = data.normal + RandomUnitVector();
 		double minValue = 1e-8;
@@ -30,6 +30,6 @@ namespace RTW
 		scatterDirection = scatterDirection < minValue ? data.normal : scatterDirection;
 
 		ray = Ray(data.point, scatterDirection, ray.time());
-		return { true, m_Texture->GetColour(data.uv, data.point) };
+		return { m_Texture->GetColour(data.uv, data.point), true };
 	}
 }

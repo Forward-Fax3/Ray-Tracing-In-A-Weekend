@@ -17,7 +17,7 @@ namespace RTW
 		Metal(const Colour& albedo, double fuzz);
 		Metal(std::shared_ptr<BaseTexture> texture, double fuzz);
 
-		std::pair<const bool, const Colour> Scatter(Ray& ray, const HitData& data) const override;
+		ScatterReturn Scatter(Ray& ray, const HitData& data) const override;
 
 	private:
 		std::shared_ptr<BaseTexture> m_Texture;

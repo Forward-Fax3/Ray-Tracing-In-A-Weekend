@@ -15,15 +15,29 @@ namespace RTW
 {
 	struct HitData;
 
+	union ScatterReturn
+	{
+		explicit(false) ScatterReturn(const Colour& colour, bool isScattered)
+			: _total(glm::dvec4(colour, *reinterpret_cast<double*>(&isScattered))) {}
+
+		Colour attenuation;
+		struct
+		{
+			glm::vec<3, double, glm::packed_highp> _;
+			bool bounced;
+		};
+
+		glm::dvec4 _total;
+	};
+
 	class BaseMaterial
 	{
 	public:
 		BaseMaterial() = default;
 		virtual ~BaseMaterial() = default;
 
-		virtual std::pair<const bool, const Colour> Scatter([[maybe_unused]] Ray& ray, [[maybe_unused]] const HitData& data) const
-			{ return { false, { 0.0, 0.0, 0.0 } }; }
+		virtual ScatterReturn Scatter(Ray&, const HitData&) const { return { {0.0, 0.0, 0.0 }, false }; }
 
-		virtual Colour EmittedColour([[maybe_unused]] const UV& uv, [[maybe_unused]] const Point& point) const { return Colour(0.0); }
+		virtual Colour EmittedColour(const UV&, const Point&) const { return Colour(0.0); }
 	};
 }

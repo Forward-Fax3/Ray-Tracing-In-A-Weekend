@@ -117,12 +117,12 @@ namespace RTW
 
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 
-		const auto [bounced, attenuation] = data.material->Scatter(ray, data);
+		ScatterReturn scatteredData = data.material->Scatter(ray, data);
 
-		if (!bounced)
+		if (!scatteredData.bounced)
 			return emittedColour;
 
-		return emittedColour + attenuation * RayColour(ray, bouncesLeft - 1, object);
+		return emittedColour + scatteredData.attenuation * RayColour(ray, bouncesLeft - 1, object);
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j) const

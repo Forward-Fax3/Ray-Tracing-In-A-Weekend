@@ -19,7 +19,7 @@ namespace RTW
 	Dielectric::Dielectric(double refactionIndex, std::shared_ptr<BaseTexture> texture)
 		: m_RefractionIndex(refactionIndex), m_Texture(texture)	{}
 
-	std::pair<const bool, const Colour> Dielectric::Scatter(Ray& ray, const HitData& data) const
+	ScatterReturn Dielectric::Scatter(Ray& ray, const HitData& data) const
 	{
 		double ri = data.isFrontFace ? (1.0 / m_RefractionIndex) : m_RefractionIndex;
 
@@ -32,7 +32,7 @@ namespace RTW
 			glm::refract(normalDirection, data.normal, ri);
 
 		ray = Ray(data.point, newDirection, ray.time());
-		return { true, m_Texture->GetColour(data.uv, data.point) };
+		return { m_Texture->GetColour(data.uv, data.point), true };
 	}
 
 	Vec3 Dielectric::refract(const Vec3& uv, const Vec3& normal, double etaOverEtaPrime)
