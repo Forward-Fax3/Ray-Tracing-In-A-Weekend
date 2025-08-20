@@ -150,7 +150,23 @@ namespace RTW
 
 	Colour Camera::ColourCorrection(const Colour& colour) const
 	{
-		return Interval(0.0, 0.999).Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)) * static_cast<double>(std::numeric_limits<uint16_t>::max());
+		static Interval minMax(0.0, 0.999);
+		Vec3 scalledGammaCorrectedAndClampedColour{};
+#if RTW_AVX2 || RTW_AVX512
+		Vec3 scalledAndGammaCorrectedColour{};
+		scalledAndGammaCorrectedColour.data = _mm256_pow_pd((colour * m_SampleScale).data, m_InvGamma.data);
+		scalledGammaCorrectedAndClampedColour.data = _mm256_min_pd(_mm256_max_pd(scalledAndGammaCorrectedColour.data, _mm256_set1_pd(minMax.GetMin())), _mm256_set1_pd(minMax.GetMax()));
+#else
+		Vec3 scalledColour(colour * m_SampleScale);
+		Vec3 scalledAndGammaCorrectedColour{};
+
+		scalledAndGammaCorrectedColour.data.setv(0, _mm_pow_pd(scalledColour.data.getv(0), m_InvGamma.data.getv(0)));
+		scalledGammaCorrectedAndClampedColour.data.setv(0, _mm_min_pd(_mm_max_pd(scalledAndGammaCorrectedColour.data.getv(0), _mm_set1_pd(minMax.GetMin())), _mm_set1_pd(minMax.GetMax())));
+
+		scalledAndGammaCorrectedColour.z = glm::pow(scalledColour.z, m_InvGamma.z);
+		scalledGammaCorrectedAndClampedColour.z = minMax.Clamp(scalledAndGammaCorrectedColour.z);
+#endif
+		return scalledGammaCorrectedAndClampedColour * static_cast<double>(std::numeric_limits<uint16_t>::max());
 	}
 
 	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object)
