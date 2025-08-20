@@ -32,13 +32,41 @@ namespace RTW
 	private:
 		struct BestSplit
 		{
-			BestSplit() = default;
+			inline BestSplit()
+				: axis(AABB::Axis::none), Cost(doubleInf) {}
 
-			AABB LeftAABB;
-			AABB RightAABB;
-			size_t SplitPosition = 0;
-			double Cost = doubleInf;
-			AABB::Axis axis = AABB::Axis::none;
+			inline ~BestSplit()
+			{
+				LeftAABB.~AxisAliagnedBoundingBoxes();
+				RightAABB.~AxisAliagnedBoundingBoxes();
+			}
+
+			union
+			{
+				AABB LeftAABB;
+
+				struct
+				{
+					Interval padding0[3];
+					AABB::Axis padding1;
+					
+					AABB::Axis axis;
+					double Cost;
+				};
+			};
+
+			union
+			{
+				AABB RightAABB;
+
+				struct
+				{
+					Interval padding3[3];
+					AABB::Axis padding4;
+
+					size_t SplitPosition = 0;
+				};
+			};
 		};
 
 	private:
