@@ -18,16 +18,14 @@ namespace RTW
 	union ScatterReturn
 	{
 		explicit(false) ScatterReturn(const Colour& colour, bool isScattered)
-			: _total(glm::dvec4(colour, *reinterpret_cast<double*>(&isScattered))) {}
+			: _(colour), bounced(isScattered) {}
 
 		Colour attenuation;
 		struct
 		{
-			glm::vec<3, double, glm::packed_highp> _;
+			glm::highp_dvec3 _;
 			bool bounced;
 		};
-
-		glm::dvec4 _total;
 	};
 
 	class BaseMaterial
