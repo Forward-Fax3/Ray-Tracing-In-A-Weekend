@@ -34,8 +34,6 @@ namespace RTW
 		}
 	};
 
-	class RayNoHit;
-
 	class BaseRayHittable
 	{
 	public:
@@ -46,7 +44,7 @@ namespace RTW
 		virtual const AABB& GetBoundingBox() const = 0;
 		virtual void SetBoundingBox(const AABB& newBox) = 0;
 
-		static std::shared_ptr<BaseRayHittable>& GetNoHit();
+		static std::shared_ptr<BaseRayHittable> GetNoHit();
 	};
 
 	class RayNoHit final : public BaseRayHittable
@@ -54,17 +52,17 @@ namespace RTW
 	public:
 		RayNoHit() = default;
 
-		bool IsRayHit([[maybe_unused]] const Ray& ray, [[maybe_unused]] const Interval& rayDistance, [[maybe_unused]] HitData& hitData) const override { return false; }
+		bool IsRayHit(const Ray&, const Interval&, HitData&) const override { return false; }
 
 		const AABB& GetBoundingBox() const override { return AABB::empty; }
-		inline void SetBoundingBox([[maybe_unused]] const AABB& newAABB) override {} // not possible newAABB will be ignored
+		inline void SetBoundingBox(const AABB&) override { /* not possible newAABB will be ignored */ }
 
-		static inline std::shared_ptr<BaseRayHittable>& GetNoHit() { return s_NoHit; }
-
-	private:
-		static std::shared_ptr<BaseRayHittable> s_NoHit;
-		friend class BaseRayHittable;
+		static inline std::shared_ptr<BaseRayHittable> GetNoHit()
+		{
+			static std::shared_ptr<BaseRayHittable> noHit = std::make_shared<RayNoHit>();
+			return noHit;
+		}
 	};
 
-	inline std::shared_ptr<BaseRayHittable>& BaseRayHittable::GetNoHit() { return RayNoHit::s_NoHit; }
+	inline std::shared_ptr<BaseRayHittable> BaseRayHittable::GetNoHit() { return RayNoHit::GetNoHit(); }
 }
