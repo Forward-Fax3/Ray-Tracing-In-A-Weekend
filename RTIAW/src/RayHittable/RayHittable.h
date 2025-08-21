@@ -18,19 +18,41 @@ namespace RTW
 {
 	class BaseMaterial;
 
+	// point must be written to before distance
 	struct HitData
 	{
-		Point point;
-		Vec3 normal;
+		union
+		{
+			// point must be written to before distance
+			Point point;
+
+			struct
+			{
+				glm::highp_dvec3 padding1;
+				// point must be written to before distance
+				double distance = 0.0;
+			};
+		};
+
+		union
+		{
+			Vec3 normal;
+
+			struct
+			{
+				glm::highp_dvec3 padding2;
+				bool isFrontFace = false;
+			};
+		};
+
 		UV uv;
 		std::shared_ptr<BaseMaterial> material;
-		double distance = 0.0;
-		bool isFrontFace = false;
 
 		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)
 		{
-			isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
-			normal = isFrontFace ? outwardNormal : -outwardNormal;
+			bool tempIsFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
+			normal = tempIsFrontFace ? outwardNormal : -outwardNormal;
+			isFrontFace = tempIsFrontFace;
 		}
 	};
 

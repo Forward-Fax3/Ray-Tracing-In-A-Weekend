@@ -47,8 +47,8 @@ namespace RTW
 
 				struct
 				{
-					Interval padding0[3];
-					AABB::Axis padding1;
+					Interval padding1[3];
+					AABB::Axis padding2;
 					
 					AABB::Axis axis;
 					double Cost;
