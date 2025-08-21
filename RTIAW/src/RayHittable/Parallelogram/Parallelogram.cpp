@@ -38,8 +38,8 @@ namespace RTW
 		if (!Interval(0.0, 1.0).Contains(tempUV))
 			return false;
 
-		hitData.point = hitPoint;
 		hitData.distance = rayT;
+		hitData.SetPoint(hitPoint);
 		hitData.uv = tempUV;
 		hitData.material = m_Material;
 		hitData.SetFaceNormal(ray, m_Normal);

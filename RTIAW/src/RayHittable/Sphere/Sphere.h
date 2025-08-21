@@ -59,8 +59,8 @@ namespace RTW::Templates
 					return false;
 			}
 
-			hitData.point = ray.at(root);
 			hitData.distance = root;
+			hitData.SetPoint(ray.at(root));
 			hitData.material = m_Material;
 
 			Vec3 normal = (hitData.point - center) / m_Radius;

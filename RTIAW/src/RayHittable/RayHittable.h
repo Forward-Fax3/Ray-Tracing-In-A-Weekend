@@ -21,38 +21,59 @@ namespace RTW
 	// point must be written to before distance
 	struct HitData
 	{
+		inline HitData()
+		{
+			point.data = glm::dvec4(0.0).data; // will also set distance to 0
+			normal.data = glm::dvec4(0.0).data; // will also set isFaceNormal to false
+			uv.data = glm::dvec2(0.0).data;
+		}
+
 		union
 		{
 			// point must be written to before distance
-			Point point;
+			Point point{};
 
 			struct
 			{
 				glm::highp_dvec3 padding1;
 				// point must be written to before distance
-				double distance = 0.0;
+				double distance;
 			};
 		};
 
 		union
 		{
-			Vec3 normal;
+			Vec3 normal{};
 
 			struct
 			{
 				glm::highp_dvec3 padding2;
-				bool isFrontFace = false;
+				
+				union
+				{
+					bool isFrontFace;
+					double isFrontFaceAsDouble;
+				};
 			};
 		};
 
-		UV uv;
+		UV uv{};
 		std::shared_ptr<BaseMaterial> material;
 
 		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)
 		{
-			bool tempIsFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
-			normal = tempIsFrontFace ? outwardNormal : -outwardNormal;
-			isFrontFace = tempIsFrontFace;
+			isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
+			this->SetNormal(isFrontFace ? outwardNormal : -outwardNormal);
+		}
+
+		inline void SetPoint(const Point& newPoint)
+		{
+			point.data = glm::dvec4(newPoint, distance).data;
+		}
+
+		inline void SetNormal(const Vec3& newNormal)
+		{
+			normal.data = glm::dvec4(newNormal, isFrontFaceAsDouble).data;
 		}
 	};
 
