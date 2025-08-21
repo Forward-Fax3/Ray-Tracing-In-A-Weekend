@@ -33,7 +33,7 @@ namespace RTW
 		struct BestSplit
 		{
 			inline BestSplit()
-				: axis(AABB::Axis::none), Cost(doubleInf) {}
+				: axis(AABB::Axis::none), Cost(doubleInf), SplitPosition(0) {}
 
 			~BestSplit() {}; // need to use "{}" instead of "= default" due to the function being deleted by the compiler
 
@@ -60,7 +60,7 @@ namespace RTW
 					Interval padding3[3];
 					AABB::Axis padding4;
 
-					size_t SplitPosition = 0;
+					size_t SplitPosition;
 				};
 			};
 		};
