@@ -7,9 +7,6 @@ namespace RTW
 {
 	class BVHBase : public BaseRayHittable
 	{
-	public:
-		BVHBase() = default;
-
 	protected:
 		static bool BoxComparison(std::shared_ptr<BaseRayHittable> boxA, std::shared_ptr<BaseRayHittable> boxB, AABB::Axis axis);
 
