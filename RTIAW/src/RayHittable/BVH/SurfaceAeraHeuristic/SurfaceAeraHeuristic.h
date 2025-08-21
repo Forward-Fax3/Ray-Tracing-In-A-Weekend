@@ -35,11 +35,7 @@ namespace RTW
 			inline BestSplit()
 				: axis(AABB::Axis::none), Cost(doubleInf) {}
 
-			inline ~BestSplit()
-			{
-				LeftAABB.~AxisAliagnedBoundingBoxes();
-				RightAABB.~AxisAliagnedBoundingBoxes();
-			}
+			~BestSplit() {}; // need to use "{}" instead of "= default" due to the function being deleted by the compiler
 
 			union
 			{
