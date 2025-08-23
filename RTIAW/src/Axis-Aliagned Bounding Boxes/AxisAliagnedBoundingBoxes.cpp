@@ -101,33 +101,33 @@ namespace RTW
 		// create T in AVX512
 		__m512d m512_T = _mm512_mul_pd(_mm512_sub_pd(m512_AxisBounds, m512_RayOrigin), m512_RayInvDirection);
 
-#if __clang__
+#if __clang__ || RTW_INTEL_COMPILER
 		// split interleaving T into 2 AVX256 registers for comparison of smaller and larger
-		__m256d m256_TMin = { m512_T[0], m512_T[2], m512_T[4], m512_T[6] };
-		__m256d m512_TMax = { m512_T[1], m512_T[3], m512_T[5], m512_T[7] };
-
-		// preform comparison
-		__mmask8 TSwapMask = _mm256_cmp_pd_mask(m256_TMin, m512_TMax, _CMP_GT_OS);
-		// scale the bit mask from AVX2 to avx512so that it load correctly 
-		TSwapMask = ScaleBits(TSwapMask, 2);
-
-		// make swaps as necessary
-		m512_T = _mm512_mask_permute_pd(m512_T, TSwapMask, m512_T, 0b01010101);
+//		__m256d m256_TMin = { m512_T[0], m512_T[2], m512_T[4], m512_T[6] };
+//		__m256d m512_TMax = { m512_T[1], m512_T[3], m512_T[5], m512_T[7] };
+//
+//		// preform comparison
+//		__mmask8 TSwapMask = _mm256_cmp_pd_mask(m256_TMin, m512_TMax, _CMP_GT_OS);
+//		// scale the bit mask from AVX2 to avx512 so that it load correctly 
+//		TSwapMask = ScaleBits<2>(TSwapMask);
+//
+//		// make swaps as necessary
+//		m512_T = _mm512_mask_permute_pd(m512_T, TSwapMask, m512_T, 0b01010101);
 		
 		// creates a swap mask to swap in 128 bit flips
-//		const __m512i m512_SwapBitMap = _mm512_set_epi64(6, 7, 4, 5, 2, 3, 0, 1);
-//		const __mmask8 m512_SwapBitMask = 0b10101010;
-//
-// 		// creates the swapped T register
-//		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
-// 
-//		// creates a register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
-//		__m512d m512_TMin = _mm512_min_pd(m512_T, m512_T128BitSwaped);
-//		// creates a register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
-//		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
-//
-// 		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
-//		m512_T = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
+		const __m512i m512_SwapBitMap = _mm512_set_epi64(6, 7, 4, 5, 2, 3, 0, 1);
+		const __mmask8 m512_SwapBitMask = 0b10101010;
+
+ 		// creates the swapped T register
+		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
+ 
+		// creates a register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
+		__m512d m512_TMin = _mm512_min_pd(m512_T, m512_T128BitSwaped);
+		// creates a register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
+		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
+
+ 		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
+		m512_T = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
 
 #elif _MSC_VER
 		// split interleaving T into 2 AVX256 registers for comparison of smaller and larger
@@ -137,7 +137,7 @@ namespace RTW
 		// preform comparison
 		__mmask8 TSwapMask = _mm256_cmp_pd_mask(m256_TMin, m512_TMax, _CMP_GT_OS);
 		// scale the bit mask from AVX2 to avx512so that it load correctly 
-		TSwapMask = ScaleBits(TSwapMask, 2);
+		TSwapMask = ScaleBits<2>(TSwapMask);
 
 		// make swaps as necessary
 		m512_T = _mm512_mask_permute_pd(m512_T, TSwapMask, m512_T, 0b01010101);
@@ -155,7 +155,7 @@ namespace RTW
 		// performs comparison and removes the negation
 		__m512d m512_MaxMinT = _mm512_mul_pd(_mm512_max_pd(m512_AltInvRayT, m512_AltInvT), m512_InvertValue);
 
-		// checks each 128 bit pair to see if the AABB has been hit 
+		// checks each 128 bit pair to see if the AABB has been hit
 		return CheckOrderedPairs0To5(m512_MaxMinT);
 
 #else // RTW_AVX512
@@ -215,6 +215,122 @@ namespace RTW
 		}
 		return true;
 #endif // RTW_AVX512
+
+
+
+//		const __m128d m128_InvertValue = { 1.0, -1.0 };
+//
+//		const __mmask8 loadMask = 0b00111111;
+//		// load m_X, m_Y and m_Z into an AVX512 register
+//		__m512d m512_AxisBounds = _mm512_maskz_load_pd(loadMask, &m_X);
+//
+//		// Load ray origin into an AVX512 Register and double each axis into 128 bit lanes
+//		const Vec3& rayOrigin = ray.origin();
+//		__m512d m512_RayOrigin = _mm512_set_pd(0.0, 0.0, rayOrigin.z, rayOrigin.z, rayOrigin.y, rayOrigin.y, rayOrigin.x, rayOrigin.x);
+//
+//
+//		// Load ray inverted direction into an AVX512 Register and double each axis into 128 bit lanes
+//		const Vec3& rayInvDirection = ray.invDirection();
+//		__m512d m512_RayInvDirection = _mm512_set_pd(0.0, 0.0, rayInvDirection.z, rayInvDirection.z, rayInvDirection.y, rayInvDirection.y, rayInvDirection.x, rayInvDirection.x);
+//
+//		// create T in AVX512
+//		__m512d m512_T = _mm512_mul_pd(_mm512_sub_pd(m512_AxisBounds, m512_RayOrigin), m512_RayInvDirection);
+//
+//#if __clang__ || RTW_INTEL_COMPILER		
+//		// creates a swap mask to swap in 128 bit flips
+//		const __m512i m512_SwapBitMap = _mm512_set_epi64(6, 7, 4, 5, 2, 3, 0, 1);
+//		const __mmask8 m512_SwapBitMask = 0b10101010;
+//
+// 		// creates the swapped T register
+//		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
+// 
+//		// creates a register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
+//		__m512d m512_TMin = _mm512_min_pd(m512_T, m512_T128BitSwaped);
+//		// creates a register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
+//		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
+//
+// 		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
+//		m512_T = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
+//
+//#elif _MSC_VER
+//		// split interleaving T into 2 AVX256 registers for comparison of smaller and larger
+//		__m256d m256_TMin = { m512_T.m512d_f64[0], m512_T.m512d_f64[2], m512_T.m512d_f64[4], m512_T.m512d_f64[6] };
+//		__m256d m512_TMax = { m512_T.m512d_f64[1], m512_T.m512d_f64[3], m512_T.m512d_f64[5], m512_T.m512d_f64[7] };
+//
+//		// preform comparison
+//		__mmask8 TSwapMask = _mm256_cmp_pd_mask(m256_TMin, m512_TMax, _CMP_GT_OS);
+//		// scale the bit mask from AVX2 to avx512so that it load correctly 
+//		TSwapMask = ScaleBits<2>(TSwapMask);
+//
+//		// make swaps as necessary
+//		m512_T = _mm512_mask_permute_pd(m512_T, TSwapMask, m512_T, 0b01010101);
+//#else
+//#error only supports clang and msc
+//#endif
+//		// load rayT and the inverted mask and broadcast it duplicating it in each 128 bit lane except the last one but that is not needed
+//		__m512d m512_RayT = _mm512_maskz_broadcast_f64x2(loadMask, rayT.GetAsVector().data);
+//		const __m512d m512_InvertValue = _mm512_maskz_broadcast_f64x2(loadMask, m128_InvertValue);
+//
+//		// negates T and rayT so that the same comparison can be computed on each x and y (as per 128 bit registers)
+//		__m512d m512_AltInvT = _mm512_mul_pd(m512_T, m512_InvertValue);
+//		__m512d m512_AltInvRayT = _mm512_mul_pd(m512_RayT, m512_InvertValue);
+//
+//		// performs comparison and removes the negation
+//		__m512d m512_MaxMinT = _mm512_mul_pd(_mm512_max_pd(m512_AltInvRayT, m512_AltInvT), m512_InvertValue);
+//
+//		// checks each 128 bit pair to see if the AABB has been hit
+//		bool AVX512Result = CheckOrderedPairs0To5(m512_MaxMinT);
+//
+//		bool standardResult = true;
+//
+//		for (Axis axis = Axis::x; axis <= Axis::z; axis++)
+//		{
+//			const Interval& axisBounds = GetAxisInterval(axis);
+//			const double rAxisOrigin = ray.origin()[+axis];
+//			const double rAxisInvDirection = ray.invDirection()[+axis];
+//
+//			glm::dvec2 t = (axisBounds.GetAsVector() - rAxisOrigin) * rAxisInvDirection;
+//
+//			if (t.x > t.y)
+//				std::swap(t.x, t.y);
+//
+//#if (defined(RTW_AVX2) | defined(RTW_AVX512)) & (SIMD == 1)
+//			// load t and rayT into SIMD register while negating y so that the same comparison can be computed on x and y
+//			__m128d m128_T = _mm_mul_pd(m128_InvertValue, t.data);
+//			__m128d m128_RayT = _mm_mul_pd(m128_InvertValue, rayT.GetAsVector().data);
+//
+//#ifdef RTW_AVX512
+//			// perform comparison
+//			__mmask8 bitMask = _mm_cmp_pd_mask(m128_T, m128_RayT, _CMP_GT_OS);
+//			// load based on mask rayT or T into register
+//			// this also resets the negation on on y as we pull the data from the original scaler data in memory but the compiler
+//			// will optimize that out and use the memory load from earlier.
+//			m128_RayT = _mm_mask_load_pd(rayT.GetAsVector().data, bitMask, &t.data);
+//
+//#else // RTW_AVX512
+//			// perform comparison
+//			__m128d bitMask = _mm_cmpgt_pd(m128_T, m128_RayT);
+//			// load based on mask rayT or T into register
+//			m128_RayT = _mm_blendv_pd(rayT.GetAsVector().data, t.data, bitMask);
+//#endif // RTW_AVX512
+//
+//			// check if x is smaller than or equal y if so return as the ray has missed the box
+//			if (m128_RayT[0] >= m128_RayT[1])
+//			{
+//				standardResult = false;
+//				break;
+//			}
+//
+//			// store rayT back into scaler rayT
+//			rayT.SetMinMax(m128_RayT);
+//
+//#endif // defined(RTW_AVX2) | defined(RTW_AVX512) & (SIMD == 1)
+//		}
+//
+//		if (AVX512Result != standardResult && !standardResult)
+//			__debugbreak();
+//
+//		return standardResult;
 	}
 
 	bool AxisAliagnedBoundingBoxes::IsBigger(const AxisAliagnedBoundingBoxes& otherAABB) const

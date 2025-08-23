@@ -38,7 +38,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::PerlinNoiseSpheres;
+	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
@@ -65,8 +65,8 @@ int main()
 	else
 		worldHittables = sceneHitables->GetObjects()[0];
 
-//	camera.Render(worldHittables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
+	camera.Render(worldHittables);
+//	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
 
 	finishTime = std::chrono::high_resolution_clock::now();
 
@@ -74,3 +74,4 @@ int main()
 	sceneHitables->clear();
 	std::cin.get();
 }
+// 150 sec
