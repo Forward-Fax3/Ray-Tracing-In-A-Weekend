@@ -7,7 +7,7 @@
 
 #include <array>
 
-#define SIMD 0
+#define SIMD 1
 
 
 namespace RTW
@@ -69,12 +69,16 @@ namespace RTW
 
 		double accum = 0.0;
 		for (size_t i = 0; i < 2; i++)
+#if defined(RTW_AVX512) && 0
+		__m512d test = _mm512_broadcast_f64x4(smoothedUVWW.data);
+		(void)test;
+#else // !defined(RTW_AVX512) || 1
 			for (size_t j = 0; j < 2; j++)
 			{
 				glm::dvec4 ijk(static_cast<double>(i), static_cast<double>(j), 0.0, 1.0);
 				glm::dvec4 weightV(glm::xyzz(uvw) - ijk);
 
-#if defined(RTW_AVX2) || defined(RTW_AVX512) && !defined(__clang__) && SIMD // clang optimizes better with the simple version
+#if (defined(RTW_AVX2) || defined(RTW_AVX512)) && (!defined(__clang__) || defined(RTW_INTEL_COMPILER)) && SIMD // clang optimizes better with the simple version
 				static const __m256d temp1_256bit = _mm256_set1_pd(1.0);
 				__m256d tempIJK_256bit = _mm256_sub_pd(temp1_256bit, ijk.data);
 				__m256d tempUVW_256bit = _mm256_sub_pd(temp1_256bit, smoothedUVWW.data);
@@ -88,7 +92,7 @@ namespace RTW
 				std::array<Vec3, 2> weightVK{};
 				weightVK[0].data = weightV.data;
 
-#if defined(RTW_AVX2) || defined(RTW_AVX512) && SIMD
+#if (defined(RTW_AVX2) || defined(RTW_AVX512)) && SIMD
 				weightVK[1].data = _mm256_permute_pd(weightV.data, 0b0110);
 #elif defined(RTW_SSE2) && SIMD
 				weightVK[1].data.setv(0, weightV.data.getv(0));
@@ -100,6 +104,7 @@ namespace RTW
 				accum += tempMultXY * temp.z * glm::dot(samples[i][j][0], weightVK[0]) +
 					tempMultXY * temp.w * glm::dot(samples[i][j][1], weightVK[1]);
 			}
+#endif // AVX512
 		return accum;
 	}
 
@@ -122,3 +127,4 @@ namespace RTW
 		}
 	}
 }
+ 
