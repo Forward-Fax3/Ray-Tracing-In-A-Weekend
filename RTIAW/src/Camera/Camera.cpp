@@ -152,10 +152,12 @@ namespace RTW
 	{
 		static Interval minMax(0.0, 0.999);
 		Vec3 scalledGammaCorrectedAndClampedColour{};
-#if RTW_AVX2 || RTW_AVX512
+#if (RTW_AVX2 || RTW_AVX512) && (!defined(__clang__) || defined(RTW_INTEL_COMPILER))
 		Vec3 scalledAndGammaCorrectedColour{};
 		scalledAndGammaCorrectedColour.data = _mm256_pow_pd((colour * m_SampleScale).data, m_InvGamma.data);
 		scalledGammaCorrectedAndClampedColour.data = _mm256_min_pd(_mm256_max_pd(scalledAndGammaCorrectedColour.data, _mm256_set1_pd(minMax.GetMin())), _mm256_set1_pd(minMax.GetMax()));
+#elif defined(__clang__) && (RTW_AVX2 || RTW_AVX512) // clang does not support SMVL 256 bit pow call so need to do the standard way
+		scalledGammaCorrectedAndClampedColour.data = minMax.Clamp(glm::pow(colour * m_SampleScale, m_InvGamma)).data;
 #else
 		Vec3 scalledColour(colour * m_SampleScale);
 		Vec3 scalledAndGammaCorrectedColour{};
