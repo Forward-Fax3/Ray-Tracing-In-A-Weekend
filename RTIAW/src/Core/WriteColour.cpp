@@ -19,7 +19,7 @@ namespace std
 
 		auto format(const glm::u16vec3& colour, format_context& ctx) const
 		{
-			return format_to(ctx.out(), "{} {} {}\n", colour.x, colour.y, colour.z);
+			return format_to(ctx.out(), "{} {} {}", colour.x, colour.y, colour.z);
 		}
 	};
 }
@@ -30,9 +30,9 @@ namespace RTW
 	{
 		glm::u16vec3 colourTemp = colour;
 #if _HAS_CXX23
-		std::print(out, "{}", colourTemp);
+		std::println(out, "{}", colourTemp);
 #else
-		out << std::format("{}", colourTemp);
+		out << std::format("{}\n", colourTemp);
 #endif
 	}
 }
