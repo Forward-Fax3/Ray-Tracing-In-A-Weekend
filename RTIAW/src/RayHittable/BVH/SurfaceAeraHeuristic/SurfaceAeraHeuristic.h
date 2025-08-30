@@ -37,6 +37,7 @@ namespace RTW
 
 			~BestSplit() {}; // need to use "{}" instead of "= default" due to the function being deleted by the compiler
 
+#ifndef _DEBUG
 			union
 			{
 				AABB LeftAABB;
@@ -63,6 +64,14 @@ namespace RTW
 					size_t SplitPosition;
 				};
 			};
+
+#else // ifdef _DEBUG
+			AABB LeftAABB;
+			AABB RightAABB;
+			double Cost;
+			size_t SplitPosition;
+			AABB::Axis axis;
+#endif
 		};
 
 	private:
