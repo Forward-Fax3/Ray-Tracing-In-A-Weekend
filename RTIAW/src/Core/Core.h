@@ -21,12 +21,11 @@
 
 namespace RTW
 {
+	using Vec2 = glm::dvec2;
 	using Vec3 = glm::dvec3;
-//	using Vec3 = glm::vec3;
 	using Colour = Vec3;
 	using Point = Vec3;
-	using UV = glm::dvec2;
-//	using UV = glm::vec2;
+	using UV = Vec2;
 	static constexpr double doubleInf = std::numeric_limits<double>::infinity();
 
 	using UVvec3 = glm::dmat2x3;
@@ -41,9 +40,9 @@ namespace RTW
 	extern ::ctpl::thread_pool g_Threads;
 
 	template <typename Tout, uint64_t t_ScaleIn, typename Tin>
-	inline Tout ScaleBits(Tin in)
+	inline Tout ScaleBits(Tin in) requires std::numeric_limits<Tout>::is_integer && std::numeric_limits<Tin>::is_integer
 	{
-		unsigned mask = 0x0FF;
+		auto mask = std::numeric_limits<Tout>::max();
 		auto out = static_cast<Tout>(in);
 		constexpr uint8_t N = sizeof(Tout) * 2;
 		for (uint64_t scale = t_ScaleIn; scale != 0; scale /= 2)
@@ -58,7 +57,7 @@ namespace RTW
 	}
 
 	template <uint64_t t_Scale, typename T>
-	inline T ScaleBits(T in)
+	inline T ScaleBits(T in) requires std::numeric_limits<T>::is_integer
 	{
 		return ScaleBits<T, t_Scale>(in);
 	}
