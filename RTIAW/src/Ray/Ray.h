@@ -22,9 +22,25 @@ namespace RTW
 		double time() const { return m_Time; }
 
 	private:
+#ifndef _DEBUG
+		union
+		{
+			Point m_Origin;
+			glm::dvec4 m_OriginTime;
+
+			struct
+			{
+				glm::highp_dvec3 padding;
+				double m_Time;
+			};
+		};
+		Vec3 m_Direction;
+		Vec3 m_InvDirection;
+#else
 		Point m_Origin;
 		Vec3 m_Direction;
 		Vec3 m_InvDirection;
 		double m_Time;
+#endif
 	};
 }
