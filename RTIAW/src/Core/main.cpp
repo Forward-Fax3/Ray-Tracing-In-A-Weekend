@@ -38,7 +38,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
+	RTW::Scenes scene = RTW::Scenes::Earth;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
@@ -74,4 +74,3 @@ int main()
 	sceneHitables->clear();
 	std::cin.get();
 }
-// 150 sec
