@@ -106,7 +106,7 @@ namespace RTW
 
 		static inline std::shared_ptr<BaseRayHittable> GetNoHit()
 		{
-			static std::shared_ptr<BaseRayHittable> noHit = std::make_shared<RayNoHit>(PRIVATE());
+			static auto noHit(std::make_shared<RayNoHit>(PRIVATE()));
 			return noHit;
 		}
 	};
