@@ -97,7 +97,7 @@ namespace RTW
 
 	public:
 		RayNoHit() = delete;
-		consteval explicit RayNoHit(PRIVATE) {};
+		explicit RayNoHit(PRIVATE) {};
 
 		bool IsRayHit(const Ray&, const Interval&, HitData&) const override { return false; }
 
