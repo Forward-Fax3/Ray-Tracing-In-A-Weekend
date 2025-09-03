@@ -30,7 +30,11 @@ namespace RTW
 		static constexpr int32_t componentsPerPixel = 3;
 		int32_t componentsPerPixelTemp = componentsPerPixel;
 		glm::i32vec2 tempSizes(0);
-		float* data = stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &componentsPerPixelTemp, componentsPerPixel);
+
+		auto stbFreeLambda = [](float data[]) { STBI_FREE(data); };
+
+		std::unique_ptr<float[], decltype(stbFreeLambda)> data(stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &componentsPerPixelTemp, componentsPerPixel), stbFreeLambda);
+
 		if (data == nullptr) return false;
 
 		m_ImageSize = tempSizes;
@@ -42,8 +46,6 @@ namespace RTW
 			m_Colours[i].g = data[j + 1];
 			m_Colours[i].b = data[j + 2];
 		}
-
-		STBI_FREE(data);
 
 		m_NumberOfPixelsPerScanline = m_ImageSize.x;
 		return true;

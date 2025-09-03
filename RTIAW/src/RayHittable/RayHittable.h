@@ -92,8 +92,12 @@ namespace RTW
 
 	class RayNoHit final : public BaseRayHittable
 	{
+	private:
+		struct PRIVATE { consteval explicit PRIVATE() = default; };
+
 	public:
-		RayNoHit() = default;
+		RayNoHit() = delete;
+		consteval explicit RayNoHit(PRIVATE) {};
 
 		bool IsRayHit(const Ray&, const Interval&, HitData&) const override { return false; }
 
@@ -102,7 +106,7 @@ namespace RTW
 
 		static inline std::shared_ptr<BaseRayHittable> GetNoHit()
 		{
-			static std::shared_ptr<BaseRayHittable> noHit = std::make_shared<RayNoHit>();
+			static auto noHit(std::make_shared<RayNoHit>(PRIVATE()));
 			return noHit;
 		}
 	};

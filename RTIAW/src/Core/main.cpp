@@ -74,4 +74,3 @@ int main()
 	sceneHitables->clear();
 	std::cin.get();
 }
-// 150 sec
