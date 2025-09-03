@@ -235,8 +235,7 @@ namespace RTW
 		auto red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
 		auto white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
 		auto green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-		std::shared_ptr<BaseTexture> earthTexture = std::make_shared<ImageTexture>("earthmap.jpg");
-		auto light = std::make_shared<DiffusedLight>(earthTexture, 15);
+		auto light = std::make_shared<DiffusedLight>(Colour(1.0), 15);
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), green));
 		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), red));
@@ -244,6 +243,9 @@ namespace RTW
 		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(555, 0, 0), Vec3(0, 0, 555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(555, 555, 555), UVvec3(Vec3(-555, 0, 0), Vec3(0, 0, -555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 555), UVvec3(Vec3(555, 0, 0), Vec3(0, 555, 0)), white));
+
+		hittables->add(CreateBox(Point(130, 0, 65), Point(295, 165, 230), white));
+		hittables->add(CreateBox(Point(265, 0, 295), Point(430, 330, 460), white));
 
 		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 40.0;

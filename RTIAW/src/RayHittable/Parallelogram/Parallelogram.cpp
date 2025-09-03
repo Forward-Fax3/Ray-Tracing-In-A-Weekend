@@ -1,5 +1,6 @@
 #include "Core.h"
 #include "RayHittable.h"
+#include "RayHittables.h"
 #include "BaseMaterial.h"
 #include "Parallelogram.h"
 
@@ -59,5 +60,27 @@ namespace RTW
 	UV Parallelogram::CalculateUV(const Point& p) const
 	{
 		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p))};
+	}
+
+	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material)
+	{
+		auto sides(std::make_shared<RayHittables>());
+
+		// Construct the two opposite vertices with the minimum and maximum coordinates.
+		auto min = Point(std::fmin(pointA.x, pointB.x), std::fmin(pointA.y, pointB.y), std::fmin(pointA.z, pointB.z));
+		auto max = Point(std::fmax(pointA.x, pointB.x), std::fmax(pointA.y, pointB.y), std::fmax(pointA.z, pointB.z));
+
+		auto dx = Vec3(max.x - min.x, 0, 0);
+		auto dy = Vec3(0, max.y - min.y, 0);
+		auto dz = Vec3(0, 0, max.z - min.z);
+
+		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, max.z), UVvec3(dx, dy), material)); // front
+		sides->add(std::make_shared<Parallelogram>(Point(max.x, min.y, max.z), UVvec3(-dz, dy), material)); // right
+		sides->add(std::make_shared<Parallelogram>(Point(max.x, min.y, min.z), UVvec3(-dx, dy), material)); // back
+		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, min.z), UVvec3(dz, dy), material)); // left
+		sides->add(std::make_shared<Parallelogram>(Point(min.x, max.y, max.z), UVvec3(dx, -dz), material)); // top
+		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, min.z), UVvec3(dx, dz), material)); // bottom
+
+		return sides;
 	}
 }
