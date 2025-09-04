@@ -26,7 +26,7 @@ namespace RTW
 		return hasHit;
 	}
 
-	void RayHittables::add(const std::shared_ptr<BaseRayHittable>& object)
+	void RayHittables::add(const std::shared_ptr<BaseRayHittable> object)
 	{
 		// checks if object is actually a RayHittables if so call the RayHittables specialization
 		if (const auto rayHittables(dynamic_pointer_cast<RayHittables>(object)); rayHittables != nullptr)
@@ -35,11 +35,11 @@ namespace RTW
 			return;
 		}
 
-		m_Objects.emplace_back(object);
-		m_AABB.Expand(object->GetBoundingBox());
+		this->m_Objects.emplace_back(object);
+		this->m_AABB.Expand(object->GetBoundingBox());
 	}
 
-	void RayHittables::add(const std::shared_ptr<RayHittables>& newHittables)
+	void RayHittables::add(const std::shared_ptr<RayHittables> newHittables)
 	{
 		this->m_Objects.reserve(this->size() + newHittables->size());
 
@@ -123,8 +123,8 @@ namespace RTW
 		case z:
 			zInteval.Expand(1e-3, 0.0);
 			break;
-		case none:
-		default:
+		[[unlikely]] case none:
+		[[unlikely]] default:
 			__debugbreak(); // should be impossible
 		}
 

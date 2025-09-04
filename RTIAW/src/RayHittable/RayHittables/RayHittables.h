@@ -12,12 +12,12 @@ namespace RTW
 	class RayHittables : public BaseRayHittable
 	{
 	public:
-		inline RayHittables() = default;
-		explicit inline RayHittables(std::shared_ptr<BaseRayHittable>& object) { m_Objects.emplace_back(object); }
+		RayHittables() = default;
+		explicit inline RayHittables(const std::shared_ptr<BaseRayHittable> object) { this->add(object); }
 
 		constexpr void reserve(size_t size) { m_Objects.reserve(size); }
-		void add(const std::shared_ptr<BaseRayHittable>& object);
-		void add(const std::shared_ptr<RayHittables>& object);
+		void add(const std::shared_ptr<BaseRayHittable> object);
+		void add(const std::shared_ptr<RayHittables> object);
 
 		// add buffers to AABBs so that comparisons that need to be axis aligned don't end up having the same value
 		void addBuffer();
