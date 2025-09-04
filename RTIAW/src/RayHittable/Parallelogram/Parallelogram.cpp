@@ -4,6 +4,8 @@
 #include "BaseMaterial.h"
 #include "Parallelogram.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 #include <memory>
 #include <array>
 
@@ -62,24 +64,63 @@ namespace RTW
 		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p))};
 	}
 
-	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material)
+	static __forceinline auto RotateAroundPoint(double rad, const Point& center, const Vec3& axis)
+	{
+		auto t1 = glm::translate(glm::dmat4(1.0), -center);
+		auto r = glm::rotate(glm::dmat4(1.0), rad, axis);
+		auto t2 = glm::translate(glm::dmat4(1.0), center);
+		return t2 * r * t1;
+	}
+
+	static __forceinline auto RotateAroundPoint3D(const Vec3& radVec3, const Point& point, const Point& center)
+	{
+		auto temp = glm::translate(glm::dmat4(1.0), point);
+		temp = RotateAroundPoint(radVec3.x, center, Vec3(0.0, 1.0, 0.0)) * temp;
+		temp = RotateAroundPoint(radVec3.y, center, Vec3(0.0, 0.0, 1.0)) * temp;
+		temp = RotateAroundPoint(radVec3.z, center, Vec3(1.0, 0.0, 0.0)) * temp;
+
+		return temp[3];
+	}
+
+	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material, const Vec3& rotation /*= Vec3(0.0)*/)
 	{
 		auto sides(std::make_shared<RayHittables>());
 
 		// Construct the two opposite vertices with the minimum and maximum coordinates.
-		auto min = Point(std::fmin(pointA.x, pointB.x), std::fmin(pointA.y, pointB.y), std::fmin(pointA.z, pointB.z));
-		auto max = Point(std::fmax(pointA.x, pointB.x), std::fmax(pointA.y, pointB.y), std::fmax(pointA.z, pointB.z));
+		Point min{};
+		Point max{};
 
-		auto dx = Vec3(max.x - min.x, 0, 0);
-		auto dy = Vec3(0, max.y - min.y, 0);
-		auto dz = Vec3(0, 0, max.z - min.z);
+#if RTW_AVX2 || RTW_AVX512
+		min.data = _mm256_min_pd(pointA.data, pointB.data);
+		max.data = _mm256_max_pd(pointA.data, pointB.data);
+#else
+		min.data.setv(0, _mm_min_pd(pointA.data.getv(0), pointB.data.getv(0)));
+		min.data.setv(1, _mm_min_pd(pointA.data.getv(1), pointB.data.getv(1)));
 
-		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, max.z), UVvec3(dx, dy), material)); // front
-		sides->add(std::make_shared<Parallelogram>(Point(max.x, min.y, max.z), UVvec3(-dz, dy), material)); // right
-		sides->add(std::make_shared<Parallelogram>(Point(max.x, min.y, min.z), UVvec3(-dx, dy), material)); // back
-		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, min.z), UVvec3(dz, dy), material)); // left
-		sides->add(std::make_shared<Parallelogram>(Point(min.x, max.y, max.z), UVvec3(dx, -dz), material)); // top
-		sides->add(std::make_shared<Parallelogram>(Point(min.x, min.y, min.z), UVvec3(dx, dz), material)); // bottom
+		max.data.setv(0, _mm_max_pd(pointA.data.getv(0), pointB.data.getv(0)));
+		max.data.setv(1, _mm_max_pd(pointA.data.getv(1), pointB.data.getv(1)));
+#endif
+
+		glm::dmat4 rot(1.0);
+		rot = glm::rotate(rot, glm::radians(rotation.x), Vec3(0.0, 1.0, 0.0));
+		rot = glm::rotate(rot, glm::radians(rotation.y), Vec3(0.0, 0.0, 1.0));
+		rot = glm::rotate(rot, glm::radians(rotation.z), Vec3(1.0, 0.0, 0.0));
+
+		Vec3 delta = max - min;
+
+		min = RotateAroundPoint3D(glm::radians(-rotation), min, min + delta / 2.0);
+		max = RotateAroundPoint3D(glm::radians(-rotation), max, max - delta / 2.0);
+
+		Vec3 dx(delta.x * Vec3(rot[0].x, rot[1].x, rot[2].x));
+		Vec3 dy(delta.y * Vec3(rot[0].y, rot[1].y, rot[2].y));
+		Vec3 dz(delta.z * Vec3(rot[0].z, rot[1].z, rot[2].z));
+
+		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dx,  dy), material)); // front
+		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dz,  dy), material)); // right
+		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dz,  dx), material)); // bottom
+		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dx, -dy), material)); // back
+		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dz, -dy), material)); // left
+		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dz, -dx), material)); // top
 
 		return sides;
 	}

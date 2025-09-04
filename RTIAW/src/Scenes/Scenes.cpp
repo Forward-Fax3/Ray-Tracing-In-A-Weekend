@@ -232,20 +232,20 @@ namespace RTW
 
 	void CornelBox(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
-		auto red = std::make_shared<Lambertian>(Colour(.65, .05, .05));
-		auto white = std::make_shared<Lambertian>(Colour(.73, .73, .73));
-		auto green = std::make_shared<Lambertian>(Colour(.12, .45, .15));
-		auto light = std::make_shared<DiffusedLight>(Colour(1.0), 15);
+		auto red  (std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
+		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
+		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
+		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 15.0));
 
-		hittables->add(std::make_shared<Parallelogram>(Point(555, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), green));
-		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(0, 555, 0), Vec3(0, 0, 555)), red));
-		hittables->add(std::make_shared<Parallelogram>(Point(343, 554, 332), UVvec3(Vec3(-130, 0, 0), Vec3(0, 0, -105)), light));
-		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 0), UVvec3(Vec3(555, 0, 0), Vec3(0, 0, 555)), white));
-		hittables->add(std::make_shared<Parallelogram>(Point(555, 555, 555), UVvec3(Vec3(-555, 0, 0), Vec3(0, 0, -555)), white));
-		hittables->add(std::make_shared<Parallelogram>(Point(0, 0, 555), UVvec3(Vec3(555, 0, 0), Vec3(0, 555, 0)), white));
-
-		hittables->add(CreateBox(Point(130, 0, 65), Point(295, 165, 230), white));
-		hittables->add(CreateBox(Point(265, 0, 295), Point(430, 330, 460), white));
+		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), red  ));
+		hittables->add(std::make_shared<Parallelogram>(Point(343.0, 554.0, 332.0), UVvec3(Vec3(-130.0,   0.0, 0.0), Vec3(0, 0, -105)), light));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 0,  555)), white));
+		hittables->add(std::make_shared<Parallelogram>(Point(555.0),               UVvec3(Vec3(-555.0,   0.0, 0.0), Vec3(0, 0, -555)), white));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
+		
+		hittables->add(CreateBox(Point(105.0, 0.0,  65.0), Point(270.0, 165.0, 230.0), white, Vec3( 18.0, 0.0, 0.0)));
+		hittables->add(CreateBox(Point(290.0, 0.0, 295.0), Point(455.0, 330.0, 460.0), white, Vec3(-15.0, 0.0, 0.0)));
 
 		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 40.0;

@@ -16,14 +16,14 @@ int main()
 
 	RTW::CameraData cameraData{};
 
-	cameraData.ImageWidth = 3840;
+	cameraData.ImageWidth = 1920;
 	cameraData.VUp = RTW::Vec3(0.0, 1.0, 0.0);
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 32;
+	cameraData.SamplesPerPixel = 64;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 

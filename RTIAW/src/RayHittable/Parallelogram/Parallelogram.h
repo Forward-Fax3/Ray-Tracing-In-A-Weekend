@@ -37,5 +37,6 @@ namespace RTW
 		Vec3 m_W;
 	};
 
-	std::shared_ptr<BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material);
+	std::shared_ptr<BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material, const Vec3& rotation = Vec3(0.0));
 }
+	
