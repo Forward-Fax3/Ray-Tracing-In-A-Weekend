@@ -23,7 +23,7 @@ namespace RTW
 		SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded = false);
 
 		const AABB& GetBoundingBox() const override { return m_AABB; }
-		inline void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen. 
+		inline void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen.
 		{
 			if (newAABB.IsBigger(this->m_AABB))
 				m_AABB = newAABB;
@@ -32,12 +32,12 @@ namespace RTW
 	private:
 		struct BestSplit
 		{
-			inline BestSplit()
-				: axis(AABB::Axis::none), Cost(doubleInf), SplitPosition(0) {}
-
 			~BestSplit() {}; // need to use "{}" instead of "= default" due to the function being deleted by the compiler
 
 #ifndef _DEBUG
+			inline BestSplit()
+				: axis(AABB::Axis::none), Cost(doubleInf), SplitPosition(0) {}
+
 			union
 			{
 				AABB LeftAABB;
@@ -66,6 +66,9 @@ namespace RTW
 			};
 
 #else // ifdef _DEBUG
+			inline BestSplit()
+				: Cost(doubleInf), SplitPosition(0), axis(AABB::Axis::none) {}
+
 			AABB LeftAABB;
 			AABB RightAABB;
 			double Cost;
