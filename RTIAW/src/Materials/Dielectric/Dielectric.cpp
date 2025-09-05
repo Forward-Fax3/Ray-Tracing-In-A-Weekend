@@ -39,7 +39,7 @@ namespace RTW
 	{
 		double cosTheta = glm::min(glm::dot(-uv, normal), 1.0);
 		Vec3 rOutPerp = etaOverEtaPrime * (uv + cosTheta * normal);
-		Vec3 rOutParrallel = -glm::sqrt(glm::abs(1.0 - glm::length2(rOutPerp))) * normal;
+		Vec3 rOutParrallel = -glm::sqrt(std::abs(1.0 - glm::length2(rOutPerp))) * normal;
 		return rOutPerp + rOutParrallel;
 	}
 

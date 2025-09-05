@@ -59,7 +59,7 @@ namespace RTW
 			tempPoint *= 2.0;
 		}
 
-		return glm::abs(accum);
+		return std::abs(accum);
 	}
 
 	double PerlinNoise::PerlinInterpilation(const std::array<std::array<std::array<Vec3, 2>, 2>, 2>& samples, const Vec3& uvw)

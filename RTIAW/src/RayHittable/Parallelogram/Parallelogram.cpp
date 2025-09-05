@@ -28,7 +28,7 @@ namespace RTW
 		double denom = glm::dot(m_Normal, ray.direction());
 
 		// if demon is 0 it is parallel to the parallelogram
-		if (glm::abs(denom) < 1e-8)
+		if (std::abs(denom) < 1e-8)
 			return false;
 
 		double rayT = (m_D - glm::dot(m_Normal, ray.origin())) / denom;
