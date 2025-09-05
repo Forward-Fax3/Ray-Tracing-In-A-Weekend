@@ -64,6 +64,41 @@ namespace RTW
 		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p))};
 	}
 
+	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material)
+	{
+		auto box(std::make_shared<RayHittables>());
+
+		// Construct the two opposite vertices with the minimum and maximum coordinates.
+		Point min{};
+		Point max{};
+
+#if RTW_AVX2 || RTW_AVX512
+		min.data = _mm256_min_pd(pointA.data, pointB.data);
+		max.data = _mm256_max_pd(pointA.data, pointB.data);
+#else
+		min.data.setv(0, _mm_min_pd(pointA.data.getv(0), pointB.data.getv(0)));
+		min.data.setv(1, _mm_min_pd(pointA.data.getv(1), pointB.data.getv(1)));
+
+		max.data.setv(0, _mm_max_pd(pointA.data.getv(0), pointB.data.getv(0)));
+		max.data.setv(1, _mm_max_pd(pointA.data.getv(1), pointB.data.getv(1)));
+#endif
+
+		Vec3 delta = max - min;
+		Vec3 dX(delta.x, 0.0, 0.0);
+		Vec3 dY(0.0, delta.y, 0.0);
+		Vec3 dZ(0.0, 0.0, delta.z);
+
+		box->reserve(6);
+		box->add(std::make_shared<Parallelogram>(min, UVvec3(dX, dY), material)); // front
+		box->add(std::make_shared<Parallelogram>(min, UVvec3(dZ, dY), material)); // right
+		box->add(std::make_shared<Parallelogram>(min, UVvec3(dZ, dX), material)); // bottom
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dX, -dY), material)); // back
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dZ, -dY), material)); // left
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dZ, -dX), material)); // top
+
+		return box;
+	}
+
 	static __forceinline auto RotateAroundPoint(double rad, const Point& center, const Vec3& axis)
 	{
 		auto t1 = glm::translate(glm::dmat4(1.0), -center);
@@ -82,9 +117,13 @@ namespace RTW
 		return temp[3];
 	}
 
-	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material, const Vec3& rotation /*= Vec3(0.0)*/)
+	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material, const Vec3& degrees)
 	{
-		auto sides(std::make_shared<RayHittables>());
+		[[unlikely]]
+		if (degrees == Vec3(0.0))
+			return CreateBox(pointA, pointB, material);
+
+		auto box(std::make_shared<RayHittables>());
 
 		// Construct the two opposite vertices with the minimum and maximum coordinates.
 		Point min{};
@@ -101,27 +140,29 @@ namespace RTW
 		max.data.setv(1, _mm_max_pd(pointA.data.getv(1), pointB.data.getv(1)));
 #endif
 
-		glm::dmat4 rot(1.0);
-		rot = glm::rotate(rot, glm::radians(rotation.x), Vec3(0.0, 1.0, 0.0));
-		rot = glm::rotate(rot, glm::radians(rotation.y), Vec3(0.0, 0.0, 1.0));
-		rot = glm::rotate(rot, glm::radians(rotation.z), Vec3(1.0, 0.0, 0.0));
-
 		Vec3 delta = max - min;
+		Vec3 radians = degrees * glm::radians(1.0); // using glm::radians(1.0) instead of glm::radians(degrees) as this way can be done with 1 multiply instruction instead of 3
 
-		min = RotateAroundPoint3D(glm::radians(-rotation), min, min + delta / 2.0);
-		max = RotateAroundPoint3D(glm::radians(-rotation), max, max - delta / 2.0);
+		min = RotateAroundPoint3D(-radians, min, min + delta / 2.0);
+		max = RotateAroundPoint3D(-radians, max, max - delta / 2.0);
 
-		Vec3 dx(delta.x * Vec3(rot[0].x, rot[1].x, rot[2].x));
-		Vec3 dy(delta.y * Vec3(rot[0].y, rot[1].y, rot[2].y));
-		Vec3 dz(delta.z * Vec3(rot[0].z, rot[1].z, rot[2].z));
+		glm::dmat4 rot(1.0);
+		rot = glm::rotate(rot, radians.x, Vec3(0.0, 1.0, 0.0));
+		rot = glm::rotate(rot, radians.y, Vec3(0.0, 0.0, 1.0));
+		rot = glm::rotate(rot, radians.z, Vec3(1.0, 0.0, 0.0));
 
-		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dx,  dy), material)); // front
-		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dz,  dy), material)); // right
-		sides->add(std::make_shared<Parallelogram>(min, UVvec3( dz,  dx), material)); // bottom
-		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dx, -dy), material)); // back
-		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dz, -dy), material)); // left
-		sides->add(std::make_shared<Parallelogram>(max, UVvec3(-dz, -dx), material)); // top
+		Vec3 dX(delta.x * Vec3(rot[0].x, rot[1].x, rot[2].x));
+		Vec3 dY(delta.y * Vec3(rot[0].y, rot[1].y, rot[2].y));
+		Vec3 dZ(delta.z * Vec3(rot[0].z, rot[1].z, rot[2].z));
 
-		return sides;
+		box->reserve(6);
+		box->add(std::make_shared<Parallelogram>(min, UVvec3( dX,  dY), material)); // front
+		box->add(std::make_shared<Parallelogram>(min, UVvec3( dZ,  dY), material)); // right
+		box->add(std::make_shared<Parallelogram>(min, UVvec3( dZ,  dX), material)); // bottom
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dX, -dY), material)); // back
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dZ, -dY), material)); // left
+		box->add(std::make_shared<Parallelogram>(max, UVvec3(-dZ, -dX), material)); // top
+
+		return box;
 	}
 }
