@@ -66,8 +66,6 @@ namespace RTW
 
 	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material)
 	{
-		auto box(std::make_shared<RayHittables>());
-
 		// Construct the two opposite vertices with the minimum and maximum coordinates.
 		Point min{};
 		Point max{};
@@ -88,6 +86,7 @@ namespace RTW
 		Vec3 dY(0.0, delta.y, 0.0);
 		Vec3 dZ(0.0, 0.0, delta.z);
 
+		auto box(std::make_shared<RayHittables>());
 		box->reserve(6);
 		box->add(std::make_shared<Parallelogram>(min, UVvec3(dX, dY), material)); // front
 		box->add(std::make_shared<Parallelogram>(min, UVvec3(dZ, dY), material)); // right
@@ -123,8 +122,6 @@ namespace RTW
 		if (degrees == Vec3(0.0))
 			return CreateBox(pointA, pointB, material);
 
-		auto box(std::make_shared<RayHittables>());
-
 		// Construct the two opposite vertices with the minimum and maximum coordinates.
 		Point min{};
 		Point max{};
@@ -155,6 +152,7 @@ namespace RTW
 		Vec3 dY(delta.y * Vec3(rot[0].y, rot[1].y, rot[2].y));
 		Vec3 dZ(delta.z * Vec3(rot[0].z, rot[1].z, rot[2].z));
 
+		auto box(std::make_shared<RayHittables>());
 		box->reserve(6);
 		box->add(std::make_shared<Parallelogram>(min, UVvec3( dX,  dY), material)); // front
 		box->add(std::make_shared<Parallelogram>(min, UVvec3( dZ,  dY), material)); // right
