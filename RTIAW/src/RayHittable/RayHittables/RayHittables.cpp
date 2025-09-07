@@ -1,4 +1,5 @@
 #include <memory>
+#include <utility>
 
 #include "Core.h"
 #include "Ray.h"
@@ -123,9 +124,9 @@ namespace RTW
 		case z:
 			zInteval.Expand(1e-3, 0.0);
 			break;
-		[[unlikely]] case none:
-		[[unlikely]] default:
-			__debugbreak(); // should be impossible
+		case none:
+		default:
+			unreachable();
 		}
 
 		boxA->SetBoundingBox(AABB(xInteval, yInteval, zInteval));

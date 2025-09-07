@@ -21,6 +21,17 @@
 
 namespace RTW
 {
+	__forceinline void unreachable() noexcept
+	{
+#if _HAS_CXX23
+		std::unreachable();
+#elif defined(_MSC_VER) && !defined(__clang__)
+		__assume(false);
+#else // GCC, Clang
+		__builtin_unreachable();
+#endif
+	}
+
 	using Vec2 = glm::dvec2;
 	using Vec3 = glm::dvec3;
 	using Colour = Vec3;
