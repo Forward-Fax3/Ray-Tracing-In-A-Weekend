@@ -29,7 +29,7 @@ namespace RTW
 	void RayHittables::add(const std::shared_ptr<BaseRayHittable> object)
 	{
 		// checks if object is actually a RayHittables if so call the RayHittables specialization
-		if (const auto rayHittables(dynamic_pointer_cast<RayHittables>(object)); rayHittables != nullptr)
+		if (const auto rayHittables(std::dynamic_pointer_cast<RayHittables>(object)); rayHittables != nullptr)
 		{
 			this->add(rayHittables);
 			return;

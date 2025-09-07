@@ -61,7 +61,7 @@ namespace RTW
 
 	UV Parallelogram::CalculateUV(const Point& p) const
 	{
-		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p))};
+		return { glm::dot(m_W, glm::cross(p, m_UV[1])), glm::dot(m_W, glm::cross(m_UV[0], p)) };
 	}
 
 	std::shared_ptr<RTW::BaseRayHittable> CreateBox(const Point& pointA, const Point& pointB, std::shared_ptr<BaseMaterial> material)
