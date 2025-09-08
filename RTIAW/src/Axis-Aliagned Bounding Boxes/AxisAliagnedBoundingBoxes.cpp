@@ -107,14 +107,15 @@ namespace RTW
 		__m512d m512_MaxMinT = _mm512_mul_pd(_mm512_max_pd(m512_AltInvRayT, m512_AltInvT), m512_InvertValue);
 
 
-		// checks each 128 bit pair to see if the AABB has been hit
+		// creates a test interval then shrinks it to the smallest size
 		Interval test(_mm512_extractf64x2_pd(m512_MaxMinT, 0));
 		test.Shrink(_mm512_extractf64x2_pd(m512_MaxMinT, 1));
 		test.Shrink(_mm512_extractf64x2_pd(m512_MaxMinT, 2));
 
+		// test the bound of the test interval to make sure max is not smaller than or equal to the minium bound
 		return test.GetMin() < test.GetMax();
 
-#else // RTW_AVX512
+#else // !RTW_AVX512
 		for (Axis axis = Axis::x; axis <= Axis::z; axis++)
 		{
 			const Interval& axisBounds = GetAxisInterval(axis);
