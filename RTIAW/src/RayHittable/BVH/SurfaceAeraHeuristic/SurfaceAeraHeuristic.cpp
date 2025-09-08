@@ -60,9 +60,6 @@ namespace RTW
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
 		: m_AABB(thisAABB)
 	{
-//		for (size_t i = start; i < end; i++)
-//			m_AABB.Expand(hittables[i]->GetBoundingBox());
-
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
 			m_AABB.Expand((*i)->GetBoundingBox());
 
