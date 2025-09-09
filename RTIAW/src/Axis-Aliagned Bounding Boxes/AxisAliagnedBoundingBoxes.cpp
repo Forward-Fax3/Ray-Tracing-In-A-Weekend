@@ -67,6 +67,7 @@ namespace RTW
 		const __mmask8 m512_SwapBitMask = 0b10101010;
 
 		const __m512d m512_InvertValue = _mm512_set_pd(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+		const __m128d m128_InvertValue = _mm_set_pd(-1.0, 1.0);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
@@ -87,9 +88,9 @@ namespace RTW
 		// creates the swapped T register
 		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
 
-		// creates test register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
+		// creates test1 register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
 		__m512d m512_TMin = _mm512_min_pd(m512_T, m512_T128BitSwaped);
-		// creates test register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
+		// creates test1 register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
 		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
 
 		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
@@ -103,17 +104,21 @@ namespace RTW
 		__m512d m512_AltInvT = _mm512_mul_pd(m512_T, m512_InvertValue);
 		__m512d m512_AltInvRayT = _mm512_mul_pd(m512_RayT, m512_InvertValue);
 
-		// performs comparison and removes the negation
-		__m512d m512_MaxMinT = _mm512_mul_pd(_mm512_max_pd(m512_AltInvRayT, m512_AltInvT), m512_InvertValue);
-
+		// performs AVX512 comparison
+		__m512d m512_MaxMinT = _mm512_max_pd(m512_AltInvRayT, m512_AltInvT);
+		// negation is not necessary yet the shrinking process would need to do the same negation
 
 		// creates a test interval then shrinks it to the smallest size
-		Interval test(_mm512_extractf64x2_pd(m512_MaxMinT, 0));
-		test.Shrink(_mm512_extractf64x2_pd(m512_MaxMinT, 1));
-		test.Shrink(_mm512_extractf64x2_pd(m512_MaxMinT, 2));
+		// the shrinking is performed here instead of with Intervals own shrink function as it adds unnecessary multiplications
+		Interval test;
+		test.SetMinMax(_mm_max_pd(_mm512_extractf64x2_pd(m512_MaxMinT, 0), _mm512_extractf64x2_pd(m512_MaxMinT, 1)));
+		test.SetMinMax(_mm_mul_pd(_mm_max_pd(test.GetAsVector().data, _mm512_extractf64x2_pd(m512_MaxMinT, 2)), m128_InvertValue));
 
 		// test the bound of the test interval to make sure max is not smaller than or equal to the minium bound
-		return test.GetMin() < test.GetMax();
+		// using shufpd and comisd instructions as other wise the compiler will do the same thing in memory instead
+		// of just using built in instruction
+		__m128d maxValue = _mm_shuffle_pd(test.GetAsVector().data, test.GetAsVector().data, 1);
+		return _mm_comilt_sd(test.GetAsVector().data, maxValue);
 
 #else // !RTW_AVX512
 		for (Axis axis = Axis::x; axis <= Axis::z; axis++)
