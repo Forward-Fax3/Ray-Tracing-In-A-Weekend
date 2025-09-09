@@ -10,10 +10,6 @@
 
 #if defined(__INTEL_COMPILER) || defined(__INTEL_LLVM_COMPILER)
 	#define RTW_INTEL_COMPILER 1
-
-	#ifndef __INTEL_COMPILER
-		#define __INTEL_COMPILER 2021
-	#endif
 #endif
 
 #include "glm/glm.hpp"

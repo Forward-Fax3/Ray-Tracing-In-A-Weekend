@@ -57,7 +57,7 @@ project "RTIAW"
 	location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "c++23"
+	cppdialect "C++latest"
 	cdialect "c17"
 	staticruntime "on"
 	toolset "msc"
@@ -95,6 +95,7 @@ project "RTIAW"
 	{
 		"GLM_ENABLE_EXPERIMENTAL",
 		"GLM_FORCE_DEFAULT_ALIGNED_GENTYPES",
+		"GLM_FORCE_INLINE",
 	}
 
 	flags
