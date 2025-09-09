@@ -110,7 +110,7 @@ namespace RTW
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
 		if (bestSplit->axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto boxA, auto boxB) -> bool {
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto&& boxA, auto&& boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
 
@@ -142,7 +142,7 @@ namespace RTW
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
 		if (bestSplit->axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto boxA, auto boxB) -> bool {
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto&& boxA, auto&& boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
 
@@ -175,7 +175,7 @@ namespace RTW
 
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis](auto boxA, auto boxB) -> bool {
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis](auto&& boxA, auto&& boxB) -> bool {
 				return BoxComparison(boxA, boxB, axis);
 			});
 
