@@ -98,7 +98,7 @@ namespace RTW
 		return box;
 	}
 
-	static __forceinline auto RotateAroundPoint(double rad, const Point& center, const Vec3& axis)
+	static RTW_FORCE_INLINE auto RotateAroundPoint(double rad, const Point& center, const Vec3& axis)
 	{
 		auto t1 = glm::translate(glm::dmat4(1.0), -center);
 		auto r = glm::rotate(glm::dmat4(1.0), rad, axis);
@@ -106,7 +106,7 @@ namespace RTW
 		return t2 * r * t1;
 	}
 
-	static __forceinline auto RotateAroundPoint3D(const Vec3& radVec3, const Point& point, const Point& center)
+	static RTW_FORCE_INLINE auto RotateAroundPoint3D(const Vec3& radVec3, const Point& point, const Point& center)
 	{
 		auto temp = glm::translate(glm::dmat4(1.0), point);
 		temp = RotateAroundPoint(radVec3.x, center, Vec3(0.0, 1.0, 0.0)) * temp;

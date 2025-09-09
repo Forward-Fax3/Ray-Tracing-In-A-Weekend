@@ -14,10 +14,12 @@
 
 #include "glm/glm.hpp"
 
+#define RTW_FORCE_INLINE GLM_INLINE
+
 
 namespace RTW
 {
-	__forceinline void unreachable() noexcept
+	RTW_FORCE_INLINE void unreachable() noexcept
 	{
 #if _HAS_CXX23
 		std::unreachable();

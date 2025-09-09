@@ -31,7 +31,7 @@ namespace RTW
 
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
-		__forceinline bool IsHit(const Ray& ray, Interval rayT) const;
+		RTW_FORCE_INLINE bool IsHit(const Ray& ray, Interval rayT) const;
 
 		void Expand(const AxisAliagnedBoundingBoxes& newAABB);
 
