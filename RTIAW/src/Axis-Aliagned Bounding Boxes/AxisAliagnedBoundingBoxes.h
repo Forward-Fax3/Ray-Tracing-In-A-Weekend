@@ -87,7 +87,6 @@ namespace RTW
 		const __mmask8 m512_SwapBitMask = 0b10101010;
 
 		const __m512d m512_InvertValue = _mm512_set_pd(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-		const __m128d m128_InvertValue = _mm_set_pd(-1.0, 1.0);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
@@ -132,7 +131,7 @@ namespace RTW
 		// the shrinking is performed here instead of with Intervals own shrink function as it adds unnecessary multiplications
 		Interval test;
 		test.SetMinMax(_mm_max_pd(_mm512_extractf64x2_pd(m512_MaxMinT, 0), _mm512_extractf64x2_pd(m512_MaxMinT, 1)));
-		test.SetMinMax(_mm_mul_pd(_mm_max_pd(test.GetAsVector().data, _mm512_extractf64x2_pd(m512_MaxMinT, 2)), m128_InvertValue));
+		test.SetMinMax(_mm_mul_pd(_mm_max_pd(test.GetAsVector().data, _mm512_extractf64x2_pd(m512_MaxMinT, 2)), _mm512_extractf64x2_pd(m512_InvertValue, 0)));
 
 		// test the bound of the test interval to make sure max is not smaller than or equal to the minimum bound
 		// using shufpd and comisd instructions as other wise the compiler will do the same thing in memory instead
