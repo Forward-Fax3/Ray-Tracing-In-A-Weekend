@@ -61,7 +61,7 @@ namespace RTW::Templates
 
 			hitData.distance = root;
 			hitData.SetPoint(ray.at(root));
-			hitData.material = m_Material;
+			hitData.material = m_Material.get();
 
 			Vec3 normal = (hitData.point - center) / m_Radius;
 			hitData.SetFaceNormal(ray, normal);

@@ -44,7 +44,7 @@ namespace RTW
 		hitData.distance = rayT;
 		hitData.SetPoint(hitPoint);
 		hitData.uv = tempUV;
-		hitData.material = m_Material;
+		hitData.material = m_Material.get();
 		hitData.SetFaceNormal(ray, m_Normal);
 
 		return true;

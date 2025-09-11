@@ -103,7 +103,7 @@ namespace RTW
 		m_MaxBounces++;
 	}
 
-	Colour Camera::RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable> object) const
+	Colour Camera::RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable>& object) const
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
