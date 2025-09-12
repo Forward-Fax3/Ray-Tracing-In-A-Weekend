@@ -32,8 +32,7 @@ namespace RTW
 		glm::i32vec2 tempSizes(0);
 
 		auto stbFreeLambda = [](float data[]) { STBI_FREE(data); };
-
-		std::unique_ptr<float[], decltype(stbFreeLambda)> data(stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &componentsPerPixelTemp, componentsPerPixel), stbFreeLambda);
+		std::unique_ptr<float[], decltype(stbFreeLambda)> data(stbi_loadf(filePath.c_str(), &tempSizes.x, &tempSizes.y, &componentsPerPixelTemp, componentsPerPixel));
 
 		if (data == nullptr) return false;
 
