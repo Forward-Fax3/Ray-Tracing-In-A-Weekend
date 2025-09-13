@@ -43,7 +43,7 @@ namespace RTW
 
 		Vec3 normal{};
 		UV uv{};
-		const BaseMaterial* material;
+		const BaseMaterial* material = nullptr;
 		bool isFrontFace;
 
 		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)

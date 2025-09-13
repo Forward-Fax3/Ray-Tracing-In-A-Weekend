@@ -111,7 +111,7 @@ namespace RTW
 
 		if (bestSplit->axis != AABB::Axis::z)
 			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis]<class boxType = std::shared_ptr<BaseRayHittable>>
-				(boxType && boxA, boxType && boxB) -> bool {
+				(boxType&& boxA, boxType&& boxB) -> bool {
 				return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
@@ -144,7 +144,7 @@ namespace RTW
 
 		if (bestSplit->axis != AABB::Axis::z)
 			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis]<class boxType = std::shared_ptr<BaseRayHittable>>
-				(boxType && boxA, boxType && boxB) -> bool {
+				(boxType&& boxA, boxType&& boxB) -> bool {
 			return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
@@ -178,7 +178,7 @@ namespace RTW
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{
 			std::sort(hittables.begin() + start, hittables.begin() + end, [axis]<class boxType = std::shared_ptr<BaseRayHittable>>
-				(boxType && boxA, boxType && boxB) -> bool {
+				(boxType&& boxA, boxType&& boxB) -> bool {
 				return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
