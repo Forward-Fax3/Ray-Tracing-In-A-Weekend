@@ -53,10 +53,12 @@ namespace RTW
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 		m_ColourPixelArray.resize(m_NumberOfPixels);
 
-		for (int16_t i = 0; i < numberOfThreads; i++)
+		for (int16_t i = 0; i < numberOfThreads - 1; i++)
 			g_Threads.push([this, i, numberOfThreads, objects](int) {
 				this->MultiThreadRenderLoop(i, numberOfThreads, objects);
 			});
+
+		MultiThreadRenderLoop(numberOfThreads - 1, numberOfThreads, objects);
 
 		g_Threads.stop(true); // Waits for all threads to finish.
 

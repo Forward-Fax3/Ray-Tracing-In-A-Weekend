@@ -33,7 +33,7 @@ int main()
 	cameraData.FocusDistance = 0.0;
 
 	uint32_t numberOfThreads = std::thread::hardware_concurrency();
-	RTW::g_Threads.resize(numberOfThreads);
+	RTW::g_Threads.resize(numberOfThreads - 1);
 
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
@@ -63,7 +63,7 @@ int main()
 		startTime = std::chrono::high_resolution_clock::now();
 	}
 	else
-		worldHittables = sceneHitables->GetObjects()[0];
+		worldHittables = sceneHitables->GetObjects().front();
 
 //	camera.Render(worldHittables);
 	camera.RenderMultiThreaded(numberOfThreads, worldHittables);

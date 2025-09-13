@@ -51,7 +51,7 @@ namespace RTW
 
 		MultiThreadedCalculateBVH(hittables, start, end);
 
-		while (g_Threads.n_idle() != static_cast<int>(std::thread::hardware_concurrency()))
+		while (g_Threads.n_idle() != static_cast<int>(std::thread::hardware_concurrency()) - 1)
 			std::this_thread::sleep_for(std::chrono::microseconds(50));
 
 		currentDepth--;
@@ -110,8 +110,9 @@ namespace RTW
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
 		if (bestSplit->axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto&& boxA, auto&& boxB) -> bool {
-				return BoxComparison(boxA, boxB, axis);
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis]<class boxType = std::shared_ptr<BaseRayHittable>>
+				(boxType && boxA, boxType && boxB) -> bool {
+				return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
 		m_Left = (bestSplit->SplitPosition == 1) ? hittables[start] :
@@ -142,8 +143,9 @@ namespace RTW
 		CalculateBestSplit(hittables, start, end, hittablesRange, bestSplit);
 
 		if (bestSplit->axis != AABB::Axis::z)
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis](auto&& boxA, auto&& boxB) -> bool {
-				return BoxComparison(boxA, boxB, axis);
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis = bestSplit->axis]<class boxType = std::shared_ptr<BaseRayHittable>>
+				(boxType && boxA, boxType && boxB) -> bool {
+			return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
 		if (bestSplit->SplitPosition < 64)
@@ -152,7 +154,7 @@ namespace RTW
 		else
 			g_Threads.push([this, &hittables, start, lambdaEnd = start + bestSplit->SplitPosition, lambdaAABB = bestSplit->LeftAABB](int) {
 					this->m_Left = std::make_shared<SAHNode>(hittables, start, lambdaEnd, lambdaAABB, true);
-				});
+			});
 
 		if (end - bestSplit->SplitPosition < 64)
 			m_Right = (end - bestSplit->SplitPosition == 1) ? hittables[end - 1] :
@@ -175,8 +177,9 @@ namespace RTW
 
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{
-			std::sort(hittables.begin() + start, hittables.begin() + end, [axis](auto&& boxA, auto&& boxB) -> bool {
-				return BoxComparison(boxA, boxB, axis);
+			std::sort(hittables.begin() + start, hittables.begin() + end, [axis]<class boxType = std::shared_ptr<BaseRayHittable>>
+				(boxType && boxA, boxType && boxB) -> bool {
+				return BoxComparison(std::forward<boxType>(boxA), std::forward<boxType>(boxB), axis);
 			});
 
 			for (size_t split = 1; split < numberOfSplits + 1; split++)
