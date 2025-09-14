@@ -92,8 +92,7 @@ namespace RTW
 #if RTW_AVX512 & SIMD
 		const __mmask8 loadMask = 0b00111111;
 
-		const __m512i m512_SwapBitMap = _mm512_set_epi64(6, 7, 4, 5, 2, 3, 0, 1);
-		const __mmask8 m512_SwapBitMask = 0b10101010;
+		const __m512i m512_SwapBitMap = _mm512_setr_epi64(1, 0, 3, 2, 5, 4, 7, 6);
 
 		const __m512d m512_AltNegMul = _mm512_set_pd(-0.0, 0.0, -0.0, 0.0, -0.0, 0.0, -0.0, 0.0);
 
@@ -116,17 +115,14 @@ namespace RTW
 		// creates the swapped T register
 		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
 
-		// creates test register of the minimum values of t such that the resistor will be (Xmin, Xmin, Ymin, Ymin, Zmin, Zmin, Amin, Amin)
-		__m512d m512_TMin = _mm512_min_pd(m512_T, m512_T128BitSwaped);
-		// creates test register of the maximum values of t such that the resistor will be (Xmax, Xmax, Ymax, Ymax, Zmax, Zmax, Amax, Amax)
-		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
 
-		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
-		__m512d m512_MinMaxT = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
+		// performs an xor so that min and max operations can be performed
+		__m512d m512_AltNegT = _mm512_xor_pd(m512_T, m512_AltNegMul);
+		__m512d m512_AltNegSwapedT = _mm512_xor_pd(m512_T128BitSwaped, m512_AltNegMul);
 
+		// minimums m512_AltNegT and m512_AltNegSwapedT so that m512_T is (Xmin, -Xmax, Ymin, -Ymax, Zmin, -Zmax, Amin, -Amax)
+		__m512d m512_MinNegMaxT = _mm512_min_pd(m512_AltNegT, m512_AltNegSwapedT);
 
-		// multiply m512_T by alternating negative value of 1 an -1 to make max computations possible
-		__m512d m512_MinNegMaxT = _mm512_xor_pd(m512_MinMaxT, m512_AltNegMul);
 
 		// creates a m128_AltNegTest register then shrinks it to the smallest size
 		__m128d m128_AltNegTest = _mm_max_pd(_mm512_extractf64x2_pd(m512_MinNegMaxT, 0), _mm512_extractf64x2_pd(m512_MinNegMaxT, 1));
