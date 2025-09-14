@@ -95,7 +95,7 @@ namespace RTW
 		const __m512i m512_SwapBitMap = _mm512_set_epi64(6, 7, 4, 5, 2, 3, 0, 1);
 		const __mmask8 m512_SwapBitMask = 0b10101010;
 
-		const __m512d m512_AltNegMul = _mm512_set_pd(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+		const __m512d m512_AltNegMul = _mm512_set_pd(-0.0, 0.0, -0.0, 0.0, -0.0, 0.0, -0.0, 0.0);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
@@ -126,20 +126,21 @@ namespace RTW
 
 
 		// multiply m512_T by alternating negative value of 1 an -1 to make max computations possible
-		__m512d m512_MinNegMaxT = _mm512_mul_pd(m512_MinMaxT, m512_AltNegMul);
+		__m512d m512_MinNegMaxT = _mm512_xor_pd(m512_MinMaxT, m512_AltNegMul);
 
 		// creates a m128_AltNegTest register then shrinks it to the smallest size
 		__m128d m128_AltNegTest = _mm_max_pd(_mm512_extractf64x2_pd(m512_MinNegMaxT, 0), _mm512_extractf64x2_pd(m512_MinNegMaxT, 1));
 		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_MinNegMaxT, 2));
 
 		// get rayT and perform max with that as well to make sure that MinNegMaxT is inside the rays boundary
-		__m128d m128_AltNegRayT = _mm_mul_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
+//		__m128d m128_AltNegRayT = _mm_mul_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
+		__m128d m128_AltNegRayT = _mm_xor_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
 		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, m128_AltNegRayT);
 
 		// inverts the values back for final comparison
-		__m128d m128_Test = _mm_mul_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
+		__m128d m128_Test = _mm_xor_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
 
-		// test the boundary of the m128_Test miniumum and maximum to make sure max is not smaller than or equal to the minimum bound
+		// test the boundary of the m128_Test minimum and maximum to make sure max is not smaller than or equal to the minimum bound
 		// using shufpd and comisd instructions as other wise the compiler will do the same thing in memory instead
 		// of just using built in instruction
 		__m128d m128_MaxValue = _mm_shuffle_pd(m128_Test, m128_Test, 1);
@@ -158,17 +159,17 @@ namespace RTW
 				std::swap(t.x, t.y);
 
 #if SIMD
-			const __m128d m128_InvertValue = _mm_set_pd(-1.0, 1.0);
+			const __m128d m128_InvertValue = _mm_set_pd(-0.0, 0.0);
 
 			// load t and rayT into SIMD register while negating y so that the same comparison can be computed on x and y
-			__m128d m128_T = _mm_mul_pd(m128_InvertValue, t.data);
-			__m128d m128_RayT = _mm_mul_pd(m128_InvertValue, rayT.GetAsVector().data);
+			__m128d m128_T = _mm_xor_pd(m128_InvertValue, t.data);
+			__m128d m128_RayT = _mm_xor_pd(m128_InvertValue, rayT.GetAsVector().data);
 
 			// perform comparison
 			__m128d m128_BitMask = _mm_cmpgt_pd(m128_T, m128_RayT);
 
 			// load based on mask rayT or T into register
-#if RTW_AVX2 | RTW_AVX512
+#if RTW_AVX2
 			rayT.SetMinMax(_mm_blendv_pd(rayT.GetAsVector().data, t.data, m128_BitMask));
 #else // SSE2
 			rayT.SetMinMax(_mm_or_pd(_mm_and_pd(m128_BitMask, t.data), _mm_andnot_pd(m128_BitMask, rayT.GetAsVector().data)));
