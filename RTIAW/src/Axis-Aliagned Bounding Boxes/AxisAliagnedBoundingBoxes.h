@@ -122,22 +122,24 @@ namespace RTW
 		__m512d m512_TMax = _mm512_max_pd(m512_T, m512_T128BitSwaped);
 
 		// blends Tmin and Tmax so that m512_T is (Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, Amin, Amax)
-		m512_T = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
+		__m512d m512_MinMaxT = _mm512_mask_blend_pd(m512_SwapBitMask, m512_TMin, m512_TMax);
 
 
 		// multiply m512_T by alternating negative value of 1 an -1 to make max computations possible
-		__m512d m512_AltNegT = _mm512_mul_pd(m512_T, m512_AltNegMul);
+		__m512d m512_MinNegMaxT = _mm512_mul_pd(m512_MinMaxT, m512_AltNegMul);
 
-		// creates a m128_Test interval then shrinks it to the smallest size
-		// the shrinking is performed here instead of with Intervals own shrink function as it adds unnecessary multiplications
-		__m128d m128_AltNegTest = _mm_max_pd(_mm512_extractf64x2_pd(m512_AltNegT, 0), _mm512_extractf64x2_pd(m512_AltNegT, 1));
-		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_AltNegT, 2));
-		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm_mul_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0)));
+		// creates a m128_AltNegTest register then shrinks it to the smallest size
+		__m128d m128_AltNegTest = _mm_max_pd(_mm512_extractf64x2_pd(m512_MinNegMaxT, 0), _mm512_extractf64x2_pd(m512_MinNegMaxT, 1));
+		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_MinNegMaxT, 2));
+
+		// get rayT and perform max with that as well to make sure that MinNegMaxT is inside the rays boundary
+		__m128d m128_AltNegRayT = _mm_mul_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
+		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, m128_AltNegRayT);
 
 		// inverts the values back for final comparison
 		__m128d m128_Test = _mm_mul_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
 
-		// m128_Test the bound of the m128_Test interval to make sure max is not smaller than or equal to the minimum bound
+		// test the boundary of the m128_Test miniumum and maximum to make sure max is not smaller than or equal to the minimum bound
 		// using shufpd and comisd instructions as other wise the compiler will do the same thing in memory instead
 		// of just using built in instruction
 		__m128d m128_MaxValue = _mm_shuffle_pd(m128_Test, m128_Test, 1);
