@@ -51,7 +51,7 @@ namespace RTW
 	WriteFile::FullFilepath WriteFile::GetFilePath()
 	{
 		auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-		return { std::format(R"(.\Images\{:%Y\%B\%d})", time), std::format("{:%H-%M}-{:%S}.ppm", time, std::chrono::floor<std::chrono::seconds>(time)) };
+		return { std::format(R"(.\Images\{:%Y\%B\%d})", time), std::format("{:%H-%M-%S}.ppm", std::chrono::floor<std::chrono::seconds>(time)) };
 	}
 
 	bool WriteFile::CreateDir(std::string_view filepath)
