@@ -31,11 +31,11 @@ namespace RTW
 {
 	WriteFile::WriteFile()
 	{
-		FullFilepath fullFilePath = GetFilePath();
-		if (!CreateDir(fullFilePath.filepath))
+		const auto [filepath, filename] = GetFilePath();
+		if (!CreateDir(filepath))
 			return;
 
-		m_ofs.open(fullFilePath.filepath + '\\' + fullFilePath.filename);
+		m_ofs.open(filepath + '\\' + filename);
 	}
 
 	void WriteFile::WriteToFile(const std::vector<Colour>& pixelData, int16_t width, int16_t height)
