@@ -129,7 +129,6 @@ namespace RTW
 		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_MinNegMaxT, 2));
 
 		// get rayT and perform max with that as well to make sure that MinNegMaxT is inside the rays boundary
-//		__m128d m128_AltNegRayT = _mm_mul_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
 		__m128d m128_AltNegRayT = _mm_xor_pd(rayT.GetAsVector().data, _mm512_extractf64x2_pd(m512_AltNegMul, 0));
 		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, m128_AltNegRayT);
 

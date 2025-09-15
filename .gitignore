@@ -415,7 +415,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # project specific
-image.ppm
+RTIAW/Images/
 
 # intel
 **/Intel® VTune™ Profiler Results/

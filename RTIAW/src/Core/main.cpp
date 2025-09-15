@@ -8,11 +8,21 @@
 #include "SurfaceAeraHeuristic.h"
 #include "Camera.h"
 #include "Scenes.h"
+#include "WriteColour.h"
 
 
 int main()
 {
 	auto startTime = std::chrono::high_resolution_clock::now();
+
+	RTW::WriteFile writeFile;
+
+	if (!writeFile.IsOpen())
+	{
+		std::cout << "Failed to open File." << '\n';
+		std::cin.get();
+		return 1;
+	}
 
 	RTW::CameraData cameraData{};
 
@@ -23,7 +33,7 @@ int main()
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 64;
+	cameraData.SamplesPerPixel = 256;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -38,7 +48,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelBox;
+	RTW::Scenes scene = RTW::Scenes::CollectionOfSpheres;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
@@ -71,6 +81,19 @@ int main()
 	finishTime = std::chrono::high_resolution_clock::now();
 
 	std::clog << "\rRay tracing time Took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
+
+	startTime = std::chrono::high_resolution_clock::now();
+
+	const auto& pixels = camera.GetColours();
+	const int16_t imageWidth = camera.GetImageWidth();
+	const int16_t imageHeight = camera.GetImageHeight();
+
+	writeFile.WriteToFile(pixels, imageWidth, imageHeight);
+
+	finishTime = std::chrono::high_resolution_clock::now();;
+
+	std::clog << "\nFile writing took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
+
 	sceneHitables->clear();
 	std::cin.get();
 }

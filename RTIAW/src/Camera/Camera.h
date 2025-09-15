@@ -46,7 +46,11 @@ namespace RTW
 		inline void SetImageWidth(const int16_t ImageWidth) { m_ImageWidth = ImageWidth; }
 		inline void SetSamplesPerPixel(const int16_t SamplesPerPixel) { m_SamplesPerPixel = SamplesPerPixel; }
 		inline void SetMaxBounces(const int16_t MaxBounces) { m_MaxBounces = MaxBounces; }
-		inline void SetBAckgroundColour(const Colour& colour) { m_BackgroundColour = colour; };
+		inline void SetBAckgroundColour(const Colour& colour) { m_BackgroundColour = colour; }
+
+		inline const std::vector<Colour>& GetColours() const { return m_ColourPixelArray; }
+		inline int16_t GetImageWidth() const { return m_ImageWidth; }
+		inline int16_t GetImageHeight() const { return m_ImageHeight; }
 
 	// Private helper functions
 	private:

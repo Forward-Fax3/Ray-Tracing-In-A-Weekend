@@ -27,8 +27,7 @@ namespace RTW
 	void Camera::Render(const std::shared_ptr<BaseRayHittable> objects)
 	{
 		Init();
-
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << '\n' << std::numeric_limits<uint16_t>::max() << '\n';
+		m_ColourPixelArray.reserve(m_NumberOfPixels);
 
 		for (int16_t i = 0; i < m_ImageHeight; i++)
 		{
@@ -42,7 +41,7 @@ namespace RTW
 					Ray ray = CreateRay(i, j);
 					colour += RayColour(ray, m_MaxBounces, objects);
 				}
-				WriteColour(std::cout, ColourCorrection(colour));
+				m_ColourPixelArray.emplace_back(ColourCorrection(colour));
 			}
 		}
 	}
@@ -50,7 +49,6 @@ namespace RTW
 	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects)
 	{
 		Init();
-		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 		m_ColourPixelArray.resize(m_NumberOfPixels);
 
 		for (int16_t i = 0; i < numberOfThreads - 1; i++)
@@ -63,10 +61,6 @@ namespace RTW
 		g_Threads.stop(true); // Waits for all threads to finish.
 
 		std::clog << "\rDone.                 \nWriting pixels to file" << std::flush;
-
-		std::cout << "P3\n" << m_ImageWidth << ' ' << m_ImageHeight << '\n' << std::numeric_limits<uint16_t>::max() << '\n';
-		for (size_t i = 0; i < m_NumberOfPixels; i++)
-			WriteColour(std::cout, m_ColourPixelArray[i]);
 	}
 
 	void Camera::Init()
@@ -103,6 +97,8 @@ namespace RTW
 		m_DefocusDiskV = m_V * defocusRadius;
 
 		m_MaxBounces++;
+
+		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 	}
 
 	Colour Camera::RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable>& object) const
