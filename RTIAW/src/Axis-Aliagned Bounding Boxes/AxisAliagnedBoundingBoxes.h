@@ -94,7 +94,7 @@ namespace RTW
 
 		const __m512d m512_AltNegMul = _mm512_setr_pd(0.0, -0.0, 0.0, -0.0, 0.0, -0.0, 0.0, -0.0);
 
-		__m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
+		const __m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
