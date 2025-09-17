@@ -94,17 +94,17 @@ namespace RTW
 
 		const __m512d m512_AltNegMul = _mm512_setr_pd(0.0, -0.0, 0.0, -0.0, 0.0, -0.0, 0.0, -0.0);
 
-		__m512i m512_loadyloads = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
+		__m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
 		__m512d m512_AxisBounds = _mm512_load_pd(this);
 
 		// Load ray origin into an AVX512 Register and double each axis into 128 bit lanes
-		__m512d m512_RayOrigin = _mm512_permutexvar_pd(m512_loadyloads, _mm512_castpd256_pd512(ray.origin().data));
+		__m512d m512_RayOrigin = _mm512_permutexvar_pd(m512_DoubledLoadPermutationIndex, _mm512_castpd256_pd512(ray.origin().data));
 
 		// Load ray inverted direction into an AVX512 Register and double each axis into 128 bit lanes
-		__m512d m512_RayInvDirection = _mm512_permutexvar_pd(m512_loadyloads, _mm512_castpd256_pd512(ray.invDirection().data));
+		__m512d m512_RayInvDirection = _mm512_permutexvar_pd(m512_DoubledLoadPermutationIndex, _mm512_castpd256_pd512(ray.invDirection().data));
 
 
 		// create T in AVX512
