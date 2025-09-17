@@ -11,7 +11,7 @@
 
 namespace RTW
 {
-	class alignas(64) AxisAliagnedBoundingBoxes
+	class AxisAliagnedBoundingBoxes
 	{
 	public:
 		enum class Axis : uint8_t { x = 0, y, z, none };
@@ -98,7 +98,7 @@ namespace RTW
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
-		__m512d m512_AxisBounds = _mm512_load_pd(this);
+		__m512d m512_AxisBounds = _mm512_loadu_pd(this);
 
 		// Load ray origin into an AVX512 Register and double each axis into 128 bit lanes
 		__m512d m512_RayOrigin = _mm512_permutexvar_pd(m512_DoubledLoadPermutationIndex, _mm512_castpd256_pd512(ray.origin().data));
