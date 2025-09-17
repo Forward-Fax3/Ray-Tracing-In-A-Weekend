@@ -46,13 +46,13 @@ namespace RTW
 		const BaseMaterial* material = nullptr;
 		bool isFrontFace;
 
-		inline void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)
+		RTW_FORCE_INLINE void SetFaceNormal(const Ray& ray, const Vec3& outwardNormal)
 		{
 			isFrontFace = glm::dot(ray.direction(), outwardNormal) <= 0.0;
 			normal = isFrontFace ? outwardNormal : -outwardNormal;
 		}
 
-		inline void SetPoint(const Point& newPoint)
+		RTW_FORCE_INLINE void SetPoint(const Point& newPoint)
 		{
 			point.data = glm::dvec4(newPoint, distance).data;
 		}
@@ -85,12 +85,12 @@ namespace RTW
 		const AABB& GetBoundingBox() const override { return AABB::empty; }
 		inline void SetBoundingBox(const AABB&) override { /* not possible newAABB will be ignored */ }
 
-		static inline std::shared_ptr<BaseRayHittable> GetNoHit()
+		static RTW_FORCE_INLINE std::shared_ptr<BaseRayHittable> GetNoHit()
 		{
 			static auto noHit(std::make_shared<RayNoHit>(PRIVATE()));
 			return noHit;
 		}
 	};
 
-	inline std::shared_ptr<BaseRayHittable> BaseRayHittable::GetNoHit() { return RayNoHit::GetNoHit(); }
+	RTW_FORCE_INLINE std::shared_ptr<BaseRayHittable> BaseRayHittable::GetNoHit() { return RayNoHit::GetNoHit(); }
 }

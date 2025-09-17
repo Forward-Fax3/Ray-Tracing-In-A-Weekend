@@ -13,7 +13,7 @@ namespace RTW
 	{
 	public:
 		RayHittables() = default;
-		explicit inline RayHittables(const std::shared_ptr<BaseRayHittable> object) { this->add(object); }
+		explicit RTW_FORCE_INLINE RayHittables(const std::shared_ptr<BaseRayHittable> object) { this->add(object); }
 
 		constexpr void reserve(size_t size) { m_Objects.reserve(size); }
 		void add(const std::shared_ptr<BaseRayHittable> object);
@@ -22,15 +22,15 @@ namespace RTW
 		// add buffers to AABBs so that comparisons that need to be axis aligned don't end up having the same value
 		void addBuffer();
 
-		inline size_t size() const { return m_Objects.size(); }
-		inline void clear() { m_Objects.clear(); m_AABB = AABB::empty; }
+		RTW_FORCE_INLINE size_t size() const { return m_Objects.size(); }
+		RTW_FORCE_INLINE void clear() { m_Objects.clear(); m_AABB = AABB::empty; }
 
-		inline std::vector<std::shared_ptr<BaseRayHittable>>& GetObjects() { return m_Objects; }
+		RTW_FORCE_INLINE std::vector<std::shared_ptr<BaseRayHittable>>& GetObjects() { return m_Objects; }
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
-		const AABB& GetBoundingBox() const override { return m_AABB; }
-		inline void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen. 
+		RTW_FORCE_INLINE const AABB& GetBoundingBox() const override { return m_AABB; }
+		RTW_FORCE_INLINE void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen. 
 		{
 			if (newAABB.IsBigger(this->m_AABB))
 				m_AABB = newAABB;

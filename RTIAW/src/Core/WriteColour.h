@@ -14,7 +14,7 @@ namespace RTW
 		WriteFile();
 		~WriteFile() = default;
 
-		inline bool IsOpen() const { return m_ofs.is_open(); }
+		RTW_FORCE_INLINE bool IsOpen() const { return m_ofs.is_open(); }
 
 		void WriteToFile(const std::vector<Colour>& pixelData, int16_t width, int16_t height);
 

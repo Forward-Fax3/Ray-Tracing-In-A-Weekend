@@ -34,23 +34,23 @@ namespace RTW
 		void Render(const std::shared_ptr<BaseRayHittable> objects);
 		void RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects);
 
-		inline void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
-		inline void SetFOV(const double FOV) { m_FOV = FOV; }
-		inline void SetDefocusAngle(const double DefocusAngle) { m_DefocusAngle = DefocusAngle; }
-		inline void SetFocusDistance(const double FocusDistance) { m_FocusDistance = FocusDistance; }
-		inline void SetPosition(const Point& position) { m_Position = position; }
-		inline void SetLookFrom(const Point& LookFrom) { m_LookFrom = LookFrom; }
-		inline void SetLookAt(const Point& LookAt) { m_LookAt = LookAt; }
-		inline void SetUp(const Vec3& VUp) { m_VUp = VUp; }
-		inline void SetGamma(const Vec3& Gamma) { m_Gamma = Gamma; }
-		inline void SetImageWidth(const int16_t ImageWidth) { m_ImageWidth = ImageWidth; }
-		inline void SetSamplesPerPixel(const int16_t SamplesPerPixel) { m_SamplesPerPixel = SamplesPerPixel; }
-		inline void SetMaxBounces(const int16_t MaxBounces) { m_MaxBounces = MaxBounces; }
-		inline void SetBAckgroundColour(const Colour& colour) { m_BackgroundColour = colour; }
+		RTW_FORCE_INLINE void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
+		RTW_FORCE_INLINE void SetFOV(const double FOV) { m_FOV = FOV; }
+		RTW_FORCE_INLINE void SetDefocusAngle(const double DefocusAngle) { m_DefocusAngle = DefocusAngle; }
+		RTW_FORCE_INLINE void SetFocusDistance(const double FocusDistance) { m_FocusDistance = FocusDistance; }
+		RTW_FORCE_INLINE void SetPosition(const Point& position) { m_Position = position; }
+		RTW_FORCE_INLINE void SetLookFrom(const Point& LookFrom) { m_LookFrom = LookFrom; }
+		RTW_FORCE_INLINE void SetLookAt(const Point& LookAt) { m_LookAt = LookAt; }
+		RTW_FORCE_INLINE void SetUp(const Vec3& VUp) { m_VUp = VUp; }
+		RTW_FORCE_INLINE void SetGamma(const Vec3& Gamma) { m_Gamma = Gamma; }
+		RTW_FORCE_INLINE void SetImageWidth(const int16_t ImageWidth) { m_ImageWidth = ImageWidth; }
+		RTW_FORCE_INLINE void SetSamplesPerPixel(const int16_t SamplesPerPixel) { m_SamplesPerPixel = SamplesPerPixel; }
+		RTW_FORCE_INLINE void SetMaxBounces(const int16_t MaxBounces) { m_MaxBounces = MaxBounces; }
+		RTW_FORCE_INLINE void SetBAckgroundColour(const Colour& colour) { m_BackgroundColour = colour; }
 
-		inline const std::vector<Colour>& GetColours() const { return m_ColourPixelArray; }
-		inline int16_t GetImageWidth() const { return m_ImageWidth; }
-		inline int16_t GetImageHeight() const { return m_ImageHeight; }
+		RTW_FORCE_INLINE const std::vector<Colour>& GetColours() const { return m_ColourPixelArray; }
+		RTW_FORCE_INLINE int16_t GetImageWidth() const { return m_ImageWidth; }
+		RTW_FORCE_INLINE int16_t GetImageHeight() const { return m_ImageHeight; }
 
 	// Private helper functions
 	private:
