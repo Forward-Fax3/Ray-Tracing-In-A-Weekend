@@ -90,11 +90,11 @@ namespace RTW
 	RTW_FORCE_INLINE bool AABB::IsHit(const Ray& ray, Interval rayT) const
 	{
 #if RTW_AVX512 & SIMD
-		const __m512i m512_SwapBitMap = _mm512_setr_epi64(1, 0, 3, 2, 5, 4, 7, 6);
+		const __m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
+
+		const __mmask8 SwapBitMap = 0b01010101;
 
 		const __m512d m512_AltNegMul = _mm512_setr_pd(0.0, -0.0, 0.0, -0.0, 0.0, -0.0, 0.0, -0.0);
-
-		const __m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
 
 
 		// load m_X, m_Y and m_Z into an AVX512 register
@@ -111,7 +111,7 @@ namespace RTW
 		__m512d m512_T = _mm512_mul_pd(_mm512_sub_pd(m512_AxisBounds, m512_RayOrigin), m512_RayInvDirection);
 
 		// creates the swapped T register
-		__m512d m512_T128BitSwaped = _mm512_permutexvar_pd(m512_SwapBitMap, m512_T);
+		__m512d m512_T128BitSwaped = _mm512_shuffle_pd(m512_T, m512_T, SwapBitMap);
 
 
 		// performs an xor so that min and max operations can be performed
