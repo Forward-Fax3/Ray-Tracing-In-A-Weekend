@@ -28,8 +28,8 @@ namespace RTW
 	class Camera
 	{
 	public:
+		Camera() = delete;
 		explicit Camera(const CameraData& data);
-		Camera();
 
 		void Render(const std::shared_ptr<BaseRayHittable> objects);
 		void RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects);
@@ -52,18 +52,20 @@ namespace RTW
 		RTW_FORCE_INLINE int16_t GetImageWidth() const { return m_ImageWidth; }
 		RTW_FORCE_INLINE int16_t GetImageHeight() const { return m_ImageHeight; }
 
+		RTW_FORCE_INLINE static const std::shared_ptr<BaseRayHittable>& GetObjects() { return s_Instance->m_Objects; }
+
 	// Private helper functions
 	private:
 		void Init();
 
-		Colour RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable>& object) const;
+		Colour RayColour(Ray& ray, int16_t& bouncesLeft) const;
 		Ray CreateRay(int16_t i, int16_t j) const;
 		glm::dvec2 SampleSquare() const;
 		Point DefocusDiskSample() const;
 
 		inline Colour ColourCorrection(const Colour& colour) const;
 
-		void MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object);
+		void MultiThreadRenderLoop(size_t offset, size_t increment);
 
 	// Private Variables
 	private:
@@ -89,6 +91,7 @@ namespace RTW
 		double m_SampleScale = 0.0;
 		size_t m_NumberOfPixels = 0;
 		std::vector<Colour> m_ColourPixelArray;
+		std::shared_ptr<BaseRayHittable> m_Objects = nullptr;
 		Point m_Pixel100Location = Point(0.0);
 		Vec3 m_PixelDeltaU = Vec3(0.0);
 		Vec3 m_PixelDeltaV = Vec3(0.0);
@@ -98,5 +101,7 @@ namespace RTW
 		Vec3 m_V = Vec3(0.0);
 		Vec3 m_W = Vec3(0.0);
 		Vec3 m_InvGamma = Vec3(0.0);
+
+		static Camera* s_Instance;
 	};
 }

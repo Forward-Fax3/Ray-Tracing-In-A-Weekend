@@ -33,7 +33,7 @@ int main()
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 64;
+	cameraData.SamplesPerPixel = 256;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -48,7 +48,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelBox;
+	RTW::Scenes scene = RTW::Scenes::CornelSmoke;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 

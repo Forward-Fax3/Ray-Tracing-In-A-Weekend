@@ -16,8 +16,9 @@ namespace RTW
 	Metal::Metal(std::shared_ptr<BaseTexture> texture, double fuzz)
 		: m_Texture(texture), m_Fuzz((fuzz < 1.0) ? fuzz : 1.0) {}
 
-	ScatterReturn Metal::Scatter(Ray& ray, const HitData& data) const
+	ScatterReturn Metal::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
 	{
+		bouncesLeft--;
 		Vec3 refelcted = glm::reflect(ray.direction(), data.normal);
 		refelcted = glm::normalize(refelcted) + (m_Fuzz * RandomUnitVector());
 

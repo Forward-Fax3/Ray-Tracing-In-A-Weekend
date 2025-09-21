@@ -1,7 +1,5 @@
 #pragma once
 #include "Core.h"
-#include "Ray.h"
-#include "RayHittable.h"
 #include "BaseMaterial.h"
 #include "BaseTexture.h"
 
@@ -10,15 +8,16 @@
 
 namespace RTW
 {
-	class Lambertian : public BaseMaterial
+	class ConstantMedium : public BaseMaterial
 	{
 	public:
-		explicit Lambertian(const Colour& albedo);
-		explicit Lambertian(std::shared_ptr<BaseTexture> texture);
+		ConstantMedium(double density, const Colour& albedo);
+		ConstantMedium(double density, std::weak_ptr<BaseTexture> texture);
 
 		ScatterReturn Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const override;
 
 	private:
+		double m_NegitiveInvertedDensity;
 		std::shared_ptr<BaseTexture> m_Texture;
 	};
 }

@@ -10,6 +10,7 @@
 #include "Metal.h"
 #include "Dielectric.h"
 #include "DiffusedLight.h"
+#include "ConstantMedium.h"
 
 #include "BaseTexture.h"
 #include "SolidColour.h"
@@ -28,50 +29,8 @@
 
 namespace RTW
 {
-	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
-	{
-		switch (scene)
-		{
-		case RTW::Scenes::CollectionOfSpheres:
-			CollectionOfSpheres<false, 22>(hittables, cameraData);
-			return;
-		case RTW::Scenes::LargeCollectionOfSpheres:
-			CollectionOfSpheres<false, 220>(hittables, cameraData);
-			return;
-		case RTW::Scenes::MovingSpheres:
-			CollectionOfSpheres<true, 22>(hittables, cameraData);
-			return;
-		case RTW::Scenes::LargeMovingSpheres:
-			CollectionOfSpheres<true, 220>(hittables, cameraData);
-			return;
-		case Scenes::CheckeredShperes:
-			CheckeredShperes(hittables, cameraData);
-			return;
-		case Scenes::Earth:
-			Earth(hittables, cameraData);
-			return;
-		case Scenes::PerlinNoiseSpheres:
-			PerlinNoiseSpheres(hittables, cameraData);
-			return;
-		case Scenes::MarbleSpheres:
-			MarbleSpheres(hittables, cameraData);
-			return;
-		case Scenes::Parallelograms:
-			Parallelograms(hittables, cameraData);
-			return;
-		case Scenes::LightTest:
-			LightTest(hittables, cameraData);
-			return;
-		case Scenes::CornelBox:
-			CornelBox(hittables, cameraData);
-			return;
-		default:
-			return;
-		}
-	}
-
 	template <bool t_IsMoving, int t_RangeOfSmallBalls>
-	void CollectionOfSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void CollectionOfSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> texture = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
 		std::shared_ptr<BaseMaterial> material = std::make_shared<Lambertian>(texture);
@@ -130,7 +89,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void CheckeredShperes(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void CheckeredShperes(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> checker = std::make_shared<CheckeredTexture>(Colour(0.2, 0.3, 0.1), Colour(0.9), 0.32);
 
@@ -144,7 +103,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void Earth(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void Earth(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> earthTexture = std::make_shared<ImageTexture>("earthmap.jpg");
 		std::shared_ptr<BaseMaterial> earthMaterial = std::make_shared<Lambertian>(earthTexture);
@@ -157,10 +116,10 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void PerlinNoiseSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void PerlinNoiseSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(4.0);
-//		perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(perlinNoiseTexture, 32);
+		//		perlinNoiseTexture = std::make_shared<PerlinNoiseTexture>(perlinNoiseTexture, 32);
 		hittables->add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlinNoiseTexture)));
 		hittables->add(std::make_shared<Sphere>(Point(0, 2, 0), 2, std::make_shared<Lambertian>(perlinNoiseTexture)));
 
@@ -171,7 +130,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void MarbleSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void MarbleSpheres(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> marbleTexture = std::make_shared<MarbleTexture>(4.0);
 		hittables->add(std::make_shared<Sphere>(Point(0, -1000, 0), 1000, std::make_shared<Lambertian>(marbleTexture)));
@@ -184,7 +143,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void Parallelograms(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void Parallelograms(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		// Materials
 		std::shared_ptr<BaseMaterial> leftRed = std::make_shared<Lambertian>(Colour(1.0, 0.2, 0.2));
@@ -214,7 +173,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	void LightTest(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void LightTest(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> pertext = std::make_shared<MarbleTexture>(4.0);
 		hittables->add(std::make_shared<Sphere>(Point(0.0, -1000.0, 0.0), 1000.0, std::make_shared<Lambertian>(pertext)));
@@ -230,11 +189,12 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.0);
 	}
 
-	void CornelBox(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void CornelBox(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
 	{
-		auto red  (std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
+		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
 		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
 		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
+		auto glass(std::make_shared<Dielectric>(1.6));
 		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 15.0));
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
@@ -243,14 +203,91 @@ namespace RTW
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 0,  555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0),               UVvec3(Vec3(-555.0,   0.0, 0.0), Vec3(0, 0, -555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
-		
-		hittables->add(CreateBox(Point(105.0, 0.0,  65.0), Point(270.0, 165.0, 230.0), white, Vec3( 18.0, 0.0, 0.0)));
+
+		hittables->add(CreateBox(Point(105.0, -1e-8, 65.0), Point(270.0, 165.0, 230.0), glass, Vec3(18.0, 0.0, 0.0)));
 		hittables->add(CreateBox(Point(290.0, 0.0, 295.0), Point(455.0, 330.0, 460.0), white, Vec3(-15.0, 0.0, 0.0)));
+
+		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
 
 		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 40.0;
 		cameraData.LookFrom = RTW::Point(278.0, 278.0, -800.0);
 		cameraData.LookAt = RTW::Point(278, 278, 0);
 		cameraData.BackgroundColour = RTW::Colour(0.0);
+	}
+
+	static void CornelSmoke(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	{
+		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
+		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
+		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
+		auto glass(std::make_shared<Dielectric>(1.6));
+		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 7.0));
+		auto whiteSmoke(std::make_shared<ConstantMedium>(0.01, Colour(1.0)));
+		auto blackSmoke(std::make_shared<ConstantMedium>(0.001, Colour(0.0)));
+
+		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), red  ));
+		hittables->add(std::make_shared<Parallelogram>(Point(113.0, 554.0, 127.0), UVvec3(Vec3( 330.0,   0.0, 0.0), Vec3(0, 0,  305)), light));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 0,  555)), white));
+		hittables->add(std::make_shared<Parallelogram>(Point(555.0),               UVvec3(Vec3(-555.0,   0.0, 0.0), Vec3(0, 0, -555)), white));
+		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
+
+		hittables->add(CreateBox(Point(105.0, -1e-8, 65.0),  Point(270.0, 165.0, 230.0), blackSmoke, Vec3( 18.0, 0.0, 0.0)));
+		hittables->add(CreateBox(Point(290.0, -1e-8, 295.0), Point(455.0, 330.0, 460.0), whiteSmoke, Vec3(-15.0, 0.0, 0.0)));
+
+		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
+		hittables->add(std::make_shared<Sphere>(Point(350.0, 170.0, 380.0), 50.0, glass));
+
+		cameraData.AspectRatio = 1.0;
+		cameraData.FOV = 40.0;
+		cameraData.LookFrom = RTW::Point(278.0, 278.0, -800.0);
+		cameraData.LookAt = RTW::Point(278, 278, 0);
+		cameraData.BackgroundColour = RTW::Colour(0.0);
+	}
+
+	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	{
+		switch (scene)
+		{
+		case RTW::Scenes::CollectionOfSpheres:
+			CollectionOfSpheres<false, 22>(hittables, cameraData);
+			return;
+		case RTW::Scenes::LargeCollectionOfSpheres:
+			CollectionOfSpheres<false, 220>(hittables, cameraData);
+			return;
+		case RTW::Scenes::MovingSpheres:
+			CollectionOfSpheres<true, 22>(hittables, cameraData);
+			return;
+		case RTW::Scenes::LargeMovingSpheres:
+			CollectionOfSpheres<true, 220>(hittables, cameraData);
+			return;
+		case Scenes::CheckeredShperes:
+			CheckeredShperes(hittables, cameraData);
+			return;
+		case Scenes::Earth:
+			Earth(hittables, cameraData);
+			return;
+		case Scenes::PerlinNoiseSpheres:
+			PerlinNoiseSpheres(hittables, cameraData);
+			return;
+		case Scenes::MarbleSpheres:
+			MarbleSpheres(hittables, cameraData);
+			return;
+		case Scenes::Parallelograms:
+			Parallelograms(hittables, cameraData);
+			return;
+		case Scenes::LightTest:
+			LightTest(hittables, cameraData);
+			return;
+		case Scenes::CornelBox:
+			CornelBox(hittables, cameraData);
+			return;
+		case Scenes::CornelSmoke:
+			CornelSmoke(hittables, cameraData);
+			return;
+		default:
+			return;
+		}
 	}
 }

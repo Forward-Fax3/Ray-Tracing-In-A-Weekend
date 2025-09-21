@@ -19,7 +19,7 @@ namespace RTW
 	Dielectric::Dielectric(double refactionIndex, std::shared_ptr<BaseTexture> texture)
 		: m_RefractionIndex(refactionIndex), m_Texture(texture)	{}
 
-	ScatterReturn Dielectric::Scatter(Ray& ray, const HitData& data) const
+	ScatterReturn Dielectric::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
 	{
 		double ri = data.isFrontFace ? (1.0 / m_RefractionIndex) : m_RefractionIndex;
 
@@ -27,9 +27,14 @@ namespace RTW
 		double cosTheta = glm::min(glm::dot(-normalDirection, data.normal), 1.0);
 		double sinTheta = glm::sqrt(1.0 - cosTheta * cosTheta);
 
-		Vec3 newDirection = (ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0)) ?
-			glm::reflect(normalDirection, data.normal) :
-			glm::refract(normalDirection, data.normal, ri);
+		Vec3 newDirection{};
+		if ((ri * sinTheta > 1.0 || reflectance(cosTheta, ri) > glm::linearRand(0.0, 1.0)))
+		{
+			newDirection = glm::reflect(normalDirection, data.normal);
+			bouncesLeft--;
+		}
+		else
+			newDirection = glm::refract(normalDirection, data.normal, ri);
 
 		ray = Ray(data.point, newDirection, ray.time());
 		return { m_Texture->GetColour(data.uv, data.point), true };

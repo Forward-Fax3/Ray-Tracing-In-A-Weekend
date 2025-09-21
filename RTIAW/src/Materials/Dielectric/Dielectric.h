@@ -16,7 +16,7 @@ namespace RTW
 		explicit Dielectric(double refactionIndex, const Colour& colour);
 		explicit Dielectric(double refactionIndex, std::shared_ptr<BaseTexture> texture);
 
-		ScatterReturn Scatter(Ray& ray, const HitData& data) const override;
+		ScatterReturn Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const override;
 
 	private:
 		static Vec3 refract(const Vec3& uv, const Vec3& normal, double etaiOverEtat);

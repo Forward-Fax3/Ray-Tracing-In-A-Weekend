@@ -34,7 +34,7 @@ namespace RTW
 		BaseMaterial() = default;
 		virtual ~BaseMaterial() = default;
 
-		virtual ScatterReturn Scatter(Ray&, const HitData&) const { return { {0.0, 0.0, 0.0 }, false }; }
+		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return { {0.0, 0.0, 0.0 }, false }; }
 
 		virtual Colour EmittedColour(const UV&, const Point&) const { return Colour(0.0); }
 	};

@@ -22,8 +22,9 @@ namespace RTW
 	Lambertian::Lambertian(std::shared_ptr<BaseTexture> texture)
 		: m_Texture(texture) {}
 
-	ScatterReturn Lambertian::Scatter(Ray& ray, const HitData& data) const
+	ScatterReturn Lambertian::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
 	{
+		bouncesLeft--;
 		Vec3 scatterDirection = data.normal + RandomUnitVector();
 		double minValue = 1e-8;
 

@@ -16,18 +16,17 @@
 
 namespace RTW
 {
-	Camera::Camera()
-		: m_AspectRatio(0.0), m_FOV(0.0), m_DefocusAngle(0.0), m_FocusDistance(0.0), m_LookFrom(0.0), m_LookAt(0.0), m_VUp(0.0), m_Gamma(0.0), m_BackgroundColour(0.0), m_ImageWidth(0), m_SamplesPerPixel(0), m_MaxBounces(0) { }
-
+	Camera* Camera::s_Instance = nullptr;
 
 	Camera::Camera(const CameraData& data)
 		: m_AspectRatio(data.AspectRatio), m_FOV(data.FOV), m_DefocusAngle(data.DefocusAngle), m_FocusDistance(data.FocusDistance), m_LookFrom(data.LookFrom), m_LookAt(data.LookAt), m_VUp(data.VUp),
-		m_Gamma(data.Gamma), m_BackgroundColour(data.BackgroundColour), m_ImageWidth(data.ImageWidth), m_SamplesPerPixel(data.SamplesPerPixel), m_MaxBounces(data.MaxBounces) { }
+		m_Gamma(data.Gamma), m_BackgroundColour(data.BackgroundColour), m_ImageWidth(data.ImageWidth), m_SamplesPerPixel(data.SamplesPerPixel), m_MaxBounces(data.MaxBounces) { s_Instance = this; }
 
 	void Camera::Render(const std::shared_ptr<BaseRayHittable> objects)
 	{
 		Init();
 		m_ColourPixelArray.reserve(m_NumberOfPixels);
+		m_Objects = objects;
 
 		for (int16_t i = 0; i < m_ImageHeight; i++)
 		{
@@ -39,7 +38,7 @@ namespace RTW
 				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 				{
 					Ray ray = CreateRay(i, j);
-					colour += RayColour(ray, m_MaxBounces, objects);
+					colour += RayColour(ray, m_MaxBounces);
 				}
 				m_ColourPixelArray.emplace_back(ColourCorrection(colour));
 			}
@@ -50,13 +49,14 @@ namespace RTW
 	{
 		Init();
 		m_ColourPixelArray.resize(m_NumberOfPixels);
+		m_Objects = objects;
 
 		for (int16_t i = 0; i < numberOfThreads - 1; i++)
 			g_Threads.push([this, i, numberOfThreads, objects](int) {
-				this->MultiThreadRenderLoop(i, numberOfThreads, objects);
+				this->MultiThreadRenderLoop(i, numberOfThreads);
 			});
 
-		MultiThreadRenderLoop(numberOfThreads - 1, numberOfThreads, objects);
+		MultiThreadRenderLoop(numberOfThreads - 1, numberOfThreads);
 
 		g_Threads.stop(true); // Waits for all threads to finish.
 
@@ -101,23 +101,23 @@ namespace RTW
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
 	}
 
-	Colour Camera::RayColour(Ray& ray, int16_t bouncesLeft, const std::shared_ptr<BaseRayHittable>& object) const
+	Colour Camera::RayColour(Ray& ray, int16_t& bouncesLeft) const
 	{
 		if (bouncesLeft <= 0)
 			return { 0.0, 0.0, 0.0 };
 
 		HitData data;
-		if (!object->IsRayHit(ray, Interval(0.001, doubleInf), data))
+		if (!m_Objects->IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
 
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 
-		ScatterReturn scatteredData = data.material->Scatter(ray, data);
+		ScatterReturn scatteredData = data.material->Scatter(ray, data, bouncesLeft);
 
 		if (!scatteredData.bounced)
 			return emittedColour;
 
-		return emittedColour + scatteredData.attenuation * RayColour(ray, bouncesLeft - 1, object);
+		return emittedColour + scatteredData.attenuation * RayColour(ray, bouncesLeft);
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j) const
@@ -151,9 +151,7 @@ namespace RTW
 		Vec3 scalledAndGammaCorrectedColour{};
 		scalledAndGammaCorrectedColour.data = _mm256_pow_pd((colour * m_SampleScale).data, m_InvGamma.data);
 		scalledGammaCorrectedAndClampedColour.data = _mm256_min_pd(_mm256_max_pd(scalledAndGammaCorrectedColour.data, _mm256_set1_pd(minMax.GetMin())), _mm256_set1_pd(minMax.GetMax()));
-#elif defined(__clang__) // clang does not support SMVL so need to do the standard way
-		scalledGammaCorrectedAndClampedColour = minMax.Clamp(glm::pow(colour * m_SampleScale, m_InvGamma));
-#else
+#elif !defined(__clang__)
 		Vec3 scalledColour(colour * m_SampleScale);
 		Vec3 scalledAndGammaCorrectedColour{};
 
@@ -162,11 +160,13 @@ namespace RTW
 
 		scalledAndGammaCorrectedColour.z = glm::pow(scalledColour.z, m_InvGamma.z);
 		scalledGammaCorrectedAndClampedColour.z = minMax.Clamp(scalledAndGammaCorrectedColour.z);
+#else // clang does not support SMVL so need to do the standard way
+		scalledGammaCorrectedAndClampedColour = minMax.Clamp(glm::pow(colour * m_SampleScale, m_InvGamma));
 #endif
 		return scalledGammaCorrectedAndClampedColour * static_cast<double>(std::numeric_limits<uint16_t>::max());
 	}
 
-	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment, const std::shared_ptr<BaseRayHittable> object)
+	void Camera::MultiThreadRenderLoop(size_t offset, size_t increment)
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
@@ -176,8 +176,9 @@ namespace RTW
 			Colour colour(0.0);
 			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 			{
+				int16_t bouncesLeft = m_MaxBounces;
 				Ray ray = CreateRay(static_cast<int16_t>(i / m_ImageWidth), i % m_ImageWidth);
-				colour += RayColour(ray, m_MaxBounces, object);
+				colour += RayColour(ray, bouncesLeft);
 			}
 			m_ColourPixelArray[i] = ColourCorrection(colour);
 		}
