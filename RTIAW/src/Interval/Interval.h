@@ -70,6 +70,11 @@ namespace RTW
 			m_MinMax.data = _mm_mul_pd(m128_InvertValue, _mm_max_pd(invThisValues.data, invNewValues.data));
 		}
 
+		inline bool IsEqualOrBigger(const Interval& other) const
+			{ return this->GetDelta() >= other.GetDelta(); }
+
+		inline double GetDelta() const { return m_Max - m_Min; }
+
 		inline double GetMax() const { return m_Max; }
 		inline double GetMin() const { return m_Min; }
 		inline const glm::dvec2& GetAsVector() const { return m_MinMax; }

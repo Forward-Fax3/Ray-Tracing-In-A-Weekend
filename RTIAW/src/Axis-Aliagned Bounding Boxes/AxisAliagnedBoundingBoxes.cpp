@@ -59,9 +59,9 @@ namespace RTW
 	bool AxisAliagnedBoundingBoxes::IsBigger(const AxisAliagnedBoundingBoxes& otherAABB) const
 	{
 		bool returnBool = true;
-		returnBool &= this->m_X.Contains(otherAABB.m_X);
-		returnBool &= this->m_Y.Contains(otherAABB.m_Y);
-		returnBool &= this->m_Z.Contains(otherAABB.m_Z);
+		returnBool &= this->m_X.IsEqualOrBigger(otherAABB.m_X);
+		returnBool &= this->m_Y.IsEqualOrBigger(otherAABB.m_Y);
+		returnBool &= this->m_Z.IsEqualOrBigger(otherAABB.m_Z);
 		return returnBool;
 	}
 

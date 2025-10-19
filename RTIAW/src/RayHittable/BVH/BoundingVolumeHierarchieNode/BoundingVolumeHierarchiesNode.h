@@ -18,17 +18,9 @@ namespace RTW
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
-		const AABB& GetBoundingBox() const override { return m_AABB; }
-		inline void SetBoundingBox(const AABB& newAABB) override // newAABB must be bigger than or equal to current AABB in the x, y and z axises otherwise nothing will happen. 
-		{
-			if (newAABB.IsBigger(this->m_AABB))
-				m_AABB = newAABB;
-		}
-
 	private:
 		std::shared_ptr<BaseRayHittable> m_Left;
 		std::shared_ptr<BaseRayHittable> m_Right;
-		AABB m_AABB;
 	};
 
 	using BVHNode = BoundingVolumeHierarchiesNode;

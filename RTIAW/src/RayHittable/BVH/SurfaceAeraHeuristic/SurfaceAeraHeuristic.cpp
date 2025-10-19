@@ -26,10 +26,8 @@ namespace RTW
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end)
 	{
-		m_AABB = AABB::empty;
-
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
-			m_AABB.Expand((*i)->GetBoundingBox());
+			GetBoundingBox().Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -44,7 +42,7 @@ namespace RTW
 		(void)numberOfThreads;
 
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
-			m_AABB.Expand((*i)->GetBoundingBox());
+			GetBoundingBox().Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -58,10 +56,10 @@ namespace RTW
 	}
 
 	SurfaceAreaHeuristicNode::SurfaceAreaHeuristicNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end, const AABB& thisAABB, bool isMultithreaded /*= false*/)
-		: m_AABB(thisAABB)
+		: BaseRayHittable(thisAABB)
 	{
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
-			m_AABB.Expand((*i)->GetBoundingBox());
+			GetBoundingBox().Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -76,9 +74,12 @@ namespace RTW
 
 	bool SurfaceAreaHeuristicNode::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
 	{
-		if (!m_AABB.IsHit(ray, rayDistance))
+		_mm_prefetch(std::bit_cast<const char*>(&m_Left->GetBoundingBox()), _MM_HINT_T2);
+
+		if (!GetBoundingBox().IsHit(ray, rayDistance))
 			return false;
 
+		_mm_prefetch(std::bit_cast<const char*>(&m_Right->GetBoundingBox()), _MM_HINT_T2);
 		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);
 
 		if (isHit)
@@ -173,7 +174,7 @@ namespace RTW
 		AABB& rightAABB = AABBAllocation[1];
 
 		const double invertedIncermentedNumberOfSplits = 1.0 / static_cast<double>(numberOfSplits + 1);
-		const double thisAABBInvertedSurfaceArea = 1.0 / m_AABB.GetSurfaceArea();
+		const double thisAABBInvertedSurfaceArea = 1.0 / GetBoundingBox().GetSurfaceArea();
 
 		for (AABB::Axis axis = AABB::Axis::x; axis <= AABB::Axis::z; ++axis)
 		{

@@ -24,7 +24,7 @@ namespace RTW
 	BoundingVolumeHierarchiesNode::BoundingVolumeHierarchiesNode(std::vector<std::shared_ptr<BaseRayHittable>>& hittables, size_t start, size_t end) 
 	{
 		for (auto i = hittables.begin() + start; i != hittables.begin() + end; i++)
-			m_AABB.Expand((*i)->GetBoundingBox());
+			GetBoundingBox().Expand((*i)->GetBoundingBox());
 
 		currentDepth++;
 		maxDepth.store(std::max(maxDepth, currentDepth));
@@ -46,7 +46,7 @@ namespace RTW
 			return;
 		}
 
-		AABB::Axis axis = m_AABB.LongestAxis();
+		AABB::Axis axis = GetBoundingBox().LongestAxis();
 
 		std::sort(std::begin(hittables) + start, std::begin(hittables) + end, [axis](auto boxA, auto boxB) -> bool {
 			return BoxComparison(boxA, boxB, axis);
@@ -61,7 +61,7 @@ namespace RTW
 
 	bool BoundingVolumeHierarchiesNode::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const
 	{
-		if (!m_AABB.IsHit(ray, rayDistance))
+		if (!GetBoundingBox().IsHit(ray, rayDistance))
 			return false;
 
 		bool isHit = m_Left->IsRayHit(ray, rayDistance, hitData);

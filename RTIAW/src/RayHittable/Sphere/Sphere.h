@@ -21,12 +21,14 @@ namespace RTW::Templates
 	{
 	public:
 		inline Sphere<t_IsMoving>(const Point& center, double radius, std::shared_ptr<BaseMaterial> material) requires (!t_IsMoving)
-			: m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material), m_AABB(center - radius, center + radius) {}
+			: BaseRayHittable(AABB(center - radius, center + radius)), m_Radius(glm::max(0.0, radius)), m_Center(center), m_Material(material) {}
 
 		inline Sphere<t_IsMoving>(const Point& center1, const Point& center2, double radius, std::shared_ptr<BaseMaterial> material) requires t_IsMoving
-			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material), m_AABB(m_Center.at(0.0) - radius, m_Center.at(0.0) + radius)
+			: m_Radius(glm::max(0.0, radius)), m_Center(center1, center2 - center1), m_Material(material)
 		{
-			m_AABB.Expand(AABB(m_Center.at(1.0) - radius, m_Center.at(1.0) + radius));
+			AABB aabb = AABB(m_Center.at(0.0) - radius, m_Center.at(0.0) + radius);
+			aabb.Expand(AABB(m_Center.at(1.0) - radius, m_Center.at(1.0) + radius));
+			SetBoundingBox(aabb);
 		}
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override
@@ -70,13 +72,6 @@ namespace RTW::Templates
 			return true;
 		}
 
-		inline const AABB& GetBoundingBox() const override { return m_AABB; }
-		inline void SetBoundingBox(const AABB& newAABB) override
-		{
-			if (newAABB.IsBigger(this->m_AABB))
-				m_AABB = newAABB;
-		}
-
 	private:
 		static inline UV GetUV(const Point& point)
 		{
@@ -101,7 +96,6 @@ namespace RTW::Templates
 		double m_Radius;
 		m_CenterType m_Center;
 		std::shared_ptr<BaseMaterial> m_Material;
-		AABB m_AABB;
 	};
 }
 

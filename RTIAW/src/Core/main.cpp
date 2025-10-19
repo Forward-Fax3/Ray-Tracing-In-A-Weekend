@@ -48,7 +48,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelSmoke;
+	RTW::Scenes scene = RTW::Scenes::LargeCollectionOfSpheres;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
@@ -90,7 +90,7 @@ int main()
 
 	writeFile.WriteToFile(pixels, imageWidth, imageHeight);
 
-	finishTime = std::chrono::high_resolution_clock::now();;
+	finishTime = std::chrono::high_resolution_clock::now();
 
 	std::clog << "\nFile writing took: " << std::chrono::duration_cast<std::chrono::duration<double>>(finishTime - startTime).count() << " seconds";
 

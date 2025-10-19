@@ -38,8 +38,10 @@ namespace RTW
 				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
 				{
 					Ray ray = CreateRay(i, j);
-					colour += RayColour(ray, m_MaxBounces);
+					int16_t bouncesLeft = m_MaxBounces;
+					colour += RayColour(ray, bouncesLeft);
 				}
+
 				m_ColourPixelArray.emplace_back(ColourCorrection(colour));
 			}
 		}

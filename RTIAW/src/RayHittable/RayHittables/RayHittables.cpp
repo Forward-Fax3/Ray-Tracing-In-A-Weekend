@@ -11,7 +11,7 @@ namespace RTW
 {
 	bool RayHittables::IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& data) const
 	{
-		if (!m_AABB.IsHit(ray, rayDistance))
+		if (!this->GetBoundingBox().IsHit(ray, rayDistance))
 			return false;
 
 		bool hasHit = false;
@@ -37,7 +37,7 @@ namespace RTW
 		}
 
 		this->m_Objects.emplace_back(object);
-		this->m_AABB.Expand(object->GetBoundingBox());
+		this->GetBoundingBox().Expand(object->GetBoundingBox());
 	}
 
 	void RayHittables::add(const std::shared_ptr<RayHittables> newHittables)
@@ -47,7 +47,7 @@ namespace RTW
 		for (const auto& object : newHittables->GetObjects())
 			this->m_Objects.emplace_back(object);
 
-		this->m_AABB.Expand(newHittables->m_AABB);
+		this->GetBoundingBox().Expand(newHittables->GetBoundingBox());
 	}
 
 	void RayHittables::addBuffer()
@@ -72,7 +72,7 @@ namespace RTW
 		}
 
 		for (const auto& object : m_Objects)
-			m_AABB.Expand(object->GetBoundingBox());
+			GetBoundingBox().Expand(object->GetBoundingBox());
 	}
 
 	bool RayHittables::BoxComparison(std::shared_ptr<BaseRayHittable> boxA, std::shared_ptr<BaseRayHittable> boxB, AABB::Axis axis)

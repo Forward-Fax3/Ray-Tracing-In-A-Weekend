@@ -56,7 +56,7 @@ namespace RTW
 			AABB(m_Q, m_Q + m_UV[0] + m_UV[1]),
 			AABB(m_Q + m_UV[0], m_Q + m_UV[1])
 		};
-		m_AABB = AABB(AABBs[0], AABBs[1]);
+		this->SetBoundingBox(AABB(AABBs[0], AABBs[1]));
 	}
 
 	UV Parallelogram::CalculateUV(const Point& p) const

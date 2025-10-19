@@ -61,14 +61,27 @@ namespace RTW
 	class BaseRayHittable
 	{
 	public:
+		BaseRayHittable() = default;
 		virtual ~BaseRayHittable() = default;
 
 		virtual bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const = 0;
 
-		virtual const AABB& GetBoundingBox() const = 0;
-		virtual void SetBoundingBox(const AABB& newBox) = 0;
-
 		static std::shared_ptr<BaseRayHittable> GetNoHit();
+
+		RTW_FORCE_INLINE AABB& GetBoundingBox() { return m_AABB; }
+		RTW_FORCE_INLINE const AABB& GetBoundingBox() const { return m_AABB; }
+
+		RTW_FORCE_INLINE void SetBoundingBox(const AABB& newAABB)
+		{ 
+			if (newAABB.IsBigger(this->m_AABB) && GetNoHit().get() != this) // can not set bounding box of RayNoHit
+				this->m_AABB = newAABB;
+		}
+
+	protected:
+		explicit BaseRayHittable(const AABB& aabb) : m_AABB(aabb) {}
+
+	private:
+		AABB m_AABB = AABB::empty;
 	};
 
 	class RayNoHit final : public BaseRayHittable
@@ -81,9 +94,6 @@ namespace RTW
 		explicit RayNoHit(PRIVATE) {};
 
 		bool IsRayHit(const Ray&, const Interval&, HitData&) const override { return false; }
-
-		const AABB& GetBoundingBox() const override { return AABB::empty; }
-		inline void SetBoundingBox(const AABB&) override { /* not possible newAABB will be ignored */ }
 
 		static RTW_FORCE_INLINE std::shared_ptr<BaseRayHittable> GetNoHit()
 		{
