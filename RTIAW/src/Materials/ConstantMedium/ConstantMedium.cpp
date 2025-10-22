@@ -17,21 +17,36 @@ namespace RTW
 
 	RTW::ScatterReturn ConstantMedium::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
 	{
-		const auto& objects = Camera::GetObjects();
 		Colour tempColour(1.0);
 		bool bounced = true;
-		bool missed = false;
-		Ray tempRay = ray;
+		const auto& objects = Camera::GetObjects();
+		Ray tempRay(data.point, ray.direction(), ray.time());
 		HitData tempData{};
 		double distance = 0.0;
+		int16_t bouncesLeftTemp = bouncesLeft;
 
-		for (; bouncesLeft != 0; bouncesLeft--)
+		while (bouncesLeftTemp != 0 && bounced)
 		{
 			if (!objects->IsRayHit(tempRay, Interval(0.001, doubleInf), tempData))
 			{
-				missed = true;
-				bouncesLeft = 0;
-				break;
+				if (distance == 0.0)
+					distance = data.distance;
+
+				if (
+					double hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(-1.0, 1.0));
+					hitDistance <= distance
+					)
+				{
+//					ray = Ray(tempRay.at(tempData.distance), RandomUnitVector(), tempRay.time());
+//					ray = Ray(ray.at(tempData.distance), RandomUnitVector(), tempRay.time());
+					ray = Ray(tempRay.origin(), RandomUnitVector(), tempRay.time());
+					tempColour *= m_Texture->GetColour(data.uv, ray.origin());
+					bouncesLeft = bouncesLeftTemp;
+				}
+				else
+					ray = tempRay;
+
+				return { tempColour, true };
 			}
 
 			distance += tempData.distance;
@@ -41,34 +56,34 @@ namespace RTW
 
 			Colour emittedColour = tempData.material->EmittedColour(tempData.uv, tempData.point);
 
-			ScatterReturn scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeft);
-
-			if (!scatteredData.bounced)
-			{
-				bounced = false;
-				tempColour *= emittedColour;
-				break;
-			}
+			ScatterReturn scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeftTemp);
 
 			tempColour *= scatteredData.attenuation;
 			tempColour += emittedColour;
-			tempData = HitData();
+
+			if (!scatteredData.bounced)
+				bounced = false;
+			else
+				tempData = HitData();
 		}
 
-		if (missed)
-			return { { 0.0, 0.0, 0.0 }, false };
+		bouncesLeft = bouncesLeftTemp;
 
-		double rayLength = glm::length(tempData.point - ray.origin());
-		double distanceInsideMedium = distance * rayLength;
+//		double rayLength = glm::length(tempData.point - ray.origin());
+//		double rayLength = glm::length(ray.direction());
+//		double rayLength = glm::length(tempRay.direction());
+		double distanceInsideMedium = distance;
 		double hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(-1.0, 1.0));
 
 		if (hitDistance <= distanceInsideMedium)
 		{
 			ray = Ray(tempRay.at(tempData.distance), RandomUnitVector(), tempRay.time());
+//			ray = Ray(ray.at(tempData.distance), RandomUnitVector(), tempRay.time());
+//			ray = Ray(tempData.point, RandomUnitVector(), tempRay.time());
 			tempColour *= m_Texture->GetColour(data.uv, ray.origin());
 		}
 		else
-			ray = Ray(tempRay.at(tempData.distance), tempRay.direction(), tempRay.time());
+			ray = Ray(tempData.point, tempRay.direction(), tempRay.time());
 
 		return { tempColour, bounced };
 	}
