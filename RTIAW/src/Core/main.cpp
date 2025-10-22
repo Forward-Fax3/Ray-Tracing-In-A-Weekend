@@ -27,13 +27,14 @@ int main()
 	RTW::CameraData cameraData{};
 
 	cameraData.ImageWidth = 1920;
+//	cameraData.ImageWidth = 480;
 	cameraData.VUp = RTW::Vec3(0.0, 1.0, 0.0);
 
 #ifdef _DEBUG // do not change these values for debug will take for ever otherwise
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 256;
+	cameraData.SamplesPerPixel = 64;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -48,7 +49,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::LargeCollectionOfSpheres;
+	RTW::Scenes scene = RTW::Scenes::FinalSceneBook2;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 

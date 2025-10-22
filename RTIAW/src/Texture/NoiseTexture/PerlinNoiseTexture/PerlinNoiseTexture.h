@@ -7,8 +7,8 @@ namespace RTW
     class PerlinNoiseTexture : public BaseNoiseTexture
     {
     public:
-        explicit PerlinNoiseTexture(double scale = 1.0);
-        explicit PerlinNoiseTexture(std::shared_ptr<BaseTexture> baseTexture, double scale = 1.0);
+        explicit(false) PerlinNoiseTexture(double scale = 1.0);
+        explicit(false) PerlinNoiseTexture(std::shared_ptr<BaseTexture> baseTexture, double scale = 1.0);
 
         Colour GetColour(const UV& uv, const Point& point) const override;
 

@@ -19,6 +19,7 @@ namespace RTW
 		LightTest,
 		CornelBox,
 		CornelSmoke,
+		FinalSceneBook2
 	};
 
 	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, CameraData& cameraData);
