@@ -60,9 +60,28 @@ namespace RTW
 		void Init();
 
 		Colour RayColour(Ray& ray, int16_t& bouncesLeft) const;
-		Ray CreateRay(int16_t i, int16_t j) const;
-		glm::dvec2 SampleSquare() const;
-		Point DefocusDiskSample() const;
+		Ray CreateRay(int16_t i, int16_t j, int16_t sI, int16_t sJ) const;
+
+		RTW_FORCE_INLINE glm::dvec2 SampleSquare() const
+		{
+			return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
+		}
+
+		RTW_FORCE_INLINE Point DefocusDiskSample() const
+		{
+			Point point = RandomOnUnitDisk();
+			return m_Position + point.x * m_DefocusDiskU + point.y * m_DefocusDiskV;
+		}
+
+		RTW_FORCE_INLINE Vec2 RandomSquareStratified(int16_t sI, int16_t sJ) const
+		{
+			auto p = Vec2(static_cast<double>(sI), static_cast<double>(sJ));
+			p += glm::linearRand(Vec2(0.0), Vec2(1.0));
+			p *= m_RsqrtSamplesPerPixel;
+			p -= 0.5;
+
+			return p;
+		}
 
 		inline Colour ColourCorrection(const Colour& colour) const;
 
@@ -102,6 +121,8 @@ namespace RTW
 		Vec3 m_V = Vec3(0.0);
 		Vec3 m_W = Vec3(0.0);
 		Vec3 m_InvGamma = Vec3(0.0);
+		double m_RsqrtSamplesPerPixel = 0.0;
+		int16_t m_SqrtSamplesPerPixel = 0;
 
 		static Camera* s_Instance;
 	};

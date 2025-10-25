@@ -35,12 +35,13 @@ namespace RTW
 			for (int16_t j = 0; j < m_ImageWidth; j++)
 			{
 				Colour colour(0.0);
-				for (int16_t k = 0; k < m_SamplesPerPixel; k++)
-				{
-					Ray ray = CreateRay(i, j);
-					int16_t bouncesLeft = m_MaxBounces;
-					colour += RayColour(ray, bouncesLeft);
-				}
+				for (int16_t sI = 0; sI < m_SqrtSamplesPerPixel; sI++)
+					for (int16_t sJ = 0; sJ < m_SqrtSamplesPerPixel; sJ++)
+					{
+						Ray ray = CreateRay(i, j, sI, sJ);
+						int16_t bouncesLeft = m_MaxBounces;
+						colour += RayColour(ray, bouncesLeft);
+					}
 
 				m_ColourPixelArray.emplace_back(ColourCorrection(colour));
 			}
@@ -72,8 +73,6 @@ namespace RTW
 		m_ImageHeight = static_cast<int16_t>(m_ImageWidth / m_AspectRatio);
 		m_ImageHeight = (m_ImageHeight < 1) ? 1 : m_ImageHeight;
 
-		m_SampleScale = 1.0 / m_SamplesPerPixel;
-
 		double focalLength = (m_FocusDistance == 0.0) ? (m_LookFrom - m_LookAt).length() : m_FocusDistance;
 		double theta = glm::radians(m_FOV);
 		double h = glm::tan(theta / 2.0);
@@ -101,6 +100,10 @@ namespace RTW
 		m_MaxBounces++;
 
 		m_NumberOfPixels = static_cast<size_t>(m_ImageWidth) * static_cast<size_t>(m_ImageHeight);
+		
+		m_SqrtSamplesPerPixel = static_cast<int16_t>(glm::sqrt(m_SamplesPerPixel));
+		m_RsqrtSamplesPerPixel = 1.0 / static_cast<double>(m_SqrtSamplesPerPixel);
+		m_SampleScale = 1.0 / static_cast<double>(m_SqrtSamplesPerPixel * m_SqrtSamplesPerPixel);
 	}
 
 	Colour Camera::RayColour(Ray& ray, int16_t& bouncesLeft) const
@@ -122,27 +125,18 @@ namespace RTW
 		return emittedColour + scatteredData.attenuation * RayColour(ray, bouncesLeft);
 	}
 
-	Ray Camera::CreateRay(int16_t i, int16_t j) const
+	Ray Camera::CreateRay(int16_t i, int16_t j, int16_t sI, int16_t sJ) const
 	{
-		glm::dvec2 offset = SampleSquare() + glm::dvec2(j, i);
-		Vec3 pixelSample = m_Pixel100Location + offset.x * m_PixelDeltaU + offset.y * m_PixelDeltaV;
+		auto offset = RandomSquareStratified(sI, sJ) + Vec2(j, i);
+		Vec3 pixelSample = m_Pixel100Location +
+			(offset.x * m_PixelDeltaU) +
+			(offset.y * m_PixelDeltaV);
 
 		Point rayOrigin = (m_DefocusAngle <= 0.0) ? m_Position : DefocusDiskSample();
 		Vec3 rayDirection = pixelSample - rayOrigin;
 		double rayTime = glm::linearRand(0.0, 1.0);
 
 		return { rayOrigin, rayDirection, rayTime };
-	}
-
-	glm::dvec2 Camera::SampleSquare() const
-	{
-		return glm::linearRand(glm::vec2(-0.5), glm::vec2(0.5));
-	}
-
-	RTW::Point Camera::DefocusDiskSample() const
-	{
-		Point point = RandomOnUnitDisk();
-		return m_Position + point.x * m_DefocusDiskU + point.y * m_DefocusDiskV;
 	}
 
 	Colour Camera::ColourCorrection(const Colour& colour) const
@@ -172,15 +166,16 @@ namespace RTW
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
-//			if (i % m_ImageWidth == 0)
-//				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
+			if (i % m_ImageWidth == 0)
+				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
 
 			Colour colour(0.0);
-			for (int16_t k = 0; k < m_SamplesPerPixel; k++)
-			{
-				int16_t bouncesLeft = m_MaxBounces;
-				Ray ray = CreateRay(static_cast<int16_t>(i / m_ImageWidth), i % m_ImageWidth);
-				colour += RayColour(ray, bouncesLeft);
+			for (int16_t sI = 0; sI < m_SqrtSamplesPerPixel; sI++)
+				for (int16_t sJ = 0; sJ < m_SqrtSamplesPerPixel; sJ++)
+				{
+					int16_t bouncesLeft = m_MaxBounces;
+					Ray ray = CreateRay(static_cast<int16_t>(i / m_ImageWidth), i % m_ImageWidth, sI, sJ);
+					colour += RayColour(ray, bouncesLeft);
 			}
 			m_ColourPixelArray[i] = ColourCorrection(colour);
 		}

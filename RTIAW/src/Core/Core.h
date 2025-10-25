@@ -14,6 +14,8 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/random.hpp"
+#include "glm/gtx/norm.hpp"
 
 #define RTW_FORCE_INLINE GLM_INLINE
 
@@ -41,11 +43,36 @@ namespace RTW
 	using UVvec3 = glm::dmat2x3;
 	using UVWvec3 = glm::dmat3;
 
-	Vec3 RandomOnHemisphere(const Vec3& normal);
+	RTW_FORCE_INLINE Vec3 RandomUnitVector()
+	{
+		Vec3 direction(0.0);
+		double lengthSqared = 0.0;
+		double min = 1e-160;
+		double max = 1.0;
 
-	Vec3 RandomUnitVector();
+		do {
+			direction = glm::linearRand(Vec3(-1.0), Vec3(1.0));
+			lengthSqared = glm::length2(direction);
+		} while (!(min < lengthSqared && lengthSqared < max));
 
-	Vec3 RandomOnUnitDisk();
+		return direction / lengthSqared;
+	}
+
+	RTW_FORCE_INLINE Vec3 RandomOnHemisphere(const Vec3& normal)
+	{
+		Vec3 onUnitSphere = RandomUnitVector();
+		return (glm::dot(onUnitSphere, normal) > 0.0) ? onUnitSphere : -onUnitSphere;
+	}
+
+	RTW_FORCE_INLINE Vec3 RandomOnUnitDisk()
+	{
+		Point point(0.0);
+		do {
+			point = glm::linearRand(Vec3(-1.0, -1.0, 0.0), Vec3(1.0, 1.0, 0.0));
+		} while (glm::length2(point) >= 1);
+
+		return point;
+	}
 
 	extern ::ctpl::thread_pool g_Threads;
 

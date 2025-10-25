@@ -13,6 +13,8 @@
 
 int main()
 {
+	std::srand(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count()));
+
 	auto startTime = std::chrono::high_resolution_clock::now();
 
 	RTW::WriteFile writeFile;
@@ -34,7 +36,7 @@ int main()
 	cameraData.SamplesPerPixel = 4;
 	cameraData.MaxBounces = 4;
 #else
-	cameraData.SamplesPerPixel = 64;
+	cameraData.SamplesPerPixel = 2048;
 	cameraData.MaxBounces = 1024; // ridiculously high bounces doesn't seem to have much of an affect on performance
 #endif
 
@@ -49,7 +51,7 @@ int main()
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::FinalSceneBook2;
+	RTW::Scenes scene = RTW::Scenes::CornelBox;
 	RTW::SceneSelect(scene, sceneHitables, cameraData);
 	sceneHitables->addBuffer();
 
