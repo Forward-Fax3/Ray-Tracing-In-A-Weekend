@@ -55,7 +55,7 @@ namespace RTW
 			lengthSqared = glm::length2(direction);
 		} while (!(min < lengthSqared && lengthSqared < max));
 
-		return direction / lengthSqared;
+		return direction / glm::sqrt(lengthSqared);
 	}
 
 	RTW_FORCE_INLINE Vec3 RandomOnHemisphere(const Vec3& normal)
