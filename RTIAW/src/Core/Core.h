@@ -74,6 +74,20 @@ namespace RTW
 		return point;
 	}
 
+	RTW_FORCE_INLINE Vec3 RandomCosineDirection()
+	{
+		auto r1 = glm::linearRand(0.0, 1.0);
+		auto r2 = glm::linearRand(0.0, 1.0);
+
+		auto phi = glm::two_pi<double>() * r1;
+		auto r2s = glm::sqrt(r2);
+		auto x = glm::cos(phi) * r2s;
+		auto y = glm::sin(phi) * r2s;
+		auto z = glm::sqrt(1 - r2);
+
+		return { x, y, z };
+	}
+
 	extern ::ctpl::thread_pool g_Threads;
 
 	template <typename Tout, uint64_t t_ScaleIn, typename Tin>

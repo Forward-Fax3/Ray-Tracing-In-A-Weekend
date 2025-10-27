@@ -55,7 +55,7 @@ namespace RTW
 		m_Objects = objects;
 
 		for (int16_t i = 0; i < numberOfThreads - 1; i++)
-			g_Threads.push([this, i, numberOfThreads, objects](int) {
+			g_Threads.push([this, i, numberOfThreads](int) {
 				this->MultiThreadRenderLoop(i, numberOfThreads);
 			});
 
@@ -117,12 +117,23 @@ namespace RTW
 
 		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
 
-		ScatterReturn scatteredData = data.material->Scatter(ray, data, bouncesLeft);
+		double scatteringPDF;
+		ScatterReturn scatteredData;
+		{
+			Ray originalRay = ray;
+			scatteredData = data.material->Scatter(ray, data, bouncesLeft);
 
-		if (!scatteredData.bounced)
-			return emittedColour;
+			if (!scatteredData.bounced)
+				return emittedColour;
 
-		return emittedColour + scatteredData.attenuation * RayColour(ray, bouncesLeft);
+			scatteringPDF = data.material->ScatteringPDF(originalRay, data, ray);
+		}
+
+		double PDFValue = scatteringPDF;
+
+		Colour ScatteredColour =  scatteredData.attenuation * RayColour(ray, bouncesLeft) * scatteringPDF / PDFValue;
+
+		return emittedColour + ScatteredColour;
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j, int16_t sI, int16_t sJ) const
@@ -166,8 +177,8 @@ namespace RTW
 	{
 		for (size_t i = offset; i < m_NumberOfPixels; i += increment)
 		{
-			if (i % m_ImageWidth == 0)
-				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
+//			if (i % m_ImageWidth == 0)
+//				std::clog << "\rScanlines remaining: " << (m_ImageHeight - (i / m_ImageWidth)) << ' ' << std::flush;
 
 			Colour colour(0.0);
 			for (int16_t sI = 0; sI < m_SqrtSamplesPerPixel; sI++)

@@ -38,7 +38,7 @@ namespace RTW
 
 		inline double GetSurfaceArea() const { return 2.0 * (m_X.Size() * m_Y.Size() + m_X.Size() * m_Z.Size() + m_Y.Size() * m_Z.Size()); }
 
-		AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
+		RTW_FORCE_INLINE AxisAliagnedBoundingBoxes::Axis LongestAxis() const { return m_LongestAxis; }
 
 		static inline size_t GetNumberofBBs() { return s_NumberOfBoundingBoxes; }
 		static inline void ResetNumberOfBBs() { s_NumberOfBoundingBoxes = 0; }

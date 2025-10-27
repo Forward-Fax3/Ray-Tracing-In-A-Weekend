@@ -37,7 +37,7 @@ namespace RTW
 			newDirection = glm::refract(normalDirection, data.normal, ri);
 
 		ray = Ray(data.point, newDirection, ray.time());
-		return { m_Texture->GetColour(data.uv, data.point), true };
+		return { m_Texture->GetColour(data.uv, data.point), 1.0, true };
 	}
 
 	Vec3 Dielectric::refract(const Vec3& uv, const Vec3& normal, double etaOverEtaPrime)

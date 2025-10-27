@@ -194,8 +194,8 @@ namespace RTW
 		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
 		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
 		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
-		auto glass(std::make_shared<Dielectric>(1.6));
-		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 50.0));
+//		auto glass(std::make_shared<Dielectric>(1.6));
+		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 15.0));
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), red  ));
@@ -207,7 +207,7 @@ namespace RTW
 		hittables->add(CreateBox(Point(105.0, -1e-8, 65.0), Point(270.0, 165.0, 230.0), white, Vec3(18.0, 0.0, 0.0)));
 		hittables->add(CreateBox(Point(290.0, 0.0, 295.0), Point(455.0, 330.0, 460.0), white, Vec3(-15.0, 0.0, 0.0)));
 
-		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
+//		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
 
 		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 40.0;

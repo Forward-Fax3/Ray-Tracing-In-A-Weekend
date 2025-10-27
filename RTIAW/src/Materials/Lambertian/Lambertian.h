@@ -18,6 +18,8 @@ namespace RTW
 
 		ScatterReturn Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const override;
 
+		double ScatteringPDF(const Ray& inRay, const HitData& data, const Ray& scatteredRay) const override;
+
 	private:
 		std::shared_ptr<BaseTexture> m_Texture;
 	};

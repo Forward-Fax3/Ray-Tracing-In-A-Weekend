@@ -23,6 +23,6 @@ namespace RTW
 		refelcted = glm::normalize(refelcted) + (m_Fuzz * RandomUnitVector());
 
 		ray = Ray(data.point, refelcted, ray.time());
-		return { m_Texture->GetColour(data.uv, data.point), (glm::dot(ray.direction(), data.normal) > 0.0) };
+		return { m_Texture->GetColour(data.uv, data.point), 1.0, (glm::dot(ray.direction(), data.normal) > 0.0) };
 	}
 }

@@ -46,7 +46,7 @@ namespace RTW
 				else
 					ray = tempRay;
 
-				return { tempColour, true };
+				return { tempColour, 1.0 / (4.0 * glm::pi<double>()), true};
 			}
 
 			distance += tempData.distance;
@@ -56,9 +56,18 @@ namespace RTW
 
 			Colour emittedColour = tempData.material->EmittedColour(tempData.uv, tempData.point);
 
-			ScatterReturn scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeftTemp);
+			ScatterReturn scatteredData;
+			double scatteringPDF;
+			{
+				Ray originalTempRay = tempRay;
+				scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeftTemp);
+				scatteringPDF = tempData.material->ScatteringPDF(originalTempRay, tempData, tempRay);
+			}
+			double PDFValue = scatteringPDF;
 
 			tempColour *= scatteredData.attenuation;
+			tempColour *= scatteringPDF;
+			tempColour /= PDFValue;
 			tempColour += emittedColour;
 
 			if (!scatteredData.bounced)
@@ -85,6 +94,6 @@ namespace RTW
 		else
 			ray = Ray(tempData.point, tempRay.direction(), tempRay.time());
 
-		return { tempColour, bounced };
+		return { tempColour, 1.0 / (4.0 * glm::pi<double>()), bounced };
 	}
 }

@@ -15,17 +15,17 @@ namespace RTW
 {
 	struct HitData;
 
-	union ScatterReturn
+	struct ScatterReturn
 	{
-		explicit(false) ScatterReturn(const Colour& colour, bool isScattered)
-			: _(colour), bounced(isScattered) {}
+		explicit(false) ScatterReturn()
+			: attenuation(0.0), pdfValue(0.0), bounced(false) { }
+
+		explicit(false) ScatterReturn(const Colour& colour, double pdf, bool isScattered)
+			: attenuation(colour), pdfValue(pdf), bounced(isScattered) { }
 
 		Colour attenuation;
-		struct
-		{
-			glm::highp_dvec3 _;
-			bool bounced;
-		};
+		double pdfValue;
+		bool bounced;
 	};
 
 	class BaseMaterial
@@ -34,8 +34,10 @@ namespace RTW
 		BaseMaterial() = default;
 		virtual ~BaseMaterial() = default;
 
-		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return { {0.0, 0.0, 0.0 }, false }; }
+		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return { {0.0, 0.0, 0.0 }, 1.0, false }; }
 
 		virtual Colour EmittedColour(const UV&, const Point&) const { return Colour(0.0); }
+
+		virtual double ScatteringPDF(const Ray&, const HitData&, const Ray&) const { return 0.0; }
 	};
 }
