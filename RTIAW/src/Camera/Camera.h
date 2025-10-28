@@ -31,8 +31,8 @@ namespace RTW
 		Camera() = delete;
 		explicit Camera(const CameraData& data);
 
-		void Render(const std::shared_ptr<BaseRayHittable> objects);
-		void RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects);
+		void Render(const std::shared_ptr<BaseRayHittable> objects, const std::shared_ptr<BaseRayHittable> lights);
+		void RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects, const std::shared_ptr<BaseRayHittable> lights);
 
 		RTW_FORCE_INLINE void SetAspectRatio(const double AR) { m_AspectRatio = AR; }
 		RTW_FORCE_INLINE void SetFOV(const double FOV) { m_FOV = FOV; }
@@ -122,6 +122,7 @@ namespace RTW
 		Vec3 m_W = Vec3(0.0);
 		Vec3 m_InvGamma = Vec3(0.0);
 		double m_RsqrtSamplesPerPixel = 0.0;
+		std::shared_ptr<BaseRayHittable> m_Lights = nullptr;
 		int16_t m_SqrtSamplesPerPixel = 0;
 
 		static Camera* s_Instance;

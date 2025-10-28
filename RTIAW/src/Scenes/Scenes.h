@@ -22,5 +22,5 @@ namespace RTW
 		FinalSceneBook2
 	};
 
-	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, CameraData& cameraData);
+	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData);
 }

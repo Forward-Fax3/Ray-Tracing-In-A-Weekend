@@ -49,10 +49,11 @@ int main()
 	RTW::g_Threads.resize(numberOfThreads - 1);
 
 	auto sceneHitables(std::make_shared<RTW::RayHittables>());
+	auto lightHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
 	RTW::Scenes scene = RTW::Scenes::CornelBox;
-	RTW::SceneSelect(scene, sceneHitables, cameraData);
+	RTW::SceneSelect(scene, sceneHitables, lightHitables, cameraData);
 	sceneHitables->addBuffer();
 
 	RTW::Camera camera(cameraData);
@@ -78,8 +79,8 @@ int main()
 	else
 		worldHittables = sceneHitables->GetObjects().front();
 
-//	camera.Render(worldHittables);
-	camera.RenderMultiThreaded(numberOfThreads, worldHittables);
+//	camera.Render(worldHittables, lightHitables);
+	camera.RenderMultiThreaded(numberOfThreads, worldHittables, lightHitables->GetObjects().front());
 
 	finishTime = std::chrono::high_resolution_clock::now();
 

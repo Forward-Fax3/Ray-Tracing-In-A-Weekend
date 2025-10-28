@@ -33,13 +33,13 @@ namespace RTW
 		ray = Ray(data.point, glm::normalize(scatterDirection), ray.time());
 		return {
 			m_Texture->GetColour(data.uv, data.point),
-			glm::dot(onb.W(), ray.direction() * glm::one_over_pi<double>()),
+			glm::dot(onb.W(), ray.direction()) * glm::one_over_pi<double>(),
 			true
 			};
 	}
 
 	double Lambertian::ScatteringPDF(const Ray&, const HitData&, const Ray&) const
 	{
-		return 1.0 / glm::tau<double>();
+		return 1.0 / glm::two_pi<double>();
 	}
 }

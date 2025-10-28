@@ -173,14 +173,16 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.70, 0.80, 1.00);
 	}
 
-	static void LightTest(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void LightTest(std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData)
 	{
 		std::shared_ptr<BaseTexture> pertext = std::make_shared<MarbleTexture>(4.0);
 		hittables->add(std::make_shared<Sphere>(Point(0.0, -1000.0, 0.0), 1000.0, std::make_shared<Lambertian>(pertext)));
 		hittables->add(std::make_shared<Sphere>(Point(0.0, 2.0, 0), 2.0, std::make_shared<Lambertian>(pertext)));
 
 		auto difflight = std::make_shared<DiffusedLight>(Colour(20.0));
-		hittables->add(std::make_shared<Parallelogram>(Point(3.0, 1.0, -2.0), UVvec3(Vec3(2.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0)), difflight));
+		auto sceeneLight = std::make_shared<Parallelogram>(Point(3.0, 1.0, -2.0), UVvec3(Vec3(2.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0)), difflight);
+		hittables->add(sceeneLight);
+		lights->add(sceeneLight);
 
 		cameraData.AspectRatio = 16.0 / 9.0;
 		cameraData.FOV = 20.0;
@@ -189,7 +191,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.0);
 	}
 
-	static void CornelBox(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void CornelBox(std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData)
 	{
 		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
 		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
@@ -197,9 +199,12 @@ namespace RTW
 //		auto glass(std::make_shared<Dielectric>(1.6));
 		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 15.0));
 
+		auto sceeneLight = std::make_shared<Parallelogram>(Point(343.0, 554.0, 332.0), UVvec3(Vec3(-130.0, 0.0, 0.0), Vec3(0, 0, -105)), light);
+		hittables->add(sceeneLight);
+		lights->add(sceeneLight);
+
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), red  ));
-		hittables->add(std::make_shared<Parallelogram>(Point(343.0, 554.0, 332.0), UVvec3(Vec3(-130.0,   0.0, 0.0), Vec3(0, 0, -105)), light));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 0,  555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0),               UVvec3(Vec3(-555.0,   0.0, 0.0), Vec3(0, 0, -555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
@@ -216,7 +221,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.0);
 	}
 
-	static void CornelSmoke(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	static void CornelSmoke(std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData)
 	{
 		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
 		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
@@ -226,9 +231,12 @@ namespace RTW
 		auto whiteSmoke(std::make_shared<ConstantMedium>(1, Colour(1.0)));
 		auto blackSmoke(std::make_shared<ConstantMedium>(1, Colour(0.0)));
 
+		auto sceeneLight = std::make_shared<Parallelogram>(Point(113.0, 554.0, 127.0), UVvec3(Vec3(330.0, 0.0, 0.0), Vec3(0, 0, 305)), light);
+		hittables->add(sceeneLight);
+		lights->add(sceeneLight);
+
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), red  ));
-		hittables->add(std::make_shared<Parallelogram>(Point(113.0, 554.0, 127.0), UVvec3(Vec3( 330.0,   0.0, 0.0), Vec3(0, 0,  305)), light));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0),                 UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 0,  555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0),               UVvec3(Vec3(-555.0,   0.0, 0.0), Vec3(0, 0, -555)), white));
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
@@ -246,7 +254,7 @@ namespace RTW
 		cameraData.BackgroundColour = RTW::Colour(0.0);
 	}
 
-	void FinalSceneBook2(std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	void FinalSceneBook2(std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData)
 	{
 		auto ground = std::make_shared<Lambertian>(Colour(0.48, 0.83, 0.53));
 
@@ -264,8 +272,9 @@ namespace RTW
 				hittables->add(CreateBox(Point(x0, y0, z0), Point(x1, y1, z1), ground));
 			}
 		}
-
-		hittables->add(std::make_shared<Parallelogram>(Point(123.0, 554.0, 147.0), UVvec3(Vec3(300.0, 0.0, 0.0), Vec3(0.0, 0.0, 265.0)), std::make_shared<DiffusedLight>(Colour(7.0))));
+		auto light = std::make_shared<Parallelogram>(Point(123.0, 554.0, 147.0), UVvec3(Vec3(300.0, 0.0, 0.0), Vec3(0.0, 0.0, 265.0)), std::make_shared<DiffusedLight>(Colour(7.0)));
+		hittables->add(light);
+		lights->add(light);
 
 		hittables->add(std::make_shared<MovingSphere>(Point(400.0, 400.0, 200.0), Point(430.0, 400.0, 200.0), 50.0, std::make_shared<Lambertian>(Colour(0.7, 0.3, 0.1))));
 
@@ -300,7 +309,7 @@ namespace RTW
 		cameraData.LookAt = Point(278.0, 278.0, 0);
 	}
 
-	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, CameraData& cameraData)
+	void SceneSelect(Scenes scene, std::shared_ptr<RayHittables> hittables, std::shared_ptr<RayHittables> lights, CameraData& cameraData)
 	{
 		switch (scene)
 		{
@@ -332,16 +341,16 @@ namespace RTW
 			Parallelograms(hittables, cameraData);
 			return;
 		case Scenes::LightTest:
-			LightTest(hittables, cameraData);
+			LightTest(hittables, lights, cameraData);
 			return;
 		case Scenes::CornelBox:
-			CornelBox(hittables, cameraData);
+			CornelBox(hittables, lights, cameraData);
 			return;
 		case Scenes::CornelSmoke:
-			CornelSmoke(hittables, cameraData);
+			CornelSmoke(hittables, lights, cameraData);
 			return;
 		case Scenes::FinalSceneBook2:
-			FinalSceneBook2(hittables, cameraData);
+			FinalSceneBook2(hittables, lights, cameraData);
 			return;
 		default:
 			return;

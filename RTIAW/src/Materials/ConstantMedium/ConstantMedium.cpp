@@ -54,7 +54,7 @@ namespace RTW
 			if (tempData.material == this)
 				break;
 
-			Colour emittedColour = tempData.material->EmittedColour(tempData.uv, tempData.point);
+			Colour emittedColour = tempData.material->EmittedColour(tempData, tempData.point);
 
 			ScatterReturn scatteredData;
 			double scatteringPDF;

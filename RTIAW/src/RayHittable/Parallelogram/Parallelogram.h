@@ -16,6 +16,10 @@ namespace RTW
 
 		bool IsRayHit(const Ray& ray, const Interval& rayDistance, HitData& hitData) const override;
 
+		double PDFValue(const Point& origin, const Vec3& direction) const override;
+
+		Vec3 Random(const Point& origin, const Ray&) const override;
+
 	private:
 		void CreateAABB();
 		UV CalculateUV(const Point& p) const;
@@ -23,6 +27,7 @@ namespace RTW
 	private:
 		double m_D;
 		std::shared_ptr<BaseMaterial> m_Material;
+		double m_Area;
 		UVvec3 m_UV;
 		Point m_Q;
 		Vec3 m_Normal;

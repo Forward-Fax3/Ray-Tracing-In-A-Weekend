@@ -13,6 +13,10 @@
 #include "Sphere.h"
 #include "Camera.h"
 
+#include "CosinePDF.h"
+#include "HittablesPDF.h"
+#include "MixturePDF.h"
+
 
 namespace RTW
 {
@@ -22,11 +26,12 @@ namespace RTW
 		: m_AspectRatio(data.AspectRatio), m_FOV(data.FOV), m_DefocusAngle(data.DefocusAngle), m_FocusDistance(data.FocusDistance), m_LookFrom(data.LookFrom), m_LookAt(data.LookAt), m_VUp(data.VUp),
 		m_Gamma(data.Gamma), m_BackgroundColour(data.BackgroundColour), m_ImageWidth(data.ImageWidth), m_SamplesPerPixel(data.SamplesPerPixel), m_MaxBounces(data.MaxBounces) { s_Instance = this; }
 
-	void Camera::Render(const std::shared_ptr<BaseRayHittable> objects)
+	void Camera::Render(const std::shared_ptr<BaseRayHittable> objects, const std::shared_ptr<BaseRayHittable> lights)
 	{
 		Init();
 		m_ColourPixelArray.reserve(m_NumberOfPixels);
 		m_Objects = objects;
+		m_Lights = lights;
 
 		for (int16_t i = 0; i < m_ImageHeight; i++)
 		{
@@ -48,11 +53,12 @@ namespace RTW
 		}
 	}
 
-	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects)
+	void Camera::RenderMultiThreaded(const int32_t numberOfThreads, const std::shared_ptr<BaseRayHittable> objects, const std::shared_ptr<BaseRayHittable> lights)
 	{
 		Init();
 		m_ColourPixelArray.resize(m_NumberOfPixels);
 		m_Objects = objects;
+		m_Lights = lights;
 
 		for (int16_t i = 0; i < numberOfThreads - 1; i++)
 			g_Threads.push([this, i, numberOfThreads](int) {
@@ -115,9 +121,10 @@ namespace RTW
 		if (!m_Objects->IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
 
-		Colour emittedColour = data.material->EmittedColour(data.uv, data.point);
+		Colour emittedColour = data.material->EmittedColour(data, data.point);
 
 		double scatteringPDF;
+		double PDFValue;
 		ScatterReturn scatteredData;
 		{
 			Ray originalRay = ray;
@@ -126,14 +133,22 @@ namespace RTW
 			if (!scatteredData.bounced)
 				return emittedColour;
 
+			HittablesPDF hittablesPDF(data.point, m_Lights, originalRay);
+			CosinePDF cosinePDF(data.normal);
+			MixturePDF mixedPDF(hittablesPDF, cosinePDF);
+
+			ray = Ray(data.point, mixedPDF.Generate(), ray.time());
+			PDFValue = mixedPDF.Value(ray.direction());
+
 			scatteringPDF = data.material->ScatteringPDF(originalRay, data, ray);
 		}
 
-		double PDFValue = scatteringPDF;
+		Colour ScatteredColour(scatteringPDF / PDFValue);
+		ScatteredColour *= RayColour(ray, bouncesLeft);
+		ScatteredColour *= scatteredData.attenuation;
+		ScatteredColour += emittedColour;
 
-		Colour ScatteredColour =  scatteredData.attenuation * RayColour(ray, bouncesLeft) * scatteringPDF / PDFValue;
-
-		return emittedColour + ScatteredColour;
+		return ScatteredColour;
 	}
 
 	Ray Camera::CreateRay(int16_t i, int16_t j, int16_t sI, int16_t sJ) const
@@ -187,7 +202,7 @@ namespace RTW
 					int16_t bouncesLeft = m_MaxBounces;
 					Ray ray = CreateRay(static_cast<int16_t>(i / m_ImageWidth), i % m_ImageWidth, sI, sJ);
 					colour += RayColour(ray, bouncesLeft);
-			}
+				}
 			m_ColourPixelArray[i] = ColourCorrection(colour);
 		}
 	}

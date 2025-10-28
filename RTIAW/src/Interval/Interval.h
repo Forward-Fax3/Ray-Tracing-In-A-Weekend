@@ -96,7 +96,7 @@ namespace RTW
 				double m_Min;
 				double m_Max;
 			};
-			glm::dvec2 m_MinMax{};
+			Vec2 m_MinMax{};
 		};
 	};
 }

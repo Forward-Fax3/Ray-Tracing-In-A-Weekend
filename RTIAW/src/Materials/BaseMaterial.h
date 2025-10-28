@@ -2,7 +2,6 @@
 #define _BaseMaterial
 #include "Core.h"
 #include "Ray.h"
-#include "RayHittable.h"
 
 #include <utility>
 
@@ -36,7 +35,7 @@ namespace RTW
 
 		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return { {0.0, 0.0, 0.0 }, 1.0, false }; }
 
-		virtual Colour EmittedColour(const UV&, const Point&) const { return Colour(0.0); }
+		virtual Colour EmittedColour(const HitData&, const Point&) const { return Colour(0.0); }
 
 		virtual double ScatteringPDF(const Ray&, const HitData&, const Ray&) const { return 0.0; }
 	};
