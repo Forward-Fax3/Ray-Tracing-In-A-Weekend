@@ -79,7 +79,7 @@ namespace RTW
 
 		virtual double PDFValue(const Point&, const Vec3&) const { return 0.0; }
 
-		virtual Vec3 Random(const Point&, const Ray&) const { return { 1.0, 0.0, 0.0 }; }
+		virtual Vec3 Random(const Point&) const { return { 1.0, 0.0, 0.0 }; }
 
 	protected:
 		explicit BaseRayHittable(const AABB& aabb) : m_AABB(aabb) {}

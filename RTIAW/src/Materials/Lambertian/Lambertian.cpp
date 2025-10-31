@@ -7,6 +7,7 @@
 #include "Lambertian.h"
 #include "SolidColour.h"
 #include "ONB.h"
+#include "CosinePDF.h"
 
 
 namespace RTW
@@ -33,13 +34,15 @@ namespace RTW
 		ray = Ray(data.point, glm::normalize(scatterDirection), ray.time());
 		return {
 			m_Texture->GetColour(data.uv, data.point),
-			glm::dot(onb.W(), ray.direction()) * glm::one_over_pi<double>(),
-			true
+			std::make_unique<CosinePDF>(data.normal),
+			true,
+			false
 			};
 	}
 
-	double Lambertian::ScatteringPDF(const Ray&, const HitData&, const Ray&) const
+	double Lambertian::ScatteringPDF(const Ray&, const HitData& data, const Ray& rayOut) const
 	{
-		return 1.0 / glm::two_pi<double>();
+		double cosine = glm::dot(glm::normalize(data.normal), glm::normalize(rayOut.direction()));
+		return (cosine < 0.0) ? 0.0 : (cosine * glm::one_over_pi<double>());
 	}
 }

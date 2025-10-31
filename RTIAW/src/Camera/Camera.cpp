@@ -121,7 +121,7 @@ namespace RTW
 		if (!m_Objects->IsRayHit(ray, Interval(0.001, doubleInf), data))
 			return m_BackgroundColour;
 
-		Colour emittedColour = data.material->EmittedColour(data, data.point);
+		Colour emittedColour = data.material->EmittedColour(data);
 
 		double scatteringPDF;
 		double PDFValue;
@@ -132,10 +132,11 @@ namespace RTW
 
 			if (!scatteredData.bounced)
 				return emittedColour;
+			if (scatteredData.skipPDF)
+				return emittedColour + (scatteredData.attenuation * RayColour(ray, bouncesLeft));
 
-			HittablesPDF hittablesPDF(data.point, m_Lights, originalRay);
-			CosinePDF cosinePDF(data.normal);
-			MixturePDF mixedPDF(hittablesPDF, cosinePDF);
+			HittablesPDF hittablesPDF(data.point, m_Lights);
+			MixturePDF mixedPDF(hittablesPDF, *scatteredData.pdf);
 
 			ray = Ray(data.point, mixedPDF.Generate(), ray.time());
 			PDFValue = mixedPDF.Value(ray.direction());
@@ -144,8 +145,8 @@ namespace RTW
 		}
 
 		Colour ScatteredColour(scatteringPDF / PDFValue);
-		ScatteredColour *= RayColour(ray, bouncesLeft);
 		ScatteredColour *= scatteredData.attenuation;
+		ScatteredColour *= RayColour(ray, bouncesLeft);
 		ScatteredColour += emittedColour;
 
 		return ScatteredColour;

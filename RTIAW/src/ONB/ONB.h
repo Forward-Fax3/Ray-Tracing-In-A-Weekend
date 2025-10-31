@@ -23,6 +23,6 @@ namespace RTW
 		}
 
 	private:
-		std::array<Vec3, 3> m_Axis;
+		glm::dmat3 m_Axis;
 	};
 }

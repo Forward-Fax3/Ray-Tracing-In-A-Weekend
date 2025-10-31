@@ -2,6 +2,7 @@
 #define _BaseMaterial
 #include "Core.h"
 #include "Ray.h"
+#include "PDF.h"
 
 #include <utility>
 
@@ -17,14 +18,15 @@ namespace RTW
 	struct ScatterReturn
 	{
 		explicit(false) ScatterReturn()
-			: attenuation(0.0), pdfValue(0.0), bounced(false) { }
+			: attenuation(0.0), pdf(nullptr), bounced(false), skipPDF(true) { }
 
-		explicit(false) ScatterReturn(const Colour& colour, double pdf, bool isScattered)
-			: attenuation(colour), pdfValue(pdf), bounced(isScattered) { }
+		explicit(false) ScatterReturn(const Colour& colour, std::unique_ptr<PDF> Newpdf, bool isScattered, bool skipPDF)
+			: attenuation(colour), pdf(std::move(Newpdf)), bounced(isScattered), skipPDF(skipPDF) {}
 
 		Colour attenuation;
-		double pdfValue;
+		std::unique_ptr<PDF> pdf;
 		bool bounced;
+		bool skipPDF;
 	};
 
 	class BaseMaterial
@@ -33,9 +35,9 @@ namespace RTW
 		BaseMaterial() = default;
 		virtual ~BaseMaterial() = default;
 
-		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return { {0.0, 0.0, 0.0 }, 1.0, false }; }
+		virtual ScatterReturn Scatter(Ray&, const HitData&, int16_t&) const { return {}; }
 
-		virtual Colour EmittedColour(const HitData&, const Point&) const { return Colour(0.0); }
+		virtual Colour EmittedColour(const HitData&) const { return Colour(0.0); }
 
 		virtual double ScatteringPDF(const Ray&, const HitData&, const Ray&) const { return 0.0; }
 	};

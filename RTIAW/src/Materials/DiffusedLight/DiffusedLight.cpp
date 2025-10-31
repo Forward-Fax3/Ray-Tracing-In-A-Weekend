@@ -25,8 +25,8 @@ namespace RTW
 	DiffusedLight::DiffusedLight(const std::shared_ptr<BaseTexture>& texture, const Colour& brightness)
 		: m_Texture(texture), m_Brightness(brightness) {}
 
-	Colour DiffusedLight::EmittedColour(const HitData& data, const Point& point) const
+	Colour DiffusedLight::EmittedColour(const HitData& data) const
 	{
-		return (!data.isFrontFace) ? Colour(0.0) : m_Texture->GetColour(data.uv, point) * m_Brightness;
+		return (!data.isFrontFace) ? Colour(0.0) : m_Texture->GetColour(data.uv, data.point) * m_Brightness;
 	}
 }

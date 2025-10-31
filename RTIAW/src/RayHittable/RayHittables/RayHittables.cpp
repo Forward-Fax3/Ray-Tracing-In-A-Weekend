@@ -50,6 +50,23 @@ namespace RTW
 		this->GetBoundingBox().Expand(newHittables->GetBoundingBox());
 	}
 
+	double RayHittables::PDFValue(const Point& origin, const Vec3& direction) const
+	{
+		double weight = 1.0 / static_cast<double>(m_Objects.size());
+		double pdf = 0.0;
+
+		for (auto& object : m_Objects)
+			pdf += weight * object->PDFValue(origin, direction);
+
+		return pdf;
+	}
+
+	RTW::Vec3 RayHittables::Random(const Point& origin) const
+	{
+		size_t maxIndex = m_Objects.size() - 1;
+		return m_Objects[glm::linearRand(0ui64, maxIndex)]->Random(origin);
+	}
+
 	void RayHittables::addBuffer()
 	{
 		if (m_Objects.empty())

@@ -19,6 +19,10 @@ namespace RTW
 		void add(const std::shared_ptr<BaseRayHittable> object);
 		void add(const std::shared_ptr<RayHittables> object);
 
+		double PDFValue(const Point& origin, const Vec3& direction) const override;
+
+		Vec3 Random(const Point& origin) const override;
+
 		// add buffers to AABBs so that comparisons that need to be axis aligned don't end up having the same value
 		void addBuffer();
 

@@ -181,7 +181,6 @@ namespace RTW
 
 		auto difflight = std::make_shared<DiffusedLight>(Colour(20.0));
 		auto sceeneLight = std::make_shared<Parallelogram>(Point(3.0, 1.0, -2.0), UVvec3(Vec3(2.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0)), difflight);
-		hittables->add(sceeneLight);
 		lights->add(sceeneLight);
 
 		cameraData.AspectRatio = 16.0 / 9.0;
@@ -196,11 +195,11 @@ namespace RTW
 		auto red(std::make_shared<Lambertian>(Colour(0.65, 0.05, 0.05)));
 		auto white(std::make_shared<Lambertian>(Colour(0.73, 0.73, 0.73)));
 		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
-//		auto glass(std::make_shared<Dielectric>(1.6));
+		auto glass(std::make_shared<Dielectric>(1.6));
 		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 15.0));
+		auto aluminium(std::make_shared<Metal>(Colour(0.8, 0.85, 0.88), 0.0));
 
 		auto sceeneLight = std::make_shared<Parallelogram>(Point(343.0, 554.0, 332.0), UVvec3(Vec3(-130.0, 0.0, 0.0), Vec3(0, 0, -105)), light);
-		hittables->add(sceeneLight);
 		lights->add(sceeneLight);
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
@@ -210,9 +209,9 @@ namespace RTW
 		hittables->add(std::make_shared<Parallelogram>(Point(0.0,     0.0, 555.0), UVvec3(Vec3( 555.0,   0.0, 0.0), Vec3(0, 555,  0)), white));
 
 		hittables->add(CreateBox(Point(105.0, -1e-8, 65.0), Point(270.0, 165.0, 230.0), white, Vec3(18.0, 0.0, 0.0)));
-		hittables->add(CreateBox(Point(290.0, 0.0, 295.0), Point(455.0, 330.0, 460.0), white, Vec3(-15.0, 0.0, 0.0)));
+		hittables->add(CreateBox(Point(290.0, 0.0, 295.0), Point(455.0, 330.0, 460.0), aluminium, Vec3(-15.0, 0.0, 0.0)));
 
-//		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
+		hittables->add(std::make_shared<Sphere>(Point(350.0, 50.0, 100.0), 50.0, glass));
 
 		cameraData.AspectRatio = 1.0;
 		cameraData.FOV = 40.0;
@@ -228,11 +227,10 @@ namespace RTW
 		auto green(std::make_shared<Lambertian>(Colour(0.12, 0.45, 0.15)));
 		auto glass(std::make_shared<Dielectric>(1.6));
 		auto light(std::make_shared<DiffusedLight>(Colour(1.0), 7.0));
-		auto whiteSmoke(std::make_shared<ConstantMedium>(1, Colour(1.0)));
-		auto blackSmoke(std::make_shared<ConstantMedium>(1, Colour(0.0)));
+		auto whiteSmoke(std::make_shared<ConstantMedium>(0.01, Colour(1.0)));
+		auto blackSmoke(std::make_shared<ConstantMedium>(0.01, Colour(0.0)));
 
 		auto sceeneLight = std::make_shared<Parallelogram>(Point(113.0, 554.0, 127.0), UVvec3(Vec3(330.0, 0.0, 0.0), Vec3(0, 0, 305)), light);
-		hittables->add(sceeneLight);
 		lights->add(sceeneLight);
 
 		hittables->add(std::make_shared<Parallelogram>(Point(555.0,   0.0,   0.0), UVvec3(Vec3(   0.0, 555.0, 0.0), Vec3(0, 0,  555)), green));
@@ -273,7 +271,6 @@ namespace RTW
 			}
 		}
 		auto light = std::make_shared<Parallelogram>(Point(123.0, 554.0, 147.0), UVvec3(Vec3(300.0, 0.0, 0.0), Vec3(0.0, 0.0, 265.0)), std::make_shared<DiffusedLight>(Colour(7.0)));
-		hittables->add(light);
 		lights->add(light);
 
 		hittables->add(std::make_shared<MovingSphere>(Point(400.0, 400.0, 200.0), Point(430.0, 400.0, 200.0), 50.0, std::make_shared<Lambertian>(Colour(0.7, 0.3, 0.1))));
@@ -283,11 +280,11 @@ namespace RTW
 
 //		hittables->add(std::make_shared<Sphere>(Point(360.0, 150.0, 145.0), 70.0, std::make_shared<Metal>(Colour(0.1, 0.2, 0.9), 0.8)));
 		hittables->add(std::make_shared<Sphere>(Point(360.0, 150.0, 145.0), 70.0, std::make_shared<ConstantMedium>(0.2, Colour(0.2, 0.4, 0.9))));
-		hittables->add(std::make_shared<Sphere>(Point(360.0, 150.0, 145.0), 70.05, std::make_shared<Dielectric>(1.5)));
+//		hittables->add(std::make_shared<Sphere>(Point(360.0, 150.0, 145.0), 70.05, std::make_shared<Dielectric>(1.5)));
 //		hittables->add(std::make_shared<Sphere>(Point(478.0, 278.0, -600.0), 277.0, std::make_shared<ConstantMedium>(0.0001, Colour(1.0))));
 //		hittables->add(std::make_shared<Sphere>(Point(478.0, 278.0, -600.0), 277.0, std::make_shared<ConstantMedium>(0.005, Colour(1.0))));
 //		hittables->add(std::make_shared<Sphere>(Point(0.0), 277.0, std::make_shared<ConstantMedium>(0.0001, Colour(1.0))));
-//		hittables->add(std::make_shared<Sphere>(Point(0.0), 5000.0, std::make_shared<ConstantMedium>(0.0001, Colour(1.0))));
+		hittables->add(std::make_shared<Sphere>(Point(0.0), 5000.0, std::make_shared<ConstantMedium>(0.0001, Colour(1.0))));
 
 		hittables->add(std::make_shared<Sphere>(Point(400.0, 200.0, 400.0), 100.0, std::make_shared<Lambertian>(std::make_shared<ImageTexture>("earthmap.jpg"))));
 

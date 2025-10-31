@@ -11,7 +11,9 @@
 
 #include "Core.h"
 #include "Ray.h"
-#include "RayHittable.h" 
+#include "RayHittable.h"
+
+#include "ONB.h"
 
 
 namespace RTW::Templates
@@ -72,8 +74,38 @@ namespace RTW::Templates
 			return true;
 		}
 
+		double PDFValue(const Point& origin, const Vec3& direction) const override
+		{
+			if (HitData data; !IsRayHit(Ray(origin, direction), Interval(0.001, doubleInf), data))
+				return 0.0;
+
+			double rDistance2;
+			if constexpr (t_IsMoving)
+				rDistance2 = 1.0 / glm::length2(m_Center.at(0.0) - origin);
+			else
+				rDistance2 = 1.0 / glm::length2(m_Center - origin);
+			
+			double cosThetaMax = glm::sqrt(1.0 - m_Radius * m_Radius * rDistance2);
+			double solidAngle = glm::two_pi<double>() * (1.0 - cosThetaMax);
+
+			return 1.0 / solidAngle;
+		}
+
+		Vec3 Random(const Point& origin) const override
+		{
+			Vec3 direction;
+			if constexpr (t_IsMoving)
+				direction = m_Center.at(0.0) - origin;
+			else
+				direction = m_Center - origin;
+
+			double distance2 = glm::length2(direction);
+			ONB onb(direction);
+			return onb.Transform(RandomToSphere(distance2));
+		}
+
 	private:
-		static inline UV GetUV(const Point& point)
+		static RTW_FORCE_INLINE UV GetUV(const Point& point)
 		{
 			/*
 			point: a given point on the sphere of radius one, centered at the origin.
@@ -87,7 +119,20 @@ namespace RTW::Templates
 			double theta = glm::acos(-point.y);
 			double phi = glm::atan2(-point.z, point.x) + glm::pi<double>();
 
-			return { phi / glm::two_pi<double>(), theta / glm::pi<double>() };
+			return { phi * glm::one_over_two_pi<double>(), theta * glm::one_over_pi<double>() };
+		}
+
+		RTW_FORCE_INLINE Vec3 RandomToSphere(double distance2) const
+		{
+			auto r = glm::linearRand(Vec2(0.0), Vec2(1.0));
+
+			auto z = 1.0 + r.y * (glm::sqrt(1.0 - m_Radius * m_Radius / distance2) - 1.0);
+			auto phi = glm::two_pi<double>() * r.x;
+			auto sqrt1MinusZ2 = glm::sqrt(1.0 - z * z);
+			auto x = glm::cos(phi) * sqrt1MinusZ2;
+			auto y = glm::sin(phi) * sqrt1MinusZ2;
+
+			return { x, y, z };
 		}
 
 	private:

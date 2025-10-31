@@ -17,7 +17,7 @@ namespace RTW
 		DiffusedLight(const std::shared_ptr<BaseTexture>& texture, double brightness);
 		DiffusedLight(const std::shared_ptr<BaseTexture>& texture, const Colour& brightness);
 
-        Colour EmittedColour(const HitData& data, const Point& point) const override;
+        Colour EmittedColour(const HitData& data) const override;
 
     private:
         std::shared_ptr<BaseTexture> m_Texture;

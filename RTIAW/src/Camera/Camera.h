@@ -53,6 +53,7 @@ namespace RTW
 		RTW_FORCE_INLINE int16_t GetImageHeight() const { return m_ImageHeight; }
 
 		RTW_FORCE_INLINE static const std::shared_ptr<BaseRayHittable>& GetObjects() { return s_Instance->m_Objects; }
+		RTW_FORCE_INLINE static const std::shared_ptr<BaseRayHittable>& GetLights() { return s_Instance->m_Lights; }
 		RTW_FORCE_INLINE static const Colour& GetBackgroundColour() { return s_Instance->m_BackgroundColour; }
 
 	// Private helper functions

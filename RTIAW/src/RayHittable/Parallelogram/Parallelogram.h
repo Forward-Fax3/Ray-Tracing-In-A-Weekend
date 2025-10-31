@@ -18,7 +18,7 @@ namespace RTW
 
 		double PDFValue(const Point& origin, const Vec3& direction) const override;
 
-		Vec3 Random(const Point& origin, const Ray&) const override;
+		Vec3 Random(const Point& origin) const override;
 
 	private:
 		void CreateAABB();

@@ -57,13 +57,14 @@ namespace RTW
 		if (!this->IsRayHit(Ray(origin, direction), Interval(0.001, doubleInf), data))
 			return 0.0;
 
+//		double distanceSquared = data.distance * data.distance;
 		double distanceSquared = data.distance * data.distance * glm::length2(direction);
 		double cosine = glm::abs(glm::dot(direction, data.normal)) / glm::length(direction);
 
 		return distanceSquared / (cosine * m_Area);
 	}
 
-	Vec3 Parallelogram::Random(const Point& origin, const Ray&) const
+	Vec3 Parallelogram::Random(const Point& origin) const
 	{
 		return (m_Q + (glm::linearRand(0.0, 1.0) * m_UV[0]) + (glm::linearRand(0.0, 1.0) * m_UV[1])) - origin;
 	}

@@ -6,6 +6,10 @@
 
 #include "glm/gtc/random.hpp"
 
+#include "HittablesPDF.h"
+#include "SpherePDF.h"
+#include "MixturePDF.h"
+
 
 namespace RTW
 {
@@ -15,11 +19,12 @@ namespace RTW
 	ConstantMedium::ConstantMedium(double density, std::weak_ptr<BaseTexture> texture)
 		: m_NegitiveInvertedDensity(-1.0 / density), m_Texture(texture) {}
 
-	RTW::ScatterReturn ConstantMedium::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
+	ScatterReturn ConstantMedium::Scatter(Ray& ray, const HitData& data, int16_t& bouncesLeft) const
 	{
 		Colour tempColour(1.0);
 		bool bounced = true;
 		const auto& objects = Camera::GetObjects();
+		const auto& lights = Camera::GetLights();
 		Ray tempRay(data.point, ray.direction(), ray.time());
 		HitData tempData{};
 		double distance = 0.0;
@@ -46,7 +51,7 @@ namespace RTW
 				else
 					ray = tempRay;
 
-				return { tempColour, 1.0 / (4.0 * glm::pi<double>()), true};
+				return { tempColour, std::make_unique<SpherePDF>(), true, false };
 			}
 
 			distance += tempData.distance;
@@ -54,20 +59,28 @@ namespace RTW
 			if (tempData.material == this)
 				break;
 
-			Colour emittedColour = tempData.material->EmittedColour(tempData, tempData.point);
+			Colour emittedColour = tempData.material->EmittedColour(tempData);
 
 			ScatterReturn scatteredData;
 			double scatteringPDF;
 			{
 				Ray originalTempRay = tempRay;
 				scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeftTemp);
-				scatteringPDF = tempData.material->ScatteringPDF(originalTempRay, tempData, tempRay);
+				if (!scatteredData.skipPDF)
+				{
+					HittablesPDF hittablesPDF(data.point, lights);
+					MixturePDF mixedPDF(hittablesPDF, *scatteredData.pdf);
+
+					ray = Ray(data.point, mixedPDF.Generate(), ray.time());
+					double PDFValue = mixedPDF.Value(ray.direction());
+
+					scatteringPDF = tempData.material->ScatteringPDF(originalTempRay, tempData, tempRay);
+					
+					tempColour *= scatteringPDF / PDFValue;
+				}
 			}
-			double PDFValue = scatteringPDF;
 
 			tempColour *= scatteredData.attenuation;
-			tempColour *= scatteringPDF;
-			tempColour /= PDFValue;
 			tempColour += emittedColour;
 
 			if (!scatteredData.bounced)
@@ -94,6 +107,7 @@ namespace RTW
 		else
 			ray = Ray(tempData.point, tempRay.direction(), tempRay.time());
 
-		return { tempColour, 1.0 / (4.0 * glm::pi<double>()), bounced };
+		return { tempColour, std::make_unique<SpherePDF>(), bounced, false };
 	}
 }
+ 
