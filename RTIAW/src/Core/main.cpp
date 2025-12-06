@@ -11,7 +11,7 @@
 #include "WriteColour.h"
 
 
-int main()
+int _cdecl main()
 {
 	std::srand(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count()));
 
@@ -52,7 +52,7 @@ int main()
 	auto lightHitables(std::make_shared<RTW::RayHittables>());
 
 	// Scene Selection
-	RTW::Scenes scene = RTW::Scenes::CornelBox;
+	RTW::Scenes scene = RTW::Scenes::CornelSmoke;
 	RTW::SceneSelect(scene, sceneHitables, lightHitables, cameraData);
 	sceneHitables->add(lightHitables);
 	sceneHitables->addBuffer();

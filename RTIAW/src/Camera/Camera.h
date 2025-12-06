@@ -76,7 +76,7 @@ namespace RTW
 
 		RTW_FORCE_INLINE Vec2 RandomSquareStratified(int16_t sI, int16_t sJ) const
 		{
-			auto p = Vec2(static_cast<double>(sI), static_cast<double>(sJ));
+			Vec2 p(static_cast<double>(sI), static_cast<double>(sJ));
 			p += glm::linearRand(Vec2(0.0), Vec2(1.0));
 			p *= m_RsqrtSamplesPerPixel;
 			p -= 0.5;

@@ -25,87 +25,117 @@ namespace RTW
 		bool bounced = true;
 		const auto& objects = Camera::GetObjects();
 		const auto& lights = Camera::GetLights();
-		Ray tempRay(data.point, ray.direction(), ray.time());
+		Ray tempRay(data.point + 0.001 * ray.direction(), ray.direction(), ray.time());
 		HitData tempData{};
-		double distance = 0.0;
-		int16_t bouncesLeftTemp = bouncesLeft;
+		bool hasBounced = false;
 
-		while (bouncesLeftTemp != 0 && bounced)
+		while (bouncesLeft != 0 && bounced)
 		{
 			if (!objects->IsRayHit(tempRay, Interval(0.001, doubleInf), tempData))
 			{
-				if (distance == 0.0)
-					distance = data.distance;
-
-				if (
-					double hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(-1.0, 1.0));
-					hitDistance <= distance
-					)
+				if (hasBounced)
 				{
-//					ray = Ray(tempRay.at(tempData.distance), RandomUnitVector(), tempRay.time());
-//					ray = Ray(ray.at(tempData.distance), RandomUnitVector(), tempRay.time());
-					ray = Ray(tempRay.origin(), RandomUnitVector(), tempRay.time());
-					tempColour *= m_Texture->GetColour(data.uv, ray.origin());
-					bouncesLeft = bouncesLeftTemp;
-				}
-				else
+					bounced = true;
 					ray = tempRay;
+					return { { 1.0, 1.0, 1.0 }, std::make_unique<SpherePDF>(), bounced, false };
+				}
+
+				auto rayLength = glm::length(ray.direction());
+				auto distanceToHit = data.distance * rayLength;
+				auto hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(0.0, 1.0));
+
+				if (hitDistance <= distanceToHit)
+				{
+					Ray originalRay = ray;
+					tempRay = Ray(ray.at(glm::linearRand(0.0, data.distance)), RandomUnitVector(), tempRay.time());
+
+					HittablesPDF hittablesPDF(data.point, lights);
+					SpherePDF spherePDF;
+					MixturePDF mixedPDF(hittablesPDF, spherePDF);
+
+					double PDFValue = mixedPDF.Value(ray.direction());
+					double scatteringPDF = this->ScatteringPDF(originalRay, tempData, tempRay);
+
+					tempColour *= (scatteringPDF / PDFValue);
+					tempColour *= m_Texture->GetColour(data.uv, tempRay.origin());
+
+					bouncesLeft--;
+				}
+
+				ray = tempRay;
 
 				return { tempColour, std::make_unique<SpherePDF>(), true, false };
 			}
 
-			distance += tempData.distance;
-			
-			if (tempData.material == this)
-				break;
+			hasBounced = true;
 
 			Colour emittedColour = tempData.material->EmittedColour(tempData);
 
-			ScatterReturn scatteredData;
-			double scatteringPDF;
+			auto rayLength = glm::length(tempRay.direction());
+			auto distanceToHit = tempData.distance * rayLength;
+			auto hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(0.0, 1.0));
+
+			if (hitDistance <= distanceToHit)
 			{
 				Ray originalTempRay = tempRay;
-				scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeftTemp);
-				if (!scatteredData.skipPDF)
-				{
-					HittablesPDF hittablesPDF(data.point, lights);
-					MixturePDF mixedPDF(hittablesPDF, *scatteredData.pdf);
+				tempRay = Ray(tempRay.at(glm::linearRand(0.0, tempData.distance)), RandomUnitVector(), tempRay.time());
 
-					ray = Ray(data.point, mixedPDF.Generate(), ray.time());
-					double PDFValue = mixedPDF.Value(ray.direction());
+				HittablesPDF hittablesPDF(tempData.point, lights);
+				SpherePDF spherePDF;
+				MixturePDF mixedPDF(hittablesPDF, spherePDF);
 
-					scatteringPDF = tempData.material->ScatteringPDF(originalTempRay, tempData, tempRay);
-					
-					tempColour *= scatteringPDF / PDFValue;
-				}
+				double PDFValue = mixedPDF.Value(tempRay.direction());
+				double scatteringPDF = this->ScatteringPDF(originalTempRay, tempData, tempRay);
+
+				tempColour *= (scatteringPDF / PDFValue);
+				tempColour *= m_Texture->GetColour(data.uv, tempRay.origin());
+				tempColour += emittedColour;
+
+				bouncesLeft--;
+
+				if (tempData.material == this)
+					break;
 			}
+			else if (tempData.material != this)
+			{
+				ScatterReturn scatteredData;
+				double scatteringPDF;
+				{
+					Ray originalTempRay = tempRay;
+					scatteredData = tempData.material->Scatter(tempRay, tempData, bouncesLeft);
+					if (!scatteredData.bounced)
+					{
+						bounced = false;
+						break;
+					}
 
-			tempColour *= scatteredData.attenuation;
-			tempColour += emittedColour;
+					if (!scatteredData.skipPDF)
+					{
+						HittablesPDF hittablesPDF(data.point, lights);
+						MixturePDF mixedPDF(hittablesPDF, *scatteredData.pdf);
 
-			if (!scatteredData.bounced)
-				bounced = false;
+						ray = Ray(data.point, mixedPDF.Generate(), ray.time());
+						double PDFValue = mixedPDF.Value(ray.direction());
+
+						scatteringPDF = tempData.material->ScatteringPDF(originalTempRay, tempData, tempRay);
+
+						tempColour *= scatteringPDF / PDFValue;
+					}
+				}
+
+				tempColour *= scatteredData.attenuation;
+				tempColour += emittedColour;
+
+				if (!scatteredData.bounced)
+					bounced = false;
+				else
+					tempData = HitData();
+			}
 			else
-				tempData = HitData();
+				break;
 		}
 
-		bouncesLeft = bouncesLeftTemp;
-
-//		double rayLength = glm::length(tempData.point - ray.origin());
-//		double rayLength = glm::length(ray.direction());
-//		double rayLength = glm::length(tempRay.direction());
-		double distanceInsideMedium = distance;
-		double hitDistance = m_NegitiveInvertedDensity * glm::log(glm::linearRand(-1.0, 1.0));
-
-		if (hitDistance <= distanceInsideMedium)
-		{
-			ray = Ray(tempRay.at(tempData.distance), RandomUnitVector(), tempRay.time());
-//			ray = Ray(ray.at(tempData.distance), RandomUnitVector(), tempRay.time());
-//			ray = Ray(tempData.point, RandomUnitVector(), tempRay.time());
-			tempColour *= m_Texture->GetColour(data.uv, ray.origin());
-		}
-		else
-			ray = Ray(tempData.point, tempRay.direction(), tempRay.time());
+		ray = Ray(tempRay.origin()+ 0.001 * tempRay.direction(), tempRay.direction(), ray.time());
 
 		return { tempColour, std::make_unique<SpherePDF>(), bounced, false };
 	}

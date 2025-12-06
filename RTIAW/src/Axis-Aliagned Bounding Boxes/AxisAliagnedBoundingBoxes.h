@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <utility>
+#include <immintrin.h>
 
 #define SIMD 1
 
@@ -32,7 +33,7 @@ namespace RTW
 
 		const Interval& GetAxisInterval(const Axis& axis) const;
 
-		RTW_FORCE_INLINE bool IsHit(const Ray& ray, Interval rayT) const;
+		RTW_FORCE_INLINE bool __vectorcall IsHit(const Ray& ray, Interval rayT) const;
 
 		void Expand(const AxisAliagnedBoundingBoxes& newAABB);
 
@@ -87,7 +88,7 @@ namespace RTW
 #endif
 	}
 
-	RTW_FORCE_INLINE bool AABB::IsHit(const Ray& ray, Interval rayT) const
+	RTW_FORCE_INLINE bool __vectorcall AABB::IsHit(const Ray& ray, Interval rayT) const
 	{
 #if RTW_AVX512 & SIMD
 		const __m512i m512_DoubledLoadPermutationIndex = _mm512_setr_epi64(0, 0, 1, 1, 2, 2, 3, 3);
@@ -113,7 +114,6 @@ namespace RTW
 		// creates the swapped T register
 		__m512d m512_T128BitSwaped = _mm512_shuffle_pd(m512_T, m512_T, SwapBitMap);
 
-
 		// performs an xor so that min and max operations can be performed
 		__m512d m512_AltNegT = _mm512_xor_pd(m512_T, m512_AltNegMul);
 		__m512d m512_AltNegSwapedT = _mm512_xor_pd(m512_T128BitSwaped, m512_AltNegMul);
@@ -123,7 +123,7 @@ namespace RTW
 
 
 		// creates a m128_AltNegTest register then shrinks it to the smallest size
-		__m128d m128_AltNegTest = _mm_max_pd(_mm512_extractf64x2_pd(m512_MinNegMaxT, 0), _mm512_extractf64x2_pd(m512_MinNegMaxT, 1));
+		__m128d m128_AltNegTest = _mm_max_pd(_mm512_castpd512_pd128(m512_MinNegMaxT), _mm256_extractf128_pd(_mm512_castpd512_pd256(m512_MinNegMaxT), 1));
 		m128_AltNegTest = _mm_max_pd(m128_AltNegTest, _mm512_extractf64x2_pd(m512_MinNegMaxT, 2));
 
 		// get rayT and perform max with that as well to make sure that MinNegMaxT is inside the rays boundary
